@@ -1,0 +1,6 @@
+GEMINI.md
+.aider*
+.env
+.env.*local
+.env.local.*
+venv/
