@@ -38,8 +38,26 @@ class ApiClient {
           localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
           localStorage.removeItem(STORAGE_KEYS.USER_DATA);
           window.location.href = '/login';
+          return Promise.reject(new Error('Unauthorized'));
         }
-        return Promise.reject(error.response?.data || error.message);
+        
+        // Extract error message from response detail
+        let errorMessage = 'An error occurred';
+        
+        if (error.response?.data) {
+          // Try to get detail from response
+          if (typeof error.response.data === 'string') {
+            errorMessage = error.response.data;
+          } else if (error.response.data.detail) {
+            errorMessage = error.response.data.detail;
+          } else if (error.response.data.message) {
+            errorMessage = error.response.data.message;
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        return Promise.reject(new Error(errorMessage));
       }
     );
   }

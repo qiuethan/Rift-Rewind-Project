@@ -10,8 +10,9 @@ from models.players import SummonerRequest, SummonerResponse, PlayerStatsRespons
 from models.match import RecentGameSummary
 from fastapi import HTTPException, status
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 from utils.logger import logger
+import asyncio
 
 
 class PlayerService:
@@ -28,16 +29,39 @@ class PlayerService:
         self.player_domain = player_domain
         self.match_repository = match_repository
         self.riot_api = riot_api_repository
+        self._LINK_COOLDOWN_SECONDS = 120  # 2 minutes
     
     async def link_summoner(self, user_id: str, summoner_request: SummonerRequest) -> SummonerResponse:
         """Link summoner account to user"""
-        # Validate with domain - catch domain exceptions and convert to HTTP
+        # ============================================================================
+        # RATE LIMIT CHECK - MUST BE FIRST (before any processing)
+        # ============================================================================
+        last_update = await self.player_repository.get_user_summoner_last_update(user_id)
+        
+        if last_update:
+            current_time = datetime.now(timezone.utc)
+            time_since_last_link = (current_time - last_update).total_seconds()
+            
+            if time_since_last_link < self._LINK_COOLDOWN_SECONDS:
+                remaining = int(self._LINK_COOLDOWN_SECONDS - time_since_last_link)
+                minutes = remaining // 60
+                seconds = remaining % 60
+                logger.warning(f"Rate limit: {remaining}s remaining for user {user_id}")
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail=f"Please wait {minutes}m {seconds}s before linking another account"
+                )
+        
+        # ============================================================================
+        # VALIDATION
+        # ============================================================================
+        logger.debug(f"Received request - game_name: '{summoner_request.game_name}', tag_line: '{summoner_request.tag_line}', summoner_name: '{summoner_request.summoner_name}'")
+        
+        # Validate with domain
         try:
             self.player_domain.validate_region(summoner_request.region)
         except DomainException as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
-        
-        logger.debug(f"Received request - game_name: '{summoner_request.game_name}', tag_line: '{summoner_request.tag_line}', summoner_name: '{summoner_request.summoner_name}'")
         
         has_riot_id = summoner_request.game_name and summoner_request.tag_line and \
                       summoner_request.game_name.strip() and summoner_request.tag_line.strip()
@@ -109,9 +133,7 @@ class PlayerService:
         if initial_games:
             await self.player_repository.update_recent_games_cache(summoner.puuid, initial_games)
         
-        # Schedule background task to fetch ALL remaining matches with rate limiting
-        # This runs asynchronously and won't block the response
-        import asyncio
+        # Trigger background sync (non-blocking)
         asyncio.create_task(self._sync_all_matches_with_rate_limit(summoner.puuid, summoner_request.region))
         
         return result
@@ -243,8 +265,6 @@ class PlayerService:
         Rate limiting is handled automatically by RiotAPIConfig.
         Runs asynchronously without blocking the response.
         """
-        import asyncio
-        
         try:
             max_total_matches = 100  # Cap at 100 matches total
             logger.info(f"Background sync: Starting to fetch up to {max_total_matches} total matches for {puuid}")

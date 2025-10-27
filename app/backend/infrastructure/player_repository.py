@@ -457,6 +457,28 @@ class PlayerRepositoryRiot(PlayerRepository):
             'region': summoner_db.get('region', 'americas')
         }
     
+    async def get_user_summoner_last_update(self, user_id: str) -> Optional[datetime]:
+        """Get the last update timestamp for a user's linked summoner"""
+        if not self.db:
+            return None
+        
+        try:
+            response = self.db.table(DatabaseTable.USER_SUMMONERS).select(
+                'updated_at'
+            ).eq('user_id', user_id).limit(1).execute()
+            
+            if response.data and len(response.data) > 0:
+                updated_at_str = response.data[0].get('updated_at')
+                if updated_at_str:
+                    # Parse ISO format timestamp from Supabase
+                    from datetime import datetime
+                    return datetime.fromisoformat(updated_at_str.replace('Z', '+00:00'))
+            
+            return None
+        except Exception as e:
+            logger.error(f"Error getting last update time: {e}")
+            return None
+    
     async def get_user_summoner(self, user_id: str) -> Optional[SummonerResponse]:
         """Get user's linked summoner and fetch fresh data from Riot API"""
         logger.info(f"Fetching summoner for user: {user_id}")
