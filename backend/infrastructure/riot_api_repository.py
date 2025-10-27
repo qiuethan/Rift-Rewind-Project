@@ -81,6 +81,43 @@ class RiotAPIRepositoryImpl(RiotAPIRepository):
         return []
     
     # ============================================================================
+    # MATCH API v5
+    # ============================================================================
+    
+    async def get_match_ids_by_puuid(self, puuid: str, region: str, count: int = 10) -> List[str]:
+        """Get list of match IDs for a player"""
+        logger.info(f"Fetching {count} recent match IDs for PUUID: {puuid}")
+        
+        # Match API uses regional routing (americas, europe, asia, sea)
+        url = f"{self.riot.ACCOUNT_API_BASE.format(region=region)}/lol/match/v5/matches/by-puuid/{puuid}/ids?count={count}"
+        
+        logger.debug(f"Calling Match API: {url}")
+        result = await self.riot.request(url, "Match API")
+        
+        if result:
+            logger.info(f"Retrieved {len(result)} match IDs")
+            return result
+        
+        logger.warning("No match history found")
+        return []
+    
+    async def get_match_details(self, match_id: str, region: str) -> Optional[Dict[str, Any]]:
+        """Get detailed match data by match ID"""
+        logger.info(f"Fetching match details for: {match_id}")
+        
+        url = f"{self.riot.ACCOUNT_API_BASE.format(region=region)}/lol/match/v5/matches/{match_id}"
+        
+        logger.debug(f"Calling Match Details API: {url}")
+        result = await self.riot.request(url, "Match Details API")
+        
+        if result:
+            logger.info(f"Successfully retrieved match details for {match_id}")
+            return result
+        
+        logger.warning(f"Could not retrieve match details for {match_id}")
+        return None
+    
+    # ============================================================================
     # CHAMPION MASTERY API
     # ============================================================================
     

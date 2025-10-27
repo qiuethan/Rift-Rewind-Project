@@ -46,4 +46,8 @@ export const playersApi = {
   getMatchHistory: async (count: number = 20): Promise<string[]> => {
     return apiClient.get<string[]>(`/api/players/matches?count=${count}`);
   },
+
+  getRecentGames: async (count: number = 5): Promise<any[]> => {
+    return apiClient.get<any[]>(`/api/players/recent-games?count=${count}`);
+  },
 };

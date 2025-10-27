@@ -9,13 +9,16 @@ import { REGION_NAMES } from '@/constants';
 import {
   SummonerInfo,
   TopChampions,
+  RecentGames,
 } from './components';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [summoner, setSummoner] = useState<any>(null);
+  const [recentGames, setRecentGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gamesLoading, setGamesLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +45,34 @@ export default function DashboardPage() {
     const userData = authActions.getCurrentUser();
     setUser(userData);
 
-    // Try to get summoner data
-    const summonerResult = await playersActions.getSummoner();
-    if (summonerResult.success) {
-      setSummoner(summonerResult.data);
+    try {
+      // Try to get summoner data
+      const summonerResult = await playersActions.getSummoner();
+      if (summonerResult.success && summonerResult.data) {
+        setSummoner(summonerResult.data);
+        
+        // Fetch recent games separately
+        fetchRecentGames();
+      }
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+  const fetchRecentGames = async () => {
+    setGamesLoading(true);
+    try {
+      const gamesResult = await playersActions.getRecentGames(5);
+      if (gamesResult.success && gamesResult.data) {
+        setRecentGames(gamesResult.data);
+      }
+    } catch (error) {
+      console.error('Error loading recent games:', error);
+    } finally {
+      setGamesLoading(false);
+    }
   };
 
   const handleOpenModal = () => {
@@ -82,6 +106,10 @@ export default function DashboardPage() {
     if (result.success) {
       setSuccess('League of Legends account linked successfully!');
       setSummoner(result.data);
+      
+      // Refetch recent games after updating account
+      fetchRecentGames();
+      
       setTimeout(() => {
         setIsModalOpen(false);
         setSuccess(null);
@@ -118,8 +146,13 @@ export default function DashboardPage() {
           <TopChampions
             topChampions={summoner?.top_champions}
             totalMasteryScore={summoner?.total_mastery_score}
+            loading={loading}
           />
         </div>
+      </div>
+
+      <div className={styles.recentGamesSection}>
+        <RecentGames recentGames={recentGames} loading={gamesLoading} />
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Link League Account">

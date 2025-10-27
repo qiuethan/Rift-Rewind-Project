@@ -1,13 +1,25 @@
-import { Card } from '@/components';
+import { Card, Spinner } from '@/components';
 import { getChampionKey, getChampionIconUrl, FALLBACK_ICON_URL } from '@/constants';
 import styles from './TopChampions.module.css';
 
 interface TopChampionsProps {
-  topChampions: any[];
+  topChampions?: any[];
   totalMasteryScore?: number;
+  loading?: boolean;
 }
 
-export default function TopChampions({ topChampions, totalMasteryScore }: TopChampionsProps) {
+export default function TopChampions({ topChampions, totalMasteryScore, loading }: TopChampionsProps) {
+  if (loading) {
+    return (
+      <Card title="Top Champions">
+        <div className={styles.loading}>
+          <Spinner />
+          <p>Loading champion mastery...</p>
+        </div>
+      </Card>
+    );
+  }
+
   if (!topChampions || topChampions.length === 0) {
     return null;
   }

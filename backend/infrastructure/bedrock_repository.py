@@ -20,7 +20,7 @@ class BedrockRepository(LLMRepository):
     def _initialize_client(self):
         """Initialize boto3 Bedrock client with credentials"""
         if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
-            print("⚠️  Warning: AWS credentials not configured")
+            logger.warning("AWS credentials not configured")
             return
         
         try:
@@ -30,9 +30,9 @@ class BedrockRepository(LLMRepository):
                 aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
             )
-            print(f"✅ AWS Bedrock client initialized (region: {settings.AWS_REGION})")
+            logger.info(f"AWS Bedrock client initialized (region: {settings.AWS_REGION})")
         except Exception as e:
-            print(f"❌ Failed to initialize AWS Bedrock client: {e}")
+            logger.error(f"Failed to initialize AWS Bedrock client: {e}")
             self.client = None
     
     async def generate_text(self, prompt: str) -> str:

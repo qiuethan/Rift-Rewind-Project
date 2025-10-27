@@ -18,16 +18,9 @@ class SummonerRecord(BaseModel):
     summoner_level: int = 0
     profile_icon_id: int = 0
     
-    ranked_solo_tier: Optional[str] = None
-    ranked_solo_rank: Optional[str] = None
-    ranked_solo_lp: Optional[int] = None
-    ranked_solo_wins: Optional[int] = None
-    ranked_solo_losses: Optional[int] = None
-    ranked_flex_tier: Optional[str] = None
-    ranked_flex_rank: Optional[str] = None
-    
     champion_masteries: Optional[List[dict]] = None
     total_mastery_score: Optional[int] = None
+    recent_games: Optional[List[dict]] = None
     
     last_updated: Optional[str] = None
     
@@ -43,15 +36,9 @@ class SummonerRecord(BaseModel):
             region=summoner_data.get('region'),
             summoner_level=summoner_data.get('summoner_level', 0),
             profile_icon_id=summoner_data.get('profile_icon_id', 0),
-            ranked_solo_tier=summoner_data.get('ranked_solo_tier'),
-            ranked_solo_rank=summoner_data.get('ranked_solo_rank'),
-            ranked_solo_lp=summoner_data.get('ranked_solo_lp'),
-            ranked_solo_wins=summoner_data.get('ranked_solo_wins'),
-            ranked_solo_losses=summoner_data.get('ranked_solo_losses'),
-            ranked_flex_tier=summoner_data.get('ranked_flex_tier'),
-            ranked_flex_rank=summoner_data.get('ranked_flex_rank'),
             champion_masteries=summoner_data.get('champion_masteries'),
             total_mastery_score=summoner_data.get('total_mastery_score'),
+            recent_games=summoner_data.get('recent_games'),
             last_updated=summoner_data.get('last_updated')
         )
     
@@ -98,20 +85,10 @@ class SummonerResponse(BaseModel):
     profile_icon_id: int
     last_updated: str
     
-    ranked_solo_tier: Optional[str] = None
-    ranked_solo_rank: Optional[str] = None
-    ranked_solo_lp: Optional[int] = None
-    ranked_solo_wins: Optional[int] = None
-    ranked_solo_losses: Optional[int] = None
-    ranked_flex_tier: Optional[str] = None
-    ranked_flex_rank: Optional[str] = None
-    ranked_flex_lp: Optional[int] = None
-    ranked_flex_wins: Optional[int] = None
-    ranked_flex_losses: Optional[int] = None
-    
     champion_masteries: Optional[List[dict]] = None
     top_champions: Optional[List[dict]] = None
     total_mastery_score: Optional[int] = None
+    recent_games: Optional[List[dict]] = None
     
     class Config:
         extra = "allow"

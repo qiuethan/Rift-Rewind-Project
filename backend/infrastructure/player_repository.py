@@ -105,9 +105,6 @@ class PlayerRepositoryRiot(PlayerRepository):
             
             logger.debug(f"Using summoner name from DB: {summoner_name}")
             
-            ranked_data = await self.get_ranked_data_by_puuid(puuid, region)
-            logger.debug(f"Ranked data: Solo={ranked_data.ranked_solo_tier}, Flex={ranked_data.ranked_flex_tier}")
-            
             mastery_data = await self.get_mastery_data(puuid, region)
             logger.debug(f"Mastery data: {len(mastery_data.champion_masteries)} masteries, score={mastery_data.total_mastery_score}")
             
@@ -121,7 +118,6 @@ class PlayerRepositoryRiot(PlayerRepository):
                 summoner_level=summoner_data.get('summonerLevel', 0),
                 profile_icon_id=summoner_data.get('profileIconId', 0),
                 last_updated=datetime.utcnow().isoformat() + "Z",
-                **ranked_data.dict(),
                 **mastery_data.dict()
             )
             
@@ -156,14 +152,7 @@ class PlayerRepositoryRiot(PlayerRepository):
                 return RankedData()
             
             ranked_data = RankedData.from_dict_entries(league_entries)
-            
-            if ranked_data.ranked_solo_tier:
-                logger.info(f"Found Solo/Duo rank: {ranked_data.ranked_solo_tier} {ranked_data.ranked_solo_rank} ({ranked_data.ranked_solo_lp} LP)")
-            if ranked_data.ranked_flex_tier:
-                logger.info(f"Found Flex rank: {ranked_data.ranked_flex_tier} {ranked_data.ranked_flex_rank}")
-            
-            if not ranked_data.ranked_solo_tier and not ranked_data.ranked_flex_tier:
-                logger.info("No ranked data found - account is unranked")
+            logger.info("Ranked data fetched (not used)")
             
             return ranked_data
                 
@@ -195,20 +184,128 @@ class PlayerRepositoryRiot(PlayerRepository):
                 return RankedData()
             
             ranked_data = RankedData.from_dict_entries(league_entries)
-            
-            if ranked_data.ranked_solo_tier:
-                logger.info(f"Found Solo/Duo rank: {ranked_data.ranked_solo_tier} {ranked_data.ranked_solo_rank} ({ranked_data.ranked_solo_lp} LP)")
-            if ranked_data.ranked_flex_tier:
-                logger.info(f"Found Flex rank: {ranked_data.ranked_flex_tier} {ranked_data.ranked_flex_rank}")
-            
-            if not ranked_data.ranked_solo_tier and not ranked_data.ranked_flex_tier:
-                logger.info("No ranked data found - account is unranked")
+            logger.info("Ranked data fetched (not used)")
             
             return ranked_data
                 
         except Exception as e:
             logger.error(f"Error fetching ranked data: {str(e)}")
             return RankedData()
+    
+    async def get_recent_games(self, puuid: str, region: str, count: int = 5) -> List[dict]:
+        """
+        Fetch recent games for a player with smart caching
+        
+        Args:
+            puuid: Player UUID
+            region: Region code
+            count: Number of recent games to fetch (default 5)
+            
+        Returns:
+            List of recent game summaries
+        """
+        logger.info(f"Fetching {count} recent games for PUUID: {puuid}")
+        
+        try:
+            # Check if we have cached games in database first
+            cached_games = []
+            if self.db:
+                cached_summoner = self.db.table(DatabaseTable.SUMMONERS).select('recent_games').eq('puuid', puuid).limit(1).execute()
+                
+                if cached_summoner.data and len(cached_summoner.data) > 0:
+                    cached_games = cached_summoner.data[0].get('recent_games', [])
+            
+            # If we have cache, check if it's still valid by fetching only 1 match ID
+            if cached_games and len(cached_games) > 0:
+                logger.info("Checking cache validity with 1 API call")
+                first_match_id = await self.riot_api.get_match_ids_by_puuid(puuid, region, count=1)
+                
+                if not first_match_id:
+                    logger.info("No recent matches found")
+                    return []
+                
+                first_cached_match_id = cached_games[0].get('match_id')
+                first_new_match_id = first_match_id[0]
+                
+                if first_cached_match_id == first_new_match_id:
+                    logger.info(f"Cache hit! Returning {len(cached_games)} cached games (saved {count + 5} API calls)")
+                    return cached_games
+                else:
+                    logger.info(f"Cache miss - new games detected (cached: {first_cached_match_id}, new: {first_new_match_id})")
+            
+            # No cache or cache miss - fetch all match IDs
+            logger.info(f"Fetching {count} match IDs from Riot API")
+            match_ids = await self.riot_api.get_match_ids_by_puuid(puuid, region, count)
+            
+            if not match_ids:
+                logger.warning("No match IDs returned")
+                return []
+            
+            # Fetch fresh data
+            recent_games = []
+            
+            # Fetch details for each match
+            for match_id in match_ids:
+                match_data = await self.riot_api.get_match_details(match_id, region)
+                
+                if not match_data:
+                    continue
+                
+                # Find the participant data for this player
+                participant = None
+                for p in match_data.get('info', {}).get('participants', []):
+                    if p.get('puuid') == puuid:
+                        participant = p
+                        break
+                
+                if not participant:
+                    logger.warning(f"Could not find participant data in match {match_id}")
+                    continue
+                
+                # Create simplified game summary
+                game_summary = {
+                    'match_id': match_id,
+                    'game_mode': match_data.get('info', {}).get('gameMode', 'UNKNOWN'),
+                    'game_duration': match_data.get('info', {}).get('gameDuration', 0),
+                    'game_creation': match_data.get('info', {}).get('gameCreation', 0),
+                    'champion_id': participant.get('championId'),
+                    'champion_name': participant.get('championName'),
+                    'kills': participant.get('kills', 0),
+                    'deaths': participant.get('deaths', 0),
+                    'assists': participant.get('assists', 0),
+                    'win': participant.get('win', False),
+                    'cs': participant.get('totalMinionsKilled', 0) + participant.get('neutralMinionsKilled', 0),
+                    'gold': participant.get('goldEarned', 0),
+                    'damage': participant.get('totalDamageDealtToChampions', 0),
+                    'vision_score': participant.get('visionScore', 0),
+                    'items': [
+                        participant.get('item0', 0),
+                        participant.get('item1', 0),
+                        participant.get('item2', 0),
+                        participant.get('item3', 0),
+                        participant.get('item4', 0),
+                        participant.get('item5', 0),
+                        participant.get('item6', 0),  # Trinket
+                    ]
+                }
+                
+                recent_games.append(game_summary)
+                logger.debug(f"Processed match {match_id}: {game_summary['champion_name']} - {'Win' if game_summary['win'] else 'Loss'}")
+            
+            logger.info(f"Successfully processed {len(recent_games)} recent games")
+            
+            # Update database with fresh games
+            if self.db and recent_games:
+                self.db.table(DatabaseTable.SUMMONERS).update(
+                    {'recent_games': recent_games}
+                ).eq('puuid', puuid).execute()
+                logger.info(f"Updated {len(recent_games)} recent games in database")
+            
+            return recent_games
+            
+        except Exception as e:
+            logger.error(f"Error fetching recent games: {str(e)}")
+            return []
     
     async def get_mastery_data(self, puuid: str, region: str) -> MasteryData:
         """
@@ -287,7 +384,7 @@ class PlayerRepositoryRiot(PlayerRepository):
         """Save summoner data to database"""
         summoner_record = SummonerRecord.from_summoner_data(summoner_data)
         logger.debug(f"Summoner record to save: {summoner_record.puuid}")
-        logger.info(f"Ranked data - Solo: {summoner_record.ranked_solo_tier} {summoner_record.ranked_solo_rank}, Flex: {summoner_record.ranked_flex_tier}")
+        logger.info(f"Saving summoner: {summoner_record.summoner_name}, Level: {summoner_record.summoner_level}")
         
         self.db.table(DatabaseTable.SUMMONERS).upsert(summoner_record.to_db_dict()).execute()
         logger.info(f"Successfully upserted summoner data for PUUID: {summoner_record.puuid}")
@@ -325,29 +422,90 @@ class PlayerRepositoryRiot(PlayerRepository):
             return response.data[0]
         return None
     
+    async def get_user_summoner_basic(self, user_id: str) -> Optional[dict]:
+        """Get basic user summoner info (PUUID and region) without fetching fresh data"""
+        if not self.db:
+            return None
+        
+        response = self.db.table(DatabaseTable.USER_SUMMONERS).select(
+            'puuid, summoners(region)'
+        ).eq('user_id', user_id).limit(1).execute()
+        
+        if not response.data or len(response.data) == 0:
+            return None
+        
+        puuid = response.data[0].get('puuid')
+        summoner_db = response.data[0].get('summoners')
+        
+        if not summoner_db:
+            return None
+        
+        return {
+            'puuid': puuid,
+            'region': summoner_db.get('region', 'americas')
+        }
+    
     async def get_user_summoner(self, user_id: str) -> Optional[SummonerResponse]:
-        """Get user's linked summoner from database"""
+        """Get user's linked summoner and fetch fresh data from Riot API"""
         logger.info(f"Fetching summoner for user: {user_id}")
         
         if not self.db:
             logger.error("Database client not available")
             return None
         
+        # Get user's linked PUUID and region from database
         response = self.db.table(DatabaseTable.USER_SUMMONERS).select(
-            'puuid, summoners(*)'
+            'puuid, summoners(region, summoner_name, game_name, tag_line)'
         ).eq('user_id', user_id).limit(1).execute()
         
-        if response.data and len(response.data) > 0:
-            link = response.data[0]
-            summoner = link.get('summoners')
-            if summoner:
-                logger.info(f"Found summoner: {summoner.get('summoner_name', 'N/A')}")
-                # Use stored summoner_id if available, otherwise fallback to puuid
-                summoner['id'] = summoner.get('summoner_id') or summoner.get('puuid')
-                return SummonerResponse(**summoner)
+        if not response.data or len(response.data) == 0:
+            logger.info(f"No summoner linked for user: {user_id}")
+            return None
         
-        logger.info(f"No summoner found for user")
-        return None
+        puuid = response.data[0].get('puuid')
+        summoner_db = response.data[0].get('summoners')
+        
+        if not summoner_db:
+            logger.warning(f"Summoner data not found in database for PUUID: {puuid}")
+            return None
+        
+        region = summoner_db.get('region', 'americas')
+        
+        logger.info(f"Fetching fresh data from Riot API for PUUID: {puuid}")
+        
+        # Fetch fresh data from Riot API
+        try:
+            fresh_summoner = await self.get_summoner_by_puuid(puuid, region)
+            
+            if not fresh_summoner:
+                logger.warning("Could not fetch fresh data, returning cached data")
+                # Fallback to cached data
+                cached_response = self.db.table(DatabaseTable.SUMMONERS).select('*').eq('puuid', puuid).limit(1).execute()
+                if cached_response.data and len(cached_response.data) > 0:
+                    cached_data = cached_response.data[0]
+                    cached_data['id'] = cached_data.get('summoner_id') or cached_data.get('puuid')
+                    return SummonerResponse(**cached_data)
+                return None
+            
+            # Update database with fresh data
+            summoner_dict = fresh_summoner.dict()
+            await self._save_summoner_to_db(summoner_dict)
+            
+            logger.info(f"Successfully fetched fresh data - Masteries: {len(fresh_summoner.champion_masteries) if fresh_summoner.champion_masteries else 0}, Recent Games: {len(fresh_summoner.recent_games) if fresh_summoner.recent_games else 0}")
+            logger.debug(f"Top champions: {len(fresh_summoner.top_champions) if fresh_summoner.top_champions else 0}")
+            
+            return fresh_summoner
+            
+        except Exception as e:
+            logger.error(f"Error fetching fresh summoner data: {str(e)}")
+            # Fallback to cached data
+            cached_response = self.db.table(DatabaseTable.SUMMONERS).select('*').eq('puuid', puuid).limit(1).execute()
+            if cached_response.data and len(cached_response.data) > 0:
+                logger.info("Returning cached data due to API error")
+                cached_data = cached_response.data[0]
+                cached_data['id'] = cached_data.get('summoner_id') or cached_data.get('puuid')
+                return SummonerResponse(**cached_data)
+            return None
     
     async def get_champion_masteries(self, puuid: str, region: str = 'americas') -> List[ChampionMasteryResponse]:
         """Get all champion masteries for a summoner"""

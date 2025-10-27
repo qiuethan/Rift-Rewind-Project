@@ -55,3 +55,14 @@ async def get_match_history(
 ):
     """Get player's match history"""
     return await player_service.get_match_history(current_user, count)
+
+
+@router.get("/recent-games", response_model=List[dict])
+async def get_recent_games(
+    count: int = 5,
+    current_user: str = Depends(get_current_user),
+    player_service: PlayerService = Depends(get_player_service)
+):
+    """Get player's recent games (separate endpoint for performance)"""
+    logger.info(f"GET /api/players/recent-games - User: {current_user}")
+    return await player_service.get_recent_games(current_user, count)

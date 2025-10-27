@@ -75,4 +75,19 @@ export const playersActions = {
       };
     }
   },
+
+  /**
+   * Get recent games
+   */
+  getRecentGames: async (count: number = 5) => {
+    try {
+      const games = await playersApi.getRecentGames(count);
+      return { success: true, data: games };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get recent games',
+      };
+    }
+  },
 };

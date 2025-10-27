@@ -73,11 +73,8 @@ class RiotAPIRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_mastery_score(self, puuid: str, region: str) -> Optional[int]:
-        """
-        Get total mastery score for summoner
-        Returns: Total mastery score as integer
-        """
+    async def get_mastery_score(self, puuid: str, region: str) -> int:
+        """Get total mastery score for summoner"""
         pass
     
     @abstractmethod
@@ -86,4 +83,18 @@ class RiotAPIRepository(ABC):
         Get mastery for specific champion
         Returns: Mastery object for the champion
         """
+        pass
+    
+    # ============================================================================
+    # MATCH API v5
+    # ============================================================================
+    
+    @abstractmethod
+    async def get_match_ids_by_puuid(self, puuid: str, region: str, count: int = 10) -> List[str]:
+        """Get list of match IDs for a player"""
+        pass
+    
+    @abstractmethod
+    async def get_match_details(self, match_id: str, region: str) -> Optional[Dict[str, Any]]:
+        """Get detailed match data by match ID"""
         pass

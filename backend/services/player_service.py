@@ -53,23 +53,20 @@ class PlayerService:
                 detail="Summoner not found"
             )
         
-        logger.info(f"Fetching ranked and mastery data for summoner: {summoner.puuid}")
-        
-        # Use PUUID for ranked data since encrypted summoner ID is not available
-        ranked_data = await self.player_repository.get_ranked_data_by_puuid(summoner.puuid, summoner_request.region)
-        logger.info(f"Ranked data fetched: {ranked_data.dict()}")
+        logger.info(f"Fetching mastery and recent games data for summoner: {summoner.puuid}")
         
         mastery_data = await self.player_repository.get_mastery_data(summoner.puuid, summoner_request.region)
         logger.info(f"Mastery data fetched: {len(mastery_data.champion_masteries)} masteries")
         
+        recent_games = await self.player_repository.get_recent_games(summoner.puuid, summoner_request.region, count=5)
+        logger.info(f"Recent games fetched: {len(recent_games)} games")
+        
         summoner_data = summoner.dict()
         logger.debug(f"Base summoner data: {summoner_data}")
         
-        summoner_data.update(ranked_data.dict())
-        logger.debug(f"After ranked update: ranked_solo_tier={summoner_data.get('ranked_solo_tier')}")
-        
         summoner_data.update(mastery_data.to_dict())  # Use to_dict() for proper JSONB conversion
-        logger.debug(f"After mastery update: champion_masteries count={len(summoner_data.get('champion_masteries', []))}")
+        summoner_data['recent_games'] = recent_games
+        logger.debug(f"After updates: champion_masteries={len(summoner_data.get('champion_masteries', []))}, recent_games={len(recent_games)}")
         
         # Ensure game_name and tag_line are set
         if summoner_request.game_name:
@@ -143,3 +140,24 @@ class PlayerService:
         
         # Get match history
         return await self.player_repository.get_match_history(summoner.puuid, count)
+    
+    async def get_recent_games(self, user_id: str, count: int = 5) -> List[dict]:
+        """Get player's recent games"""
+        logger.info(f"Fetching recent games for user: {user_id}")
+        
+        # Get user's PUUID and region from DB only (don't fetch fresh summoner data)
+        user_summoner = await self.player_repository.get_user_summoner_basic(user_id)
+        
+        if not user_summoner:
+            logger.warning(f"No summoner linked for user: {user_id}")
+            return []
+        
+        # Fetch recent games (repository handles caching)
+        recent_games = await self.player_repository.get_recent_games(
+            user_summoner['puuid'], 
+            user_summoner['region'], 
+            count
+        )
+        
+        logger.info(f"Retrieved {len(recent_games)} recent games")
+        return recent_games
