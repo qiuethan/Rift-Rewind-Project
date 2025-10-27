@@ -148,7 +148,7 @@ export default function RecentGames({ recentGames, loading }: RecentGamesProps) 
                 </div>
 
                 <div className={styles.itemsSection}>
-                  {game.items.slice(0, 6).map((itemId, index) => (
+                  {game.items.map((itemId, index) => (
                     <div key={index} className={styles.itemSlot}>
                       {itemId !== 0 && (
                         <img
