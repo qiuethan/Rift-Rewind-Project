@@ -84,7 +84,7 @@ class BedrockRepository(LLMRepository):
             return "No response generated"
         
         except Exception as e:
-            print(f"❌ Bedrock invocation error: {e}")
+            logger.error(f"Bedrock invocation error: {e}")
             raise
     
     def is_available(self) -> bool:

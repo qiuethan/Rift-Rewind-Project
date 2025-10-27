@@ -65,7 +65,7 @@ class BedrockService:
             return response
         
         except Exception as e:
-            print(f"❌ Error generating match analysis: {e}")
+            logger.error(f"Error generating match analysis: {e}")
             return f"Error generating analysis: {str(e)}"
     
     def _extract_player_stats(
@@ -175,7 +175,7 @@ Keep it constructive and actionable."""
             return "No response generated"
         
         except Exception as e:
-            print(f"❌ Bedrock invocation error: {e}")
+            logger.error(f"Bedrock invocation error: {e}")
             raise
     
     async def generate_champion_recommendation(
@@ -210,7 +210,7 @@ Provide 3 champion recommendations with brief reasoning for each."""
             return response
         
         except Exception as e:
-            print(f"❌ Error generating recommendations: {e}")
+            logger.error(f"Error generating recommendations: {e}")
             return f"Error generating recommendations: {str(e)}"
 
 
