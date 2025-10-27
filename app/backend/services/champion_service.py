@@ -4,6 +4,7 @@ Champion service - Orchestrates champion operations
 from repositories.champion_repository import ChampionRepository
 from repositories.player_repository import PlayerRepository
 from domain.champion_domain import ChampionDomain
+from domain.exceptions import DomainException
 from models.champions import (
     ChampionRecommendationRequest,
     ChampionRecommendationResponse,
@@ -30,7 +31,10 @@ class ChampionService:
     
     async def get_champion(self, champion_id: str) -> ChampionData:
         """Get champion data"""
-        self.champion_domain.validate_champion_id(champion_id)
+        try:
+            self.champion_domain.validate_champion_id(champion_id)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
         champion = await self.champion_repository.get_champion_by_id(champion_id)
         if not champion:
@@ -49,7 +53,10 @@ class ChampionService:
         request: ChampionRecommendationRequest
     ) -> ChampionRecommendationResponse:
         """Get champion recommendations for player"""
-        self.champion_domain.validate_recommendation_limit(request.limit)
+        try:
+            self.champion_domain.validate_recommendation_limit(request.limit)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
         # Get player's champion pool
         champion_pool = await self.champion_repository.get_player_champion_pool(
@@ -84,8 +91,11 @@ class ChampionService:
         request: ChampionSimilarityRequest
     ) -> ChampionSimilarityResponse:
         """Calculate similarity between two champions"""
-        self.champion_domain.validate_champion_id(request.champion_a)
-        self.champion_domain.validate_champion_id(request.champion_b)
+        try:
+            self.champion_domain.validate_champion_id(request.champion_a)
+            self.champion_domain.validate_champion_id(request.champion_b)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
         # Calculate similarity
         similarity_score = await self.champion_repository.calculate_champion_similarity(
@@ -93,7 +103,10 @@ class ChampionService:
             request.champion_b
         )
         
-        self.champion_domain.validate_similarity_score(similarity_score)
+        try:
+            self.champion_domain.validate_similarity_score(similarity_score)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
         response = ChampionSimilarityResponse(
             champion_a=request.champion_a,

@@ -4,6 +4,7 @@ Analytics service - Orchestrates analytics operations
 from repositories.analytics_repository import AnalyticsRepository
 from repositories.match_repository import MatchRepository
 from domain.analytics_domain import AnalyticsDomain
+from domain.exceptions import DomainException
 from models.analytics import (
     PerformanceAnalysisRequest,
     PerformanceAnalysisResponse,
@@ -124,7 +125,10 @@ class AnalyticsService:
     ) -> SkillProgressionResponse:
         """Get skill progression over time"""
         # Validate
-        self.analytics_domain.validate_time_range(request.time_range_days)
+        try:
+            self.analytics_domain.validate_time_range(request.time_range_days)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
         # Calculate progression
         progression = await self.analytics_repository.calculate_skill_progression(
@@ -143,7 +147,10 @@ class AnalyticsService:
     async def generate_insights(self, request: InsightRequest) -> InsightResponse:
         """Generate AI-powered insights"""
         # Validate
-        self.analytics_domain.validate_match_list(request.match_ids)
+        try:
+            self.analytics_domain.validate_match_list(request.match_ids)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
         # Generate insights using LLM
         insights_data = await self.analytics_repository.generate_insights(

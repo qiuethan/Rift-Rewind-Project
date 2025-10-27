@@ -13,12 +13,14 @@ Rift Rewind backend follows **Clean Architecture** principles with strict separa
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Routes Layer                            │
-│                 (HTTP Request/Response)                      │
+│              (HTTP Request/Response Handling)                │
+│                    Uses: Pydantic Models                     │
 └──────────────────────┬───────────────────────────────────────┘
                        │ Depends()
 ┌──────────────────────┴───────────────────────────────────────┐
 │                    Services Layer                            │
 │              (Business Logic Orchestration)                  │
+│         Converts: DomainException → HTTPException            │
 └──────────┬──────────────────────────┬────────────────────────┘
            │                          │
     ┌──────┴──────┐          ┌────────┴────────┐
@@ -31,7 +33,114 @@ Rift Rewind backend follows **Clean Architecture** principles with strict separa
                               │ (Implementations│
                               │  + Database)    │
                               └─────────────────┘
+
+Cross-Cutting Concerns:
+┌─────────────────────────────────────────────────────────────┐
+│  Models (Pydantic) - Data validation & serialization        │
+│  Exceptions (Domain) - Business rule violations             │
+│  Logger (Utils) - Structured logging                        │
+│  Dependencies (DI) - Wiring everything together             │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Layer 0: Models (`models/`)
+
+**Responsibility**: Define data structures and validation rules using Pydantic
+
+**Rules**:
+- ✅ Use Pydantic `BaseModel` for all models
+- ✅ Define Request models for API inputs
+- ✅ Define Response models for API outputs
+- ✅ Use type hints for all fields
+- ✅ Add validation with `Field()` constraints
+- ✅ Keep models pure data structures (no business logic)
+- ❌ NO business validation (use domain layer)
+- ❌ NO database operations
+- ❌ NO external API calls
+
+**Model Categories**:
+
+1. **Request Models** - API input validation
+   ```python
+   class SummonerRequest(BaseModel):
+       """Request model for linking summoner account"""
+       summoner_name: Optional[str] = None
+       game_name: Optional[str] = None
+       tag_line: Optional[str] = None
+       region: str
+       
+       class Config:
+           extra = "forbid"  # Reject unknown fields
+   ```
+
+2. **Response Models** - API output structure
+   ```python
+   class SummonerResponse(BaseModel):
+       """Response model for summoner data"""
+       puuid: str
+       summoner_name: str
+       game_name: Optional[str] = None
+       tag_line: Optional[str] = None
+       region: str
+       summoner_level: int
+       profile_icon_id: int
+       champion_masteries: Optional[List[dict]] = None
+       top_champions: Optional[List[dict]] = None
+       recent_games: Optional[List[dict]] = None
+       
+       class Config:
+           extra = "allow"  # Allow additional fields
+   ```
+
+3. **Database Models** - Internal data structures
+   ```python
+   class SummonerRecord(BaseModel):
+       """Database record for summoner table"""
+       puuid: str
+       summoner_id: Optional[str] = None
+       summoner_name: str
+       region: str
+       
+       @classmethod
+       def from_summoner_data(cls, summoner_data: dict) -> 'SummonerRecord':
+           """Create from dictionary"""
+           return cls(**summoner_data)
+       
+       def to_db_dict(self) -> dict:
+           """Convert to database dictionary"""
+           return self.dict(exclude_none=False)
+   ```
+
+4. **External API Models** - Third-party API responses
+   ```python
+   class AccountResponse(BaseModel):
+       """Response from Riot Account API"""
+       puuid: str
+       game_name: str = Field(alias="gameName")
+       tag_line: str = Field(alias="tagLine")
+       
+       class Config:
+           populate_by_name = True  # Accept both snake_case and camelCase
+   ```
+
+**Current Model Files**:
+- `models/auth.py` - Authentication (RegisterRequest, LoginRequest, AuthResponse)
+- `models/players.py` - Player/Summoner (SummonerRequest, SummonerResponse, PlayerStatsResponse)
+- `models/matches.py` - Match data (MatchRequest, MatchTimelineResponse, MatchSummaryResponse)
+- `models/champions.py` - Champions (ChampionRecommendationRequest, ChampionSimilarityRequest)
+- `models/analytics.py` - Analytics (PerformanceAnalysisRequest, SkillProgressionRequest)
+- `models/riot_api.py` - Riot API responses (AccountResponse, SummonerAPIResponse, ChampionMasteryResponse)
+
+**Best Practices**:
+- Use `Optional[T]` for nullable fields
+- Use `Field()` for validation constraints (min_length, max_length, ge, le)
+- Use `alias` for API field name mapping (camelCase ↔ snake_case)
+- Set `extra = "forbid"` for strict Request models
+- Set `extra = "allow"` for flexible Response models
+- Add docstrings to all models
+- Group related models in the same file
 
 ---
 
@@ -117,8 +226,10 @@ class PlayerService:
 **Domain Exceptions** (`domain/exceptions.py`):
 ```python
 class DomainException(Exception):
-    """Base for all domain violations"""
-    pass
+    """Base exception for domain violations"""
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(self.message)
 
 class ValidationError(DomainException):
     """Validation rule violation"""
@@ -126,6 +237,30 @@ class ValidationError(DomainException):
 
 class InvalidRegionError(ValidationError):
     """Invalid region"""
+    pass
+
+class InvalidSummonerNameError(ValidationError):
+    """Invalid summoner name"""
+    pass
+
+class InvalidMatchIdError(ValidationError):
+    """Invalid match ID"""
+    pass
+
+class InvalidChampionIdError(ValidationError):
+    """Invalid champion ID"""
+    pass
+
+class InvalidTimeRangeError(ValidationError):
+    """Invalid time range"""
+    pass
+
+class InvalidEmailError(ValidationError):
+    """Invalid email format"""
+    pass
+
+class InvalidPasswordError(ValidationError):
+    """Invalid password"""
     pass
 ```
 
@@ -191,27 +326,48 @@ class PlayerRepository(ABC):
 **Example**:
 ```python
 class PlayerRepositoryRiot(PlayerRepository):
-    def __init__(self, client: DatabaseClient, riot_api_key: str):
-        self.client = client
-        self.riot_api_key = riot_api_key
+    def __init__(self, db: DatabaseClient, riot_api: RiotAPIRepository):
+        """
+        Initialize repository with injected dependencies
+        
+        Args:
+            db: Database abstraction for data persistence
+            riot_api: Riot API repository for external API calls
+        """
+        self.db = db
+        self.riot_api = riot_api
     
     async def get_summoner_by_riot_id(self, game_name, tag_line, region):
-        """Just fetch data - no validation, no exceptions"""
-        if self.client:
-            # Call Riot API (demo)
-            return SummonerResponse(
-                id=f"demo_{game_name}",
-                summoner_name=f"{game_name}#{tag_line}",
-                ...
+        """Fetch data from Riot API - no validation, returns None on failure"""
+        try:
+            # Step 1: Get account (PUUID) from Riot ID
+            account_data = await self.riot_api.get_account_by_riot_id(
+                game_name, tag_line, region
             )
-        return None
+            if not account_data:
+                return None
+            
+            # Step 2: Get summoner data by PUUID
+            summoner_data = await self.riot_api.get_summoner_by_puuid(
+                account_data['puuid'], region
+            )
+            
+            return SummonerResponse(**summoner_data) if summoner_data else None
+        except Exception as e:
+            logger.error(f"Error fetching summoner: {e}")
+            return None
     
     async def save_summoner(self, user_id, summoner_data):
-        """Just save data - no validation, no exceptions"""
-        if self.client:
-            self.client.table('summoners').upsert(summoner_data).execute()
-            return SummonerResponse(**summoner_data)
-        return None
+        """Save data to database - no validation, returns None on failure"""
+        try:
+            result = self.db.table('user_summoners').upsert({
+                'user_id': user_id,
+                **summoner_data
+            }).execute()
+            return SummonerResponse(**summoner_data) if result else None
+        except Exception as e:
+            logger.error(f"Error saving summoner: {e}")
+            return None
 ```
 
 ---
@@ -272,13 +428,22 @@ def get_player_domain() -> PlayerDomain:
 
 # Repository Factories (receive DatabaseClient)
 def get_player_repository() -> PlayerRepository:
-    return PlayerRepositoryRiot(supabase_service, settings.RIOT_API_KEY)
+    return PlayerRepositoryRiot(supabase_service, get_riot_api_repository())
 
 # Service Factories (receive repository + domain)
 def get_player_service() -> PlayerService:
     return PlayerService(
         player_repository=get_player_repository(),
         player_domain=get_player_domain()
+    )
+
+# LLM Service Factory (config injected via DI)
+def get_bedrock_service() -> BedrockService:
+    return BedrockService(
+        aws_access_key=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_key=settings.AWS_SECRET_ACCESS_KEY,
+        region=settings.AWS_REGION,
+        model_id=settings.AWS_BEDROCK_MODEL
     )
 ```
 
@@ -348,19 +513,26 @@ async def link_summoner(
 ## 🎯 Key Architectural Rules
 
 ### ✅ DO:
-- Routes → Services (via Depends)
+- Routes → Services (via `Depends()`)
 - Services → Domain + Repositories
-- Repositories → Database Client
-- Domain → Pure logic (no dependencies)
-- Return `Optional[T]` from repositories
-- Throw domain exceptions in domain layer
-- Convert domain exceptions to HTTP in services
+- Services wrap domain calls in try-catch blocks
+- Services convert `DomainException` → `HTTPException`
+- Repositories → Database Client or External APIs
+- Repositories return `Optional[T]` (data or `None`)
+- Domain → Pure logic (no external dependencies)
+- Domain raises custom domain exceptions
+- Infrastructure logs errors and returns `None` on failure
+- Inject config values via dependency injection
 
 ### ❌ DON'T:
 - Routes → Domain/Repositories directly
-- Domain → External dependencies
-- Repositories → HTTPException
+- Domain → Import FastAPI, HTTPException, or any framework
+- Domain → Import database, Supabase, or external services
+- Repositories → Raise `HTTPException`
+- Services → Import from `infrastructure/`
+- Services → Import from `config/` (use DI instead)
 - Services → Direct database access
+- Infrastructure → Raise `HTTPException`
 - Mix HTTP concerns with business logic
 
 ---
@@ -409,35 +581,54 @@ async def test_link_summoner_endpoint(client):
 ## 🚀 Adding a New Feature
 
 1. **Create Models** (`models/feature.py`)
-   - Request/Response Pydantic models
+   - **Request Models**: Define input validation with `Field()` constraints
+   - **Response Models**: Define output structure with proper types
+   - **Database Models**: Add helper methods like `from_dict()` and `to_db_dict()`
+   - Set `extra = "forbid"` for Request models (strict validation)
+   - Set `extra = "allow"` for Response models (flexibility)
+   - Add comprehensive docstrings
 
-2. **Create Domain** (`domain/feature_domain.py`)
-   - Business validation rules
-   - Pure calculations
-   - Custom domain exceptions
+2. **Create Domain Exceptions** (`domain/exceptions.py`)
+   - Add custom exceptions for your feature
+   - Inherit from `DomainException` or `ValidationError`
 
-3. **Create Repository Interface** (`repositories/feature_repository.py`)
+3. **Create Domain** (`domain/feature_domain.py`)
+   - Business validation rules (raise domain exceptions)
+   - Pure calculations (no side effects)
+   - Framework-agnostic logic
+
+4. **Create Repository Interface** (`repositories/feature_repository.py`)
+   - Abstract base class inheriting from `ABC`
    - Abstract methods with `Optional[T]` returns
+   - Clear method signatures and docstrings
 
-4. **Create Infrastructure** (`infrastructure/feature_repository.py`)
-   - Implement interface
-   - Use `DatabaseClient`
-   - Return data or None
+5. **Create Infrastructure** (`infrastructure/feature_repository.py`)
+   - Implement repository interface
+   - Use `DatabaseClient` for database operations
+   - Return data or `None` on failure (no exceptions)
+   - Log errors with `logger`
 
-5. **Create Service** (`services/feature_service.py`)
-   - Orchestrate domain + repository
-   - Catch domain exceptions → HTTPException
-   - Validate repository responses
+6. **Create Service** (`services/feature_service.py`)
+   - Import `DomainException` from `domain.exceptions`
+   - Orchestrate domain + repository calls
+   - Wrap domain validations in try-catch blocks
+   - Convert `DomainException` → `HTTPException`
+   - Validate repository responses (check for `None`)
 
-6. **Create Routes** (`routes/feature.py`)
-   - HTTP endpoints
+7. **Create Routes** (`routes/feature.py`)
+   - HTTP endpoints with proper status codes
    - Use `Depends()` for service injection
+   - Use `Depends(get_current_user)` for auth
+   - Pydantic models for request/response validation
 
-7. **Add Factories** (`dependency/dependencies.py`)
-   - Domain, repository, service factories
+8. **Add Factories** (`dependency/dependencies.py`)
+   - Domain factory (no dependencies)
+   - Repository factory (inject database client)
+   - Service factory (inject repository + domain)
 
-8. **Register Router** (`main.py`)
+9. **Register Router** (`main.py`)
    - `app.include_router(feature_router)`
+   - Add appropriate prefix and tags
 
 ---
 
