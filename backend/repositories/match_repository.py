@@ -20,8 +20,8 @@ class MatchRepository(ABC):
         pass
     
     @abstractmethod
-    async def save_match_timeline(self, match_id: str, timeline_data: dict) -> MatchTimelineResponse:
-        """Save match timeline to database"""
+    async def save_match_timeline(self, match_id: str, timeline_data: dict) -> Optional[MatchTimelineResponse]:
+        """Save match timeline to database, or None if failed"""
         pass
     
     @abstractmethod

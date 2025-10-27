@@ -20,25 +20,35 @@ async def get_current_user(
     try:
         token = credentials.credentials
         
-        # Verify token with Supabase (demo implementation)
-        # In production, this would verify the JWT token
-        if not token or len(token) < 10:
+        if not token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid authentication token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        # Demo: Return a mock user ID
-        # In production: user = supabase_service.verify_token(token)
-        # return user.id
+        # Verify token with auth service
+        if supabase_service:
+            user = supabase_service.auth_get_user(token)
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid or expired token",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            return user.id
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Authentication service not configured"
+            )
         
-        return "demo_user_id"
-        
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
+            detail=f"Could not validate credentials: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

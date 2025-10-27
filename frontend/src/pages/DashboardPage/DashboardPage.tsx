@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DashboardPage.module.css';
-import { Button, Card } from '@/components';
+import { Button, Card, Modal, Input } from '@/components';
 import { authActions } from '@/actions/auth';
 import { playersActions } from '@/actions/players';
 import { ROUTES } from '@/config';
@@ -11,6 +11,15 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [summoner, setSummoner] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  
+  // Form fields
+  const [gameName, setGameName] = useState('');
+  const [tagLine, setTagLine] = useState('');
+  const [region, setRegion] = useState('americas');
 
   useEffect(() => {
     loadData();
@@ -39,6 +48,48 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     await authActions.logout();
     navigate(ROUTES.LOGIN);
+  };
+
+  const handleOpenModal = () => {
+    // Pre-fill form if summoner exists
+    if (summoner?.game_name) {
+      setGameName(summoner.game_name);
+    }
+    if (summoner?.tag_line) {
+      setTagLine(summoner.tag_line);
+    }
+    if (summoner?.region) {
+      setRegion(summoner.region);
+    }
+    setIsModalOpen(true);
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+
+    const result = await playersActions.linkAccount({
+      game_name: gameName,
+      tag_line: tagLine,
+      region,
+    });
+
+    if (result.success) {
+      setSuccess('League of Legends account linked successfully!');
+      setSummoner(result.data);
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setSuccess(null);
+      }, 1500);
+    } else {
+      setError(result.error || 'Failed to link account');
+    }
+
+    setSaving(false);
   };
 
   if (loading) {
@@ -91,7 +142,7 @@ export default function DashboardPage() {
           ) : (
             <div className={styles.empty}>
               <p>No summoner linked yet</p>
-              <Button onClick={() => navigate(ROUTES.PROFILE)}>Link Account</Button>
+              <Button onClick={handleOpenModal}>Link Account</Button>
             </div>
           )}
         </Card>
@@ -104,8 +155,8 @@ export default function DashboardPage() {
             <Button fullWidth onClick={() => navigate(ROUTES.CHAMPIONS)}>
               Champion Recommendations
             </Button>
-            <Button fullWidth onClick={() => navigate(ROUTES.PROFILE)}>
-              Profile Settings
+            <Button fullWidth onClick={handleOpenModal}>
+              {summoner ? 'Update' : 'Link'} League Account
             </Button>
           </div>
         </Card>
@@ -125,6 +176,62 @@ export default function DashboardPage() {
           </div>
         </Card>
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Link League Account">
+        <form onSubmit={handleSubmit} className={styles.modalForm}>
+          <p className={styles.modalDescription}>
+            Enter your Riot ID to link your League of Legends account. We'll fetch your
+            summoner data including PUUID, summoner level, and profile icon.
+          </p>
+
+          <div className={styles.riotIdContainer}>
+            <div className={styles.riotIdField}>
+              <Input
+                label="Game Name"
+                type="text"
+                value={gameName}
+                onChange={(e) => setGameName(e.target.value)}
+                placeholder="Hide on bush"
+                required
+                fullWidth
+              />
+            </div>
+            <div className={styles.riotIdSeparator}>#</div>
+            <div className={styles.riotIdField}>
+              <Input
+                label="Tag Line"
+                type="text"
+                value={tagLine}
+                onChange={(e) => setTagLine(e.target.value)}
+                placeholder="NA1"
+                required
+                fullWidth
+              />
+            </div>
+          </div>
+
+          <div className={styles.selectContainer}>
+            <label className={styles.selectLabel}>Region</label>
+            <select
+              className={styles.select}
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+            >
+              <option value="americas">Americas (NA, BR, LAN, LAS)</option>
+              <option value="europe">Europe (EUW, EUNE, TR, RU)</option>
+              <option value="asia">Asia (KR, JP)</option>
+              <option value="sea">SEA (OCE, PH, SG, TH, TW, VN)</option>
+            </select>
+          </div>
+
+          {error && <div className={styles.modalError}>{error}</div>}
+          {success && <div className={styles.modalSuccess}>{success}</div>}
+
+          <Button type="submit" loading={saving} fullWidth>
+            {summoner ? 'Update Account' : 'Link Account'}
+          </Button>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -1,14 +1,17 @@
 import { apiClient } from './client';
 
 export interface SummonerRequest {
-  summoner_name: string;
-  region: string;
+  summoner_name?: string;
+  game_name?: string;
   tag_line?: string;
+  region: string;
 }
 
 export interface SummonerResponse {
   id: string;
   summoner_name: string;
+  game_name?: string;
+  tag_line?: string;
   region: string;
   puuid: string;
   summoner_level: number;

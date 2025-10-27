@@ -15,13 +15,18 @@ class PlayerRepository(ABC):
         pass
     
     @abstractmethod
+    async def get_summoner_by_riot_id(self, game_name: str, tag_line: str, region: str) -> Optional[SummonerResponse]:
+        """Get summoner data by Riot ID (game_name#tag_line) from Riot API"""
+        pass
+    
+    @abstractmethod
     async def get_summoner_by_puuid(self, puuid: str) -> Optional[SummonerResponse]:
         """Get summoner data by PUUID from Riot API"""
         pass
     
     @abstractmethod
-    async def save_summoner(self, user_id: str, summoner_data: dict) -> SummonerResponse:
-        """Save summoner data to database"""
+    async def save_summoner(self, user_id: str, summoner_data: dict) -> Optional[SummonerResponse]:
+        """Save summoner data to database, or None if failed"""
         pass
     
     @abstractmethod

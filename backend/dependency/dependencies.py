@@ -69,27 +69,27 @@ def get_analytics_domain() -> AnalyticsDomain:
 
 def get_auth_repository() -> AuthRepository:
     """Factory for AuthRepository"""
-    return AuthRepositorySupabase(supabase_service.client)
+    return AuthRepositorySupabase(supabase_service)
 
 
 def get_player_repository() -> PlayerRepository:
-    """Factory for PlayerRepository"""
-    return PlayerRepositoryRiot(supabase_service.client, settings.RIOT_API_KEY)
+    """Get player repository instance"""
+    return PlayerRepositoryRiot(supabase_service, settings.RIOT_API_KEY)
 
 
 def get_match_repository() -> MatchRepository:
     """Factory for MatchRepository"""
-    return MatchRepositoryRiot(supabase_service.client, settings.RIOT_API_KEY)
+    return MatchRepositoryRiot(supabase_service, settings.RIOT_API_KEY)
 
 
 def get_champion_repository() -> ChampionRepository:
     """Factory for ChampionRepository"""
-    return ChampionRepositorySupabase(supabase_service.client, settings.OPENROUTER_API_KEY)
+    return ChampionRepositorySupabase(supabase_service, settings.OPENROUTER_API_KEY)
 
 
 def get_analytics_repository() -> AnalyticsRepository:
     """Factory for AnalyticsRepository"""
-    return AnalyticsRepositorySupabase(supabase_service.client, settings.OPENROUTER_API_KEY)
+    return AnalyticsRepositorySupabase(supabase_service, settings.OPENROUTER_API_KEY)
 
 
 # ============================================================================

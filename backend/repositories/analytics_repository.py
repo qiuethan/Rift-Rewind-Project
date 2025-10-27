@@ -10,8 +10,8 @@ class AnalyticsRepository(ABC):
     """Abstract interface for analytics data access"""
     
     @abstractmethod
-    async def save_performance_metrics(self, match_id: str, metrics: dict) -> PerformanceMetrics:
-        """Save performance metrics to database"""
+    async def save_performance_metrics(self, match_id: str, metrics: dict) -> Optional[PerformanceMetrics]:
+        """Save performance metrics to database, or None if failed"""
         pass
     
     @abstractmethod
@@ -30,8 +30,8 @@ class AnalyticsRepository(ABC):
         pass
     
     @abstractmethod
-    async def save_analysis(self, match_id: str, summoner_id: str, analysis_data: dict) -> dict:
-        """Save performance analysis to database"""
+    async def save_analysis(self, match_id: str, summoner_id: str, analysis_data: dict) -> Optional[dict]:
+        """Save performance analysis to database, or None if failed"""
         pass
     
     @abstractmethod

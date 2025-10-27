@@ -6,6 +6,7 @@ from domain.player_domain import PlayerDomain
 from models.players import SummonerRequest, SummonerResponse, PlayerStatsResponse
 from fastapi import HTTPException, status
 from typing import List
+from utils.logger import logger
 
 
 class PlayerService:
@@ -17,15 +18,41 @@ class PlayerService:
     
     async def link_summoner(self, user_id: str, summoner_request: SummonerRequest) -> SummonerResponse:
         """Link summoner account to user"""
-        # Validate business rules
-        self.player_domain.validate_summoner_name(summoner_request.summoner_name)
+        # Validate region
         self.player_domain.validate_region(summoner_request.region)
         
-        # Get summoner data from Riot API
-        summoner = await self.player_repository.get_summoner_by_name(
-            summoner_request.summoner_name,
-            summoner_request.region
-        )
+        # Debug logging
+        logger.debug(f"Received request - game_name: '{summoner_request.game_name}', tag_line: '{summoner_request.tag_line}', summoner_name: '{summoner_request.summoner_name}'")
+        
+        # Check if using Riot ID (game_name + tag_line) or old format (summoner_name)
+        has_riot_id = summoner_request.game_name and summoner_request.tag_line and \
+                      summoner_request.game_name.strip() and summoner_request.tag_line.strip()
+        has_summoner_name = summoner_request.summoner_name and summoner_request.summoner_name.strip()
+        
+        logger.debug(f"Validation check - has_riot_id: {has_riot_id}, has_summoner_name: {has_summoner_name}")
+        logger.debug(f"game_name type: {type(summoner_request.game_name)}, value: '{summoner_request.game_name}'")
+        logger.debug(f"tag_line type: {type(summoner_request.tag_line)}, value: '{summoner_request.tag_line}'")
+        
+        if has_riot_id:
+            # New Riot ID format
+            summoner = await self.player_repository.get_summoner_by_riot_id(
+                summoner_request.game_name.strip(),
+                summoner_request.tag_line.strip(),
+                summoner_request.region
+            )
+        elif has_summoner_name:
+            # Old format (legacy)
+            self.player_domain.validate_summoner_name(summoner_request.summoner_name)
+            summoner = await self.player_repository.get_summoner_by_name(
+                summoner_request.summoner_name.strip(),
+                summoner_request.region
+            )
+        else:
+            logger.error(f"Validation failed - game_name: '{summoner_request.game_name}', tag_line: '{summoner_request.tag_line}', summoner_name: '{summoner_request.summoner_name}'")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Must provide either game_name+tag_line or summoner_name"
+            )
         
         if not summoner:
             raise HTTPException(
@@ -35,7 +62,22 @@ class PlayerService:
         
         # Save to database
         summoner_data = summoner.dict()
-        return await self.player_repository.save_summoner(user_id, summoner_data)
+        # Ensure game_name and tag_line are set from request
+        if summoner_request.game_name:
+            summoner_data['game_name'] = summoner_request.game_name
+        if summoner_request.tag_line:
+            summoner_data['tag_line'] = summoner_request.tag_line
+        
+        logger.debug(f"Saving summoner data: {summoner_data}")
+        result = await self.player_repository.save_summoner(user_id, summoner_data)
+        
+        if not result:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to save summoner"
+            )
+        
+        return result
     
     async def get_summoner(self, user_id: str) -> SummonerResponse:
         """Get user's linked summoner"""

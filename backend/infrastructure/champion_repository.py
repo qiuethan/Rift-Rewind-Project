@@ -1,16 +1,16 @@
 """
-Champion repository implementation with Supabase and LLM
+Champion repository implementation
 """
 from repositories.champion_repository import ChampionRepository
 from models.champions import ChampionData, ChampionRecommendation
-from fastapi import HTTPException, status
+from infrastructure.database.database_client import DatabaseClient
 from typing import Optional, List, Dict, Any
 
 
 class ChampionRepositorySupabase(ChampionRepository):
     """Supabase + LLM implementation of champion repository"""
     
-    def __init__(self, client, openrouter_api_key: Optional[str] = None):
+    def __init__(self, client: DatabaseClient, openrouter_api_key: Optional[str] = None):
         self.client = client
         self.openrouter_api_key = openrouter_api_key
     
@@ -73,17 +73,12 @@ class ChampionRepositorySupabase(ChampionRepository):
             for i, champ in enumerate(similar[:limit])
         ]
     
-    async def save_champion_data(self, champion_data: dict) -> ChampionData:
-        """Save champion data to Supabase"""
-        try:
-            if self.client:
-                self.client.table('champions').upsert(champion_data).execute()
+    async def save_champion_data(self, champion_data: dict) -> Optional[ChampionData]:
+        """Save champion data to database"""
+        if self.client:
+            self.client.table('champions').upsert(champion_data).execute()
             return ChampionData(**champion_data)
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to save champion: {str(e)}"
-            )
+        return None
     
     async def get_player_champion_pool(self, summoner_id: str) -> List[str]:
         """Get player's most played champions (DEMO)"""

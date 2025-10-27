@@ -1,18 +1,21 @@
 .card {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  transition: all 0.2s ease;
+  background: var(--white);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: none;
+  border: 1px solid var(--gray-200);
+  transition: var(--transition-slow);
 }
 
 .card:hover {
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-color: var(--gray-300);
+  box-shadow: var(--shadow-sm);
 }
 
 .title {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
-  font-weight: 700;
-  color: #111827;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.022em;
 }

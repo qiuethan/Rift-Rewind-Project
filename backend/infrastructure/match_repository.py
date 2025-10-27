@@ -1,16 +1,16 @@
 """
-Match repository implementation with Riot API and Firebase
+Match repository implementation with Riot API
 """
 from repositories.match_repository import MatchRepository
 from models.matches import MatchTimelineResponse, MatchSummaryResponse
-from fastapi import HTTPException, status
+from infrastructure.database.database_client import DatabaseClient
 from typing import Optional, Dict, Any
 
 
 class MatchRepositoryRiot(MatchRepository):
-    """Riot API + Supabase implementation of match repository"""
+    """Riot API + Database implementation of match repository"""
     
-    def __init__(self, client, riot_api_key: str):
+    def __init__(self, client: DatabaseClient, riot_api_key: str):
         self.client = client
         self.riot_api_key = riot_api_key
     
@@ -35,32 +35,21 @@ class MatchRepositoryRiot(MatchRepository):
             teams=[]
         )
     
-    async def save_match_timeline(self, match_id: str, timeline_data: dict) -> MatchTimelineResponse:
-        """Save match timeline to Supabase"""
-        try:
-            if self.client:
-                timeline_data['match_id'] = match_id
-                self.client.table('match_timelines').upsert(timeline_data).execute()
+    async def save_match_timeline(self, match_id: str, timeline_data: dict) -> Optional[MatchTimelineResponse]:
+        """Save match timeline to database"""
+        if self.client:
+            timeline_data['match_id'] = match_id
+            self.client.table('match_timelines').upsert(timeline_data).execute()
             return MatchTimelineResponse(**timeline_data)
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to save timeline: {str(e)}"
-            )
+        return None
     
     async def get_cached_timeline(self, match_id: str) -> Optional[MatchTimelineResponse]:
-        """Get cached match timeline from Supabase"""
-        try:
-            if self.client:
-                response = self.client.table('match_timelines').select('*').eq('match_id', match_id).limit(1).execute()
-                if response.data:
-                    return MatchTimelineResponse(**response.data[0])
-            return None
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to get timeline: {str(e)}"
-            )
+        """Get cached match timeline from database"""
+        if self.client:
+            response = self.client.table('match_timelines').select('*').eq('match_id', match_id).limit(1).execute()
+            if response.data:
+                return MatchTimelineResponse(**response.data[0])
+        return None
     
     async def get_participant_data(self, match_id: str, participant_id: int) -> Optional[Dict[str, Any]]:
         """Get specific participant data from match (DEMO)"""

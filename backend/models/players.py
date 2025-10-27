@@ -7,15 +7,18 @@ from typing import Optional, List
 
 class SummonerRequest(BaseModel):
     """Request model for linking summoner account"""
-    summoner_name: str = Field(..., min_length=3, max_length=16)
-    region: str = Field(..., pattern="^(NA1|EUW1|EUN1|KR|BR1|JP1|LA1|LA2|OC1|TR1|RU)$")
-    tag_line: Optional[str] = Field(None, max_length=5)
+    summoner_name: Optional[str] = None
+    game_name: Optional[str] = None
+    tag_line: Optional[str] = None
+    region: str = Field(..., pattern="^(americas|europe|asia|sea|NA1|EUW1|EUN1|KR|BR1|JP1|LA1|LA2|OC1|TR1|RU)$")
 
 
 class SummonerResponse(BaseModel):
     """Response model for summoner data"""
     id: str
     summoner_name: str
+    game_name: Optional[str] = None
+    tag_line: Optional[str] = None
     region: str
     puuid: str
     summoner_level: int

@@ -15,6 +15,21 @@ export const authActions = {
       });
 
       if (authError) throw authError;
+      
+      // Check if email confirmation is required
+      if (!authData.session && authData.user) {
+        // Email confirmation required - return success with pending status
+        return { 
+          success: true, 
+          data: { 
+            user_id: authData.user.id,
+            email: authData.user.email!,
+            token: '',
+            pending_confirmation: true,
+          } 
+        };
+      }
+
       if (!authData.session) throw new Error('No session created');
 
       // Store token

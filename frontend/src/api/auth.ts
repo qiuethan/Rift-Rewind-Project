@@ -18,6 +18,7 @@ export interface AuthResponse {
   token: string;
   summoner_name?: string;
   region?: string;
+  pending_confirmation?: boolean;
 }
 
 export interface TokenResponse {

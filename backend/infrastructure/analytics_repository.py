@@ -3,29 +3,24 @@ Analytics repository implementation with Supabase and LLM
 """
 from repositories.analytics_repository import AnalyticsRepository
 from models.analytics import PerformanceMetrics, SkillProgressionResponse
-from fastapi import HTTPException, status
+from infrastructure.database.database_client import DatabaseClient
 from typing import Optional, List, Dict, Any
 
 
 class AnalyticsRepositorySupabase(AnalyticsRepository):
     """Supabase + LLM implementation of analytics repository"""
     
-    def __init__(self, client, openrouter_api_key: Optional[str] = None):
+    def __init__(self, client: DatabaseClient, openrouter_api_key: Optional[str] = None):
         self.client = client
         self.openrouter_api_key = openrouter_api_key
     
-    async def save_performance_metrics(self, match_id: str, metrics: dict) -> PerformanceMetrics:
-        """Save performance metrics to Supabase"""
-        try:
-            if self.client:
-                metrics['match_id'] = match_id
-                self.client.table('performance_metrics').upsert(metrics).execute()
+    async def save_performance_metrics(self, match_id: str, metrics: dict) -> Optional[PerformanceMetrics]:
+        """Save performance metrics to database"""
+        if self.client:
+            metrics['match_id'] = match_id
+            self.client.table('performance_metrics').upsert(metrics).execute()
             return PerformanceMetrics(**metrics)
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to save metrics: {str(e)}"
-            )
+        return None
     
     async def get_performance_metrics(self, match_id: str, summoner_id: str) -> Optional[PerformanceMetrics]:
         """Get performance metrics from Firebase (DEMO)"""
@@ -77,30 +72,22 @@ class AnalyticsRepositorySupabase(AnalyticsRepository):
             current_rank="Gold II"
         )
     
-    async def save_analysis(self, match_id: str, summoner_id: str, analysis_data: dict) -> dict:
-        """Save performance analysis to Supabase"""
-        try:
-            if self.client:
-                analysis_data['match_id'] = match_id
-                analysis_data['summoner_id'] = summoner_id
-                self.client.table('performance_analysis').upsert(analysis_data).execute()
+    async def save_analysis(self, match_id: str, summoner_id: str, analysis_data: dict) -> Optional[dict]:
+        """Save performance analysis to database"""
+        if self.client:
+            analysis_data['match_id'] = match_id
+            analysis_data['summoner_id'] = summoner_id
+            self.client.table('performance_analysis').upsert(analysis_data).execute()
             return analysis_data
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to save analysis: {str(e)}"
-            )
+        return None
     
     async def get_cached_analysis(self, match_id: str, summoner_id: str) -> Optional[dict]:
-        """Get cached performance analysis from Supabase"""
-        try:
-            if self.client:
-                response = self.client.table('performance_analysis').select('*').eq('match_id', match_id).eq('summoner_id', summoner_id).limit(1).execute()
-                if response.data:
-                    return response.data[0]
-            return None
-        except Exception as e:
-            return None
+        """Get cached performance analysis from database"""
+        if self.client:
+            response = self.client.table('performance_analysis').select('*').eq('match_id', match_id).eq('summoner_id', summoner_id).limit(1).execute()
+            if response.data:
+                return response.data[0]
+        return None
     
     async def generate_insights(self, summoner_id: str, match_ids: List[str]) -> Dict[str, Any]:
         """Generate AI insights using LLM (DEMO)"""

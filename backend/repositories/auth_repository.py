@@ -10,8 +10,8 @@ class AuthRepository(ABC):
     """Abstract interface for authentication data access"""
     
     @abstractmethod
-    async def create_user(self, email: str, password: str, user_data: dict) -> AuthResponse:
-        """Create a new user"""
+    async def create_user(self, email: str, password: str, user_data: dict) -> Optional[AuthResponse]:
+        """Create a new user, or None if failed"""
         pass
     
     @abstractmethod
@@ -30,6 +30,11 @@ class AuthRepository(ABC):
         pass
     
     @abstractmethod
-    async def update_user(self, user_id: str, user_data: dict) -> dict:
-        """Update user data"""
+    async def login(self, email: str, password: str) -> Optional['AuthResponse']:
+        """Login user and return auth response with token, or None if failed"""
+        pass
+    
+    @abstractmethod
+    async def update_user(self, user_id: str, user_data: dict) -> Optional[dict]:
+        """Update user data, or None if failed"""
         pass

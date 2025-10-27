@@ -35,8 +35,8 @@ class ChampionRepository(ABC):
         pass
     
     @abstractmethod
-    async def save_champion_data(self, champion_data: dict) -> ChampionData:
-        """Save champion data to database"""
+    async def save_champion_data(self, champion_data: dict) -> Optional[ChampionData]:
+        """Save champion data to database, or None if failed"""
         pass
     
     @abstractmethod

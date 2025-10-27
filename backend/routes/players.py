@@ -7,6 +7,7 @@ from services.player_service import PlayerService
 from dependency.dependencies import get_player_service
 from middleware.auth import get_current_user
 from typing import List
+from utils.logger import logger
 
 
 router = APIRouter(prefix="/api/players", tags=["players"])
@@ -19,7 +20,12 @@ async def link_summoner(
     player_service: PlayerService = Depends(get_player_service)
 ):
     """Link summoner account to user"""
-    return await player_service.link_summoner(current_user, summoner_request)
+    logger.info(f"POST /api/players/summoner - User: {current_user}")
+    logger.debug(f"Request body: {summoner_request.dict()}")
+    logger.info(f"About to call player_service.link_summoner")
+    result = await player_service.link_summoner(current_user, summoner_request)
+    logger.info(f"Successfully linked summoner")
+    return result
 
 
 @router.get("/summoner", response_model=SummonerResponse)
@@ -28,6 +34,7 @@ async def get_summoner(
     player_service: PlayerService = Depends(get_player_service)
 ):
     """Get user's linked summoner"""
+    logger.info(f"GET /api/players/summoner - User: {current_user}")
     return await player_service.get_summoner(current_user)
 
 

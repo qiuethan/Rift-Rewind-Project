@@ -26,7 +26,7 @@ class PlayerDomain:
     
     def validate_region(self, region: str) -> None:
         """Validate region business rules"""
-        valid_regions = ["NA1", "EUW1", "EUN1", "KR", "BR1", "JP1", "LA1", "LA2", "OC1", "TR1", "RU"]
+        valid_regions = ["americas", "europe", "asia", "sea", "NA1", "EUW1", "EUN1", "KR", "BR1", "JP1", "LA1", "LA2", "OC1", "TR1", "RU"]
         if region not in valid_regions:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

@@ -14,11 +14,13 @@ export default function RegisterPage() {
   const [region, setRegion] = useState('NA1');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     // Validate passwords match
     if (password !== confirmPassword) {
@@ -35,12 +37,18 @@ export default function RegisterPage() {
     });
 
     if (result.success) {
-      navigate(ROUTES.DASHBOARD);
+      // Check if email confirmation is required
+      if (result.data?.pending_confirmation) {
+        setSuccess('Account created! Please check your email to confirm your account before logging in.');
+        setLoading(false);
+        // Don't navigate - let user see the message
+      } else {
+        navigate(ROUTES.DASHBOARD);
+      }
     } else {
-      setError(result.error);
+      setError(result.error || 'Registration failed');
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -117,8 +125,9 @@ export default function RegisterPage() {
           </div>
 
           {error && <div className={styles.error}>{error}</div>}
+          {success && <div className={styles.success}>{success}</div>}
 
-          <Button type="submit" loading={loading} fullWidth>
+          <Button type="submit" loading={loading} fullWidth disabled={!!success}>
             Create Account
           </Button>
         </form>

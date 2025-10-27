@@ -3,6 +3,7 @@ Auth service - Orchestrates authentication operations
 """
 from repositories.auth_repository import AuthRepository
 from domain.auth_domain import AuthDomain
+from domain.exceptions import DomainException
 from models.auth import RegisterRequest, LoginRequest, AuthResponse, TokenResponse
 from fastapi import HTTPException, status
 
@@ -16,15 +17,21 @@ class AuthService:
     
     async def register(self, register_request: RegisterRequest) -> AuthResponse:
         """Register a new user"""
-        # Validate business rules
-        self.auth_domain.validate_email(register_request.email)
-        self.auth_domain.validate_password(register_request.password)
-        
-        if register_request.summoner_name:
-            self.auth_domain.validate_summoner_name(register_request.summoner_name)
-        
-        if register_request.region:
-            self.auth_domain.validate_region(register_request.region)
+        # Validate business rules - catch domain exceptions and convert to HTTP exceptions
+        try:
+            self.auth_domain.validate_email(register_request.email)
+            self.auth_domain.validate_password(register_request.password)
+            
+            if register_request.summoner_name:
+                self.auth_domain.validate_summoner_name(register_request.summoner_name)
+            
+            if register_request.region:
+                self.auth_domain.validate_region(register_request.region)
+        except DomainException as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=e.message
+            )
         
         # Check if user already exists
         existing_user = await self.auth_repository.get_user_by_email(register_request.email)
@@ -40,45 +47,48 @@ class AuthService:
             'region': register_request.region
         }
         
-        return await self.auth_repository.create_user(
-            register_request.email,
-            register_request.password,
-            user_data
-        )
+        try:
+            result = await self.auth_repository.create_user(
+                register_request.email,
+                register_request.password,
+                user_data
+            )
+            
+            if not result:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to create user"
+                )
+            
+            return result
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to create user: {str(e)}"
+            )
     
     async def login(self, login_request: LoginRequest) -> AuthResponse:
         """Login user"""
-        # Validate credentials
-        is_valid = await self.auth_repository.verify_password(
-            login_request.email,
-            login_request.password
-        )
-        
-        if not is_valid:
+        # Login with Supabase (this returns the session with token)
+        try:
+            result = await self.auth_repository.login(
+                login_request.email,
+                login_request.password
+            )
+            
+            if not result:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid email or password"
+                )
+            
+            return result
+        except Exception as e:
+            # Handle Supabase auth errors
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password"
             )
-        
-        # Get user data
-        user = await self.auth_repository.get_user_by_email(login_request.email)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password"
-            )
-        
-        # Generate token (demo)
-        import secrets
-        token = secrets.token_urlsafe(32)
-        
-        return AuthResponse(
-            user_id=user['id'],
-            email=user['email'],
-            token=token,
-            summoner_name=user.get('summoner_name'),
-            region=user.get('region')
-        )
     
     async def verify_token(self, token: str) -> TokenResponse:
         """Verify authentication token"""

@@ -17,6 +17,21 @@ export const playersActions = {
   },
 
   /**
+   * Link account using Riot ID (game_name + tag_line)
+   */
+  linkAccount: async (data: SummonerRequest) => {
+    try {
+      const summoner = await playersApi.linkSummoner(data);
+      return { success: true, data: summoner };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to link account',
+      };
+    }
+  },
+
+  /**
    * Get linked summoner account
    */
   getSummoner: async () => {
