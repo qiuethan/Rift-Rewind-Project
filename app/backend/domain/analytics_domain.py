@@ -1,7 +1,7 @@
 """
 Analytics domain - Pure business logic for analytics operations
 """
-from fastapi import HTTPException, status
+from domain.exceptions import InvalidTimeRangeError, ValidationError
 from typing import List, Dict
 
 
@@ -14,24 +14,15 @@ class AnalyticsDomain:
     def validate_time_range(self, days: int) -> None:
         """Validate time range for analytics"""
         if days < 1 or days > 365:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Time range must be between 1 and 365 days"
-            )
+            raise InvalidTimeRangeError("Time range must be between 1 and 365 days")
     
     def validate_match_list(self, match_ids: List[str]) -> None:
         """Validate match ID list"""
         if not match_ids or len(match_ids) == 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="At least one match ID is required"
-            )
+            raise ValidationError("At least one match ID is required")
         
         if len(match_ids) > 10:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Maximum 10 match IDs allowed"
-            )
+            raise ValidationError("Maximum 10 match IDs allowed")
     
     def calculate_performance_grade(self, metrics: Dict[str, float]) -> str:
         """

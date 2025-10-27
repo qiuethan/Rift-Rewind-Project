@@ -1,7 +1,7 @@
 """
 Match domain - Pure business logic for match operations
 """
-from fastapi import HTTPException, status
+from domain.exceptions import InvalidMatchIdError, InvalidRegionError, ValidationError
 from typing import Dict, Any, List
 
 
@@ -14,19 +14,13 @@ class MatchDomain:
     def validate_match_id(self, match_id: str) -> None:
         """Validate match ID format"""
         if not match_id or len(match_id) < 10:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid match ID format"
-            )
+            raise InvalidMatchIdError("Invalid match ID format")
     
     def validate_region(self, region: str) -> None:
         """Validate region for match data"""
         valid_regions = ["americas", "asia", "europe", "sea"]
         if region not in valid_regions:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Region must be one of: {', '.join(valid_regions)}"
-            )
+            raise InvalidRegionError(f"Region must be one of: {', '.join(valid_regions)}")
     
     def calculate_cs_per_min(self, minions_killed: int, jungle_minions: int, game_duration_seconds: int) -> float:
         """Calculate CS per minute"""
@@ -67,7 +61,4 @@ class MatchDomain:
     def validate_participant_id(self, participant_id: int) -> None:
         """Validate participant ID"""
         if participant_id < 1 or participant_id > 10:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Participant ID must be between 1 and 10"
-            )
+            raise ValidationError("Participant ID must be between 1 and 10")

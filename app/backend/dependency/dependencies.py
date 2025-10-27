@@ -36,6 +36,7 @@ from services.player_service import PlayerService
 from services.match_service import MatchService
 from services.champion_service import ChampionService
 from services.analytics_service import AnalyticsService
+from services.llm_service import BedrockService
 
 
 # ============================================================================
@@ -150,4 +151,14 @@ def get_analytics_service() -> AnalyticsService:
         analytics_repository=get_analytics_repository(),
         match_repository=get_match_repository(),
         analytics_domain=get_analytics_domain()
+    )
+
+
+def get_bedrock_service() -> BedrockService:
+    """Factory for BedrockService with injected config"""
+    return BedrockService(
+        aws_access_key=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_key=settings.AWS_SECRET_ACCESS_KEY,
+        region=settings.AWS_REGION,
+        model_id=settings.AWS_BEDROCK_MODEL
     )

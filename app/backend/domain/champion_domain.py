@@ -1,7 +1,7 @@
 """
 Champion domain - Pure business logic for champion operations
 """
-from fastapi import HTTPException, status
+from domain.exceptions import InvalidChampionIdError, ValidationError
 from typing import List
 
 
@@ -14,26 +14,17 @@ class ChampionDomain:
     def validate_champion_id(self, champion_id: str) -> None:
         """Validate champion ID format"""
         if not champion_id or len(champion_id) < 2:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid champion ID"
-            )
+            raise InvalidChampionIdError("Invalid champion ID")
     
     def validate_similarity_score(self, score: float) -> None:
         """Validate similarity score is between 0 and 1"""
         if score < 0.0 or score > 1.0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Similarity score must be between 0 and 1"
-            )
+            raise ValidationError("Similarity score must be between 0 and 1")
     
     def validate_recommendation_limit(self, limit: int) -> None:
         """Validate recommendation limit"""
         if limit < 1 or limit > 20:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Recommendation limit must be between 1 and 20"
-            )
+            raise ValidationError("Recommendation limit must be between 1 and 20")
     
     def calculate_ability_similarity(self, abilities_a: List[str], abilities_b: List[str]) -> float:
         """

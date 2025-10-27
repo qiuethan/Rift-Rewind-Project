@@ -1,7 +1,7 @@
 """
 Player domain - Pure business logic for player operations
 """
-from fastapi import HTTPException, status
+from domain.exceptions import InvalidSummonerNameError, InvalidRegionError, ValidationError
 
 
 class PlayerDomain:
@@ -13,25 +13,16 @@ class PlayerDomain:
     def validate_summoner_name(self, summoner_name: str) -> None:
         """Validate summoner name business rules"""
         if not summoner_name or len(summoner_name.strip()) < 3:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Summoner name must be at least 3 characters"
-            )
+            raise InvalidSummonerNameError("Summoner name must be at least 3 characters")
         
         if len(summoner_name) > 16:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Summoner name must be less than 16 characters"
-            )
+            raise InvalidSummonerNameError("Summoner name must be less than 16 characters")
     
     def validate_region(self, region: str) -> None:
         """Validate region business rules"""
         valid_regions = ["americas", "europe", "asia", "sea", "NA1", "EUW1", "EUN1", "KR", "BR1", "JP1", "LA1", "LA2", "OC1", "TR1", "RU"]
         if region not in valid_regions:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Region must be one of: {', '.join(valid_regions)}"
-            )
+            raise InvalidRegionError(f"Region must be one of: {', '.join(valid_regions)}")
     
     def calculate_win_rate(self, wins: int, losses: int) -> float:
         """Calculate win rate percentage"""
@@ -49,7 +40,4 @@ class PlayerDomain:
     def validate_puuid(self, puuid: str) -> None:
         """Validate PUUID format"""
         if not puuid or len(puuid) < 10:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid PUUID format"
-            )
+            raise ValidationError("Invalid PUUID format")

@@ -3,6 +3,7 @@ Player service - Orchestrates player operations
 """
 from repositories.player_repository import PlayerRepository
 from domain.player_domain import PlayerDomain
+from domain.exceptions import DomainException
 from models.players import SummonerRequest, SummonerResponse, PlayerStatsResponse
 from fastapi import HTTPException, status
 from typing import List
@@ -18,7 +19,11 @@ class PlayerService:
     
     async def link_summoner(self, user_id: str, summoner_request: SummonerRequest) -> SummonerResponse:
         """Link summoner account to user"""
-        self.player_domain.validate_region(summoner_request.region)
+        # Validate with domain - catch domain exceptions and convert to HTTP
+        try:
+            self.player_domain.validate_region(summoner_request.region)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
         logger.debug(f"Received request - game_name: '{summoner_request.game_name}', tag_line: '{summoner_request.tag_line}', summoner_name: '{summoner_request.summoner_name}'")
         
@@ -35,7 +40,10 @@ class PlayerService:
                 summoner_request.region
             )
         elif has_summoner_name:
-            self.player_domain.validate_summoner_name(summoner_request.summoner_name)
+            try:
+                self.player_domain.validate_summoner_name(summoner_request.summoner_name)
+            except DomainException as e:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
             summoner = await self.player_repository.get_summoner_by_name(
                 summoner_request.summoner_name.strip(),
                 summoner_request.region
@@ -136,7 +144,10 @@ class PlayerService:
         summoner = await self.get_summoner(user_id)
         
         # Validate PUUID
-        self.player_domain.validate_puuid(summoner.puuid)
+        try:
+            self.player_domain.validate_puuid(summoner.puuid)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
         # Get match history
         return await self.player_repository.get_match_history(summoner.puuid, count)

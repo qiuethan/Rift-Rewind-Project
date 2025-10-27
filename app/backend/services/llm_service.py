@@ -5,31 +5,40 @@ Handles interactions with AWS Bedrock for AI-powered analytics
 import json
 import boto3
 from typing import Optional, Dict, Any
-from config.settings import settings
+from utils.logger import logger
 
 
 class BedrockService:
     """Service for interacting with AWS Bedrock LLMs"""
     
-    def __init__(self):
-        """Initialize Bedrock client"""
+    def __init__(self, aws_access_key: str, aws_secret_key: str, region: str, model_id: str):
+        """
+        Initialize Bedrock client with injected credentials
+        
+        Args:
+            aws_access_key: AWS access key ID
+            aws_secret_key: AWS secret access key
+            region: AWS region
+            model_id: Bedrock model ID to use
+        """
+        self.model_id = model_id
         self.client = None
-        self._initialize_client()
+        self._initialize_client(aws_access_key, aws_secret_key, region)
     
-    def _initialize_client(self):
+    def _initialize_client(self, aws_access_key: str, aws_secret_key: str, region: str):
         """Initialize boto3 Bedrock client with credentials"""
-        if not settings.AWS_ACCESS_KEY_ID or not settings.AWS_SECRET_ACCESS_KEY:
+        if not aws_access_key or not aws_secret_key:
             logger.warning("AWS credentials not configured")
             return
         
         try:
             self.client = boto3.client(
                 service_name='bedrock-runtime',
-                region_name=settings.AWS_REGION,
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+                region_name=region,
+                aws_access_key_id=aws_access_key,
+                aws_secret_access_key=aws_secret_key
             )
-            logger.info(f"AWS Bedrock client initialized (region: {settings.AWS_REGION})")
+            logger.info(f"AWS Bedrock client initialized (region: {region})")
         except Exception as e:
             logger.error(f"Failed to initialize AWS Bedrock client: {e}")
             self.client = None
@@ -159,7 +168,7 @@ Keep it constructive and actionable."""
             
             # Invoke model
             response = self.client.invoke_model(
-                modelId=settings.AWS_BEDROCK_MODEL,
+                modelId=self.model_id,
                 body=body,
                 contentType='application/json',
                 accept='application/json'
@@ -212,7 +221,3 @@ Provide 3 champion recommendations with brief reasoning for each."""
         except Exception as e:
             logger.error(f"Error generating recommendations: {e}")
             return f"Error generating recommendations: {str(e)}"
-
-
-# Global service instance
-bedrock_service = BedrockService()
