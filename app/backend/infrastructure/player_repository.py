@@ -308,6 +308,7 @@ class PlayerRepositoryRiot(PlayerRepository):
                     participant.get('item4', 0),
                     participant.get('item5', 0),
                     participant.get('item6', 0),  # Trinket
+                    participant.get('item7', 0),  # Jungle pet (Season 14+)
                 ]
             )
             

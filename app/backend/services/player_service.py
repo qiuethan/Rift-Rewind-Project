@@ -288,18 +288,16 @@ class PlayerService:
                         should_stop = True
                         break
                     
-                    # Check if match exists at all
-                    match_exists = await self.match_repository.match_exists(match_id)
+                    # Try to get match from DB first
+                    match_data = await self.match_repository.get_match(match_id)
                     
-                    if match_exists:
-                        # Match exists, just add this summoner to it
-                        logger.info(f"Background: Match {match_id} exists, adding summoner")
-                        match_data = await self.match_repository.get_match(match_id)
-                        if match_data:
-                            await self.match_repository.save_match(match_id, match_data, puuid)
+                    if match_data:
+                        # Match exists in DB, just add this summoner to tracking
+                        logger.debug(f"Background: Match {match_id} exists in DB, adding summoner to tracking")
+                        await self.match_repository.save_match(match_id, match_data, puuid)
                     else:
-                        # Fetch and save new match
-                        logger.info(f"Background: Fetching match {start_index + i + 1}: {match_id}")
+                        # Match doesn't exist, fetch from API and save
+                        logger.info(f"Background: Fetching new match {start_index + i + 1}: {match_id}")
                         match_data = await self.riot_api.get_match_details(match_id, region)
                         
                         if match_data:
@@ -307,7 +305,7 @@ class PlayerService:
                             if await self.match_repository.save_match(match_id, match_data, puuid):
                                 batch_saved += 1
                                 total_saved += 1
-                                logger.info(f"Background: Saved match {match_id} ({total_saved} total)")
+                                logger.info(f"Background: Saved new match {match_id} ({total_saved} total)")
                 
                 if should_stop:
                     break

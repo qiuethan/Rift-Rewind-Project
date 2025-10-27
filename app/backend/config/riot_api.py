@@ -11,71 +11,77 @@ from utils.logger import logger
 
 
 class RateLimiter:
-    """
-    Non-blocking rate limiter with automatic queuing
-    Implements token bucket algorithm
-    """
-    def __init__(self, requests_per_second: float = 20, requests_per_two_minutes: int = 100):
+    """Token bucket rate limiter for Riot API with concurrent request support"""
+    
+    def __init__(self, requests_per_second: int = 20, requests_per_two_minutes: int = 100):
         """
-        Initialize rate limiter
+        Initialize rate limiter with token buckets
         
         Args:
-            requests_per_second: Max requests per second (default 20)
-            requests_per_two_minutes: Max requests per 2 minutes (default 100)
+            requests_per_second: Maximum requests per second (default 20)
+            requests_per_two_minutes: Maximum requests per 2 minutes (default 100)
         """
         self.requests_per_second = requests_per_second
         self.requests_per_two_minutes = requests_per_two_minutes
         
-        # Token buckets
-        self.second_bucket = requests_per_second
-        self.two_min_bucket = requests_per_two_minutes
+        # Semaphore to limit concurrent requests
+        self.semaphore = asyncio.Semaphore(requests_per_second)
         
-        # Timestamps
+        # Timestamps for 2-minute window
+        self.request_timestamps: deque = deque()
+        
+        # Last refill time for per-second bucket
         self.last_second_refill = datetime.now()
-        self.request_timestamps = deque()  # Track requests in last 2 minutes
+        self.second_bucket = float(requests_per_second)
         
-        # Queue for pending requests
-        self.queue = asyncio.Queue()
-        self.processing = False
+        # Lock only for timestamp management
         self.lock = asyncio.Lock()
         
         logger.info(f"Rate limiter initialized: {requests_per_second} req/s, {requests_per_two_minutes} req/2min")
     
-    async def _refill_buckets(self):
-        """Refill token buckets based on time elapsed"""
+    async def _cleanup_old_timestamps(self):
+        """Remove timestamps older than 2 minutes"""
         now = datetime.now()
-        
-        # Refill per-second bucket
-        time_since_refill = (now - self.last_second_refill).total_seconds()
-        tokens_to_add = time_since_refill * self.requests_per_second
-        self.second_bucket = min(self.requests_per_second, self.second_bucket + tokens_to_add)
-        self.last_second_refill = now
-        
-        # Clean up old timestamps (older than 2 minutes)
         two_minutes_ago = now - timedelta(minutes=2)
-        while self.request_timestamps and self.request_timestamps[0] < two_minutes_ago:
-            self.request_timestamps.popleft()
-            self.two_min_bucket = min(self.requests_per_two_minutes, self.two_min_bucket + 1)
+        
+        async with self.lock:
+            while self.request_timestamps and self.request_timestamps[0] < two_minutes_ago:
+                self.request_timestamps.popleft()
+    
+    async def _wait_for_two_min_window(self):
+        """Wait if we've hit the 2-minute limit"""
+        while True:
+            await self._cleanup_old_timestamps()
+            
+            async with self.lock:
+                if len(self.request_timestamps) < self.requests_per_two_minutes:
+                    self.request_timestamps.append(datetime.now())
+                    return
+            
+            # Wait a bit before checking again
+            await asyncio.sleep(0.1)
     
     async def acquire(self):
         """
-        Acquire permission to make a request (non-blocking with queue)
-        Automatically waits if rate limit is reached
+        Acquire permission to make a request with concurrent support
+        Uses semaphore for per-second limit and deque for 2-minute window
         """
-        async with self.lock:
-            await self._refill_buckets()
-            
-            # Check if we have tokens available
-            while self.second_bucket < 1 or len(self.request_timestamps) >= self.requests_per_two_minutes:
-                # Wait a bit and refill
-                await asyncio.sleep(0.1)
-                await self._refill_buckets()
-            
-            # Consume tokens
-            self.second_bucket -= 1
-            self.request_timestamps.append(datetime.now())
-            
-            logger.debug(f"Rate limit: {self.second_bucket:.1f} tokens, {len(self.request_timestamps)} requests in 2min")
+        # Check 2-minute window first
+        await self._wait_for_two_min_window()
+        
+        # Acquire semaphore for per-second rate limit
+        # This allows up to N concurrent requests per second
+        await self.semaphore.acquire()
+        
+        # Release after 1 second to refill the bucket
+        asyncio.create_task(self._release_after_delay())
+        
+        logger.debug(f"Rate limit: {len(self.request_timestamps)} requests in 2min window")
+    
+    async def _release_after_delay(self):
+        """Release semaphore after 1 second to maintain per-second rate"""
+        await asyncio.sleep(1.0 / self.requests_per_second)
+        self.semaphore.release()
 
 
 class RiotAPIConfig:
