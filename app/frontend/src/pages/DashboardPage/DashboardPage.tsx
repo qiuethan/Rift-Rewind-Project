@@ -64,7 +64,7 @@ export default function DashboardPage() {
   const fetchRecentGames = async () => {
     setGamesLoading(true);
     try {
-      const gamesResult = await playersActions.getRecentGames(5);
+      const gamesResult = await playersActions.getRecentGames(10);
       if (gamesResult.success && gamesResult.data) {
         setRecentGames(gamesResult.data);
       }
@@ -206,8 +206,8 @@ export default function DashboardPage() {
           {error && <div className={styles.modalError}>{error}</div>}
           {success && <div className={styles.modalSuccess}>{success}</div>}
 
-          <Button type="submit" loading={saving} fullWidth>
-            {summoner ? 'Update Account' : 'Link Account'}
+          <Button type="submit" loading={saving} disabled={saving} fullWidth>
+            {saving ? 'Linking...' : (summoner ? 'Update Account' : 'Link Account')}
           </Button>
         </form>
       </Modal>

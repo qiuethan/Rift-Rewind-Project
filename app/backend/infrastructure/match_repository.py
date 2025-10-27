@@ -2,9 +2,12 @@
 Match repository implementation with Riot API
 """
 from repositories.match_repository import MatchRepository
+from repositories.riot_api_repository import RiotAPIRepository
 from models.matches import MatchTimelineResponse, MatchSummaryResponse
 from infrastructure.database.database_client import DatabaseClient
-from typing import Optional, Dict, Any
+from constants.database import DatabaseTable
+from typing import Optional, Dict, Any, List
+from utils.logger import logger
 
 
 class MatchRepositoryRiot(MatchRepository):
@@ -13,6 +16,7 @@ class MatchRepositoryRiot(MatchRepository):
     def __init__(self, client: DatabaseClient, riot_api_key: str):
         self.client = client
         self.riot_api_key = riot_api_key
+        logger.info("Match repository initialized")
     
     async def get_match_timeline(self, match_id: str, region: str) -> Optional[MatchTimelineResponse]:
         """Get match timeline from Riot API (DEMO)"""
@@ -61,3 +65,224 @@ class MatchRepositoryRiot(MatchRepository):
             "deaths": 3,
             "assists": 10
         }
+    
+    async def save_match(self, match_id: str, match_data: Dict[str, Any]) -> bool:
+        """Save complete match data to database"""
+        try:
+            if not self.client:
+                logger.error("Database client not available")
+                return False
+            
+            # Extract metadata from match_data
+            info = match_data.get('info', {})
+            metadata = match_data.get('metadata', {})
+            
+            match_record = {
+                'match_id': match_id,
+                'game_creation': info.get('gameCreation', 0),
+                'game_duration': info.get('gameDuration', 0),
+                'game_end_timestamp': info.get('gameEndTimestamp'),
+                'game_mode': info.get('gameMode', ''),
+                'game_type': info.get('gameType', ''),
+                'game_version': info.get('gameVersion', ''),
+                'map_id': info.get('mapId', 0),
+                'platform_id': info.get('platformId', ''),
+                'queue_id': info.get('queueId', 0),
+                'tournament_code': info.get('tournamentCode'),
+                'match_data': match_data  # Store complete match data as JSONB
+            }
+            
+            # Upsert match data (insert or update if exists)
+            result = self.client.table(str(DatabaseTable.MATCHES)).upsert(match_record).execute()
+            
+            if result:
+                logger.info(f"Successfully saved match: {match_id}")
+                return True
+            
+            logger.error(f"Failed to save match: {match_id}")
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error saving match {match_id}: {e}")
+            return False
+    
+    async def get_match(self, match_id: str) -> Optional[Dict[str, Any]]:
+        """Get complete match data from database"""
+        try:
+            if not self.client:
+                logger.error("Database client not available")
+                return None
+            
+            result = self.client.table(str(DatabaseTable.MATCHES))\
+                .select('match_data')\
+                .eq('match_id', match_id)\
+                .limit(1)\
+                .execute()
+            
+            if result.data and len(result.data) > 0:
+                logger.info(f"Retrieved match from database: {match_id}")
+                return result.data[0].get('match_data')
+            
+            logger.info(f"Match not found in database: {match_id}")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error retrieving match {match_id}: {e}")
+            return None
+    
+    async def match_exists(self, match_id: str) -> bool:
+        """Check if a match already exists in database"""
+        try:
+            if not self.client:
+                return False
+            
+            result = self.client.table(str(DatabaseTable.MATCHES))\
+                .select('match_id')\
+                .eq('match_id', match_id)\
+                .limit(1)\
+                .execute()
+            
+            exists = result.data and len(result.data) > 0
+            logger.debug(f"Match {match_id} exists: {exists}")
+            return exists
+            
+        except Exception as e:
+            logger.error(f"Error checking match existence {match_id}: {e}")
+            return False
+    
+    async def get_player_matches(self, puuid: str, limit: int = 20) -> List[Dict[str, Any]]:
+        """Get all matches for a specific player using JSONB query"""
+        try:
+            if not self.client:
+                logger.error("Database client not available")
+                return []
+            
+            # Query matches where the player's PUUID is in the participants array
+            # This uses PostgreSQL's JSONB containment operator
+            result = self.client.table(str(DatabaseTable.MATCHES))\
+                .select('*')\
+                .contains('match_data->metadata->participants', [puuid])\
+                .order('game_creation', desc=True)\
+                .limit(limit)\
+                .execute()
+            
+            if result.data:
+                logger.info(f"Retrieved {len(result.data)} matches for player {puuid}")
+                return result.data
+            
+            logger.info(f"No matches found for player {puuid}")
+            return []
+            
+        except Exception as e:
+            logger.error(f"Error retrieving matches for player {puuid}: {e}")
+            return []
+    
+    async def sync_player_matches(self, puuid: str, region: str, riot_api: RiotAPIRepository, max_matches: int = 100) -> int:
+        """
+        Sync matches for a player from Riot API to database.
+        Fetches matches in batches and stops when hitting existing ones or reaching max_matches.
+        
+        Args:
+            puuid: Player's PUUID
+            region: Regional routing value
+            riot_api: RiotAPIRepository instance
+            max_matches: Maximum number of matches to sync (default 100)
+        """
+        try:
+            total_saved = 0
+            start_index = 0
+            batch_size = min(100, max_matches)  # Riot API max is 100
+            
+            # Quick check: if first match exists, nothing to sync
+            if await self.is_match_history_synced(puuid, region, riot_api):
+                logger.info(f"Match history already up to date for {puuid}")
+                return 0
+            
+            while True:
+                # Check if we've reached the max
+                if total_saved >= max_matches:
+                    logger.info(f"Reached max matches limit ({max_matches}) - stopping sync")
+                    break
+                
+                # Adjust batch size if we're near the limit
+                remaining = max_matches - total_saved
+                current_batch_size = min(batch_size, remaining)
+                
+                # Fetch batch of match IDs
+                logger.info(f"Fetching match IDs batch starting at index {start_index} (max {current_batch_size})")
+                match_ids = await riot_api.get_match_ids_by_puuid(puuid, region, count=current_batch_size, start=start_index)
+                
+                if not match_ids or len(match_ids) == 0:
+                    logger.info(f"No more matches found - sync complete ({total_saved} total saved)")
+                    break
+                
+                logger.info(f"Found {len(match_ids)} match IDs in this batch")
+                
+                # Process batch
+                batch_saved = 0
+                should_stop = False
+                
+                for i, match_id in enumerate(match_ids):
+                    # Check if match already exists
+                    exists = await self.match_exists(match_id)
+                    
+                    if exists:
+                        logger.info(f"Match {match_id} already exists - stopping sync ({total_saved} total saved)")
+                        should_stop = True
+                        break
+                    
+                    # Fetch and save match
+                    logger.info(f"Fetching match details for: {match_id} (#{start_index + i + 1})")
+                    match_data = await riot_api.get_match_details(match_id, region)
+                    
+                    if not match_data:
+                        logger.warning(f"Could not fetch match details for: {match_id}")
+                        continue
+                    
+                    # Save to database
+                    if await self.save_match(match_id, match_data):
+                        batch_saved += 1
+                        total_saved += 1
+                        logger.info(f"Saved match {match_id} ({total_saved} total saved)")
+                    else:
+                        logger.error(f"Failed to save match: {match_id}")
+                
+                # If we hit an existing match, stop
+                if should_stop:
+                    break
+                
+                # If we got fewer matches than requested, we've reached the end
+                if len(match_ids) < batch_size:
+                    logger.info(f"Reached end of match history ({total_saved} total saved)")
+                    break
+                
+                # Move to next batch
+                start_index += batch_size
+            
+            logger.info(f"Match sync complete: {total_saved} new matches saved")
+            return total_saved
+            
+        except Exception as e:
+            logger.error(f"Error syncing match history for {puuid}: {e}")
+            return 0
+    
+    async def is_match_history_synced(self, puuid: str, region: str, riot_api: RiotAPIRepository) -> bool:
+        """Check if player's match history is already synced by checking first match"""
+        try:
+            # Get just the first match ID
+            match_ids = await riot_api.get_match_ids_by_puuid(puuid, region, count=1, start=0)
+            
+            if not match_ids:
+                return True  # No matches to sync
+            
+            # Check if first match exists
+            exists = await self.match_exists(match_ids[0])
+            
+            if exists:
+                logger.debug(f"First match {match_ids[0]} exists - already synced")
+            
+            return exists
+            
+        except Exception as e:
+            logger.error(f"Error checking sync status: {e}")
+            return False

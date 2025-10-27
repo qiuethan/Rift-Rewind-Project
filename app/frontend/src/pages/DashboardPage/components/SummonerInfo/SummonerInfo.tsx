@@ -1,4 +1,4 @@
-import { Button, Card, Spinner } from '@/components';
+import { Button, Card } from '@/components';
 import { getProfileIconUrl } from '@/constants';
 import styles from './SummonerInfo.module.css';
 
@@ -12,7 +12,6 @@ export default function SummonerInfo({ summoner, onLinkAccount }: SummonerInfoPr
     return (
       <Card title="Summoner Info">
         <div className={styles.empty}>
-          <Spinner />
           <p>No summoner linked yet</p>
           <Button onClick={onLinkAccount}>Link Account</Button>
         </div>

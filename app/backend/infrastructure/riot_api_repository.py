@@ -84,12 +84,12 @@ class RiotAPIRepositoryImpl(RiotAPIRepository):
     # MATCH API v5
     # ============================================================================
     
-    async def get_match_ids_by_puuid(self, puuid: str, region: str, count: int = 10) -> List[str]:
-        """Get list of match IDs for a player"""
-        logger.info(f"Fetching {count} recent match IDs for PUUID: {puuid}")
+    async def get_match_ids_by_puuid(self, puuid: str, region: str, count: int = 10, start: int = 0) -> List[str]:
+        """Get list of match IDs for a player with pagination"""
+        logger.info(f"Fetching {count} match IDs for PUUID: {puuid} (starting at {start})")
         
         # Match API uses regional routing (americas, europe, asia, sea)
-        url = f"{self.riot.ACCOUNT_API_BASE.format(region=region)}/lol/match/v5/matches/by-puuid/{puuid}/ids?count={count}"
+        url = f"{self.riot.ACCOUNT_API_BASE.format(region=region)}/lol/match/v5/matches/by-puuid/{puuid}/ids?count={count}&start={start}"
         
         logger.debug(f"Calling Match API: {url}")
         result = await self.riot.request(url, "Match API")

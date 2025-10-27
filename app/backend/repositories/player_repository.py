@@ -74,10 +74,6 @@ class PlayerRepository(ABC):
         """Get mastery data for a specific champion"""
         pass
     
-    @abstractmethod
-    async def get_recent_games(self, puuid: str, region: str, count: int = 5) -> List[dict]:
-        """Get recent games for a player"""
-        pass
     
     @abstractmethod
     async def get_user_summoner_basic(self, user_id: str) -> Optional[dict]:

@@ -15,8 +15,7 @@ class DatabaseTable(str, Enum):
     USER_SUMMONERS = "user_summoners"
     
     # Match tables
-    MATCHES = "matches"
-    MATCH_PARTICIPANTS = "match_participants"
+    MATCHES = "matches"  # Stores complete match data with match_id as primary key
     
     # Champion tables
     CHAMPIONS = "champions"

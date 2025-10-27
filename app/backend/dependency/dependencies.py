@@ -124,7 +124,9 @@ def get_player_service() -> PlayerService:
     """Factory for PlayerService"""
     return PlayerService(
         player_repository=get_player_repository(),
-        player_domain=get_player_domain()
+        player_domain=get_player_domain(),
+        match_repository=get_match_repository(),
+        riot_api_repository=get_riot_api_repository()
     )
 
 

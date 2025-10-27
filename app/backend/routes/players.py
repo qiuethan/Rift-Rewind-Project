@@ -3,6 +3,7 @@ Player routes
 """
 from fastapi import APIRouter, status, Depends
 from models.players import SummonerRequest, SummonerResponse, PlayerStatsResponse
+from models.match import RecentGameSummary
 from services.player_service import PlayerService
 from dependency.dependencies import get_player_service
 from middleware.auth import get_current_user
@@ -57,12 +58,52 @@ async def get_match_history(
     return await player_service.get_match_history(current_user, count)
 
 
-@router.get("/recent-games", response_model=List[dict])
+@router.get("/recent-games", response_model=List[RecentGameSummary])
 async def get_recent_games(
-    count: int = 5,
+    count: int = 10,
     current_user: str = Depends(get_current_user),
     player_service: PlayerService = Depends(get_player_service)
 ):
     """Get player's recent games (separate endpoint for performance)"""
     logger.info(f"GET /api/players/recent-games - User: {current_user}")
     return await player_service.get_recent_games(current_user, count)
+
+
+@router.post("/sync-matches")
+async def sync_match_history(
+    current_user: str = Depends(get_current_user),
+    player_service: PlayerService = Depends(get_player_service)
+):
+    """
+    Manually sync match history for the current user.
+    Fetches all new matches from Riot API.
+    """
+    # Get user's summoner
+    summoner = await player_service.get_summoner(current_user)
+    
+    # Sync matches
+    saved_count = await player_service.sync_match_history(summoner.puuid, summoner.region)
+    
+    return {
+        "success": True,
+        "matches_synced": saved_count,
+        "message": f"Successfully synced {saved_count} new matches"
+    }
+
+
+@router.get("/sync-status")
+async def check_sync_status(
+    current_user: str = Depends(get_current_user),
+    player_service: PlayerService = Depends(get_player_service)
+):
+    """Check if match history is up to date"""
+    # Get user's summoner
+    summoner = await player_service.get_summoner(current_user)
+    
+    # Check sync status
+    is_synced = await player_service.is_match_history_synced(summoner.puuid, summoner.region)
+    
+    return {
+        "is_synced": is_synced,
+        "message": "Match history is up to date" if is_synced else "New matches available to sync"
+    }

@@ -90,8 +90,16 @@ class RiotAPIRepository(ABC):
     # ============================================================================
     
     @abstractmethod
-    async def get_match_ids_by_puuid(self, puuid: str, region: str, count: int = 10) -> List[str]:
-        """Get list of match IDs for a player"""
+    async def get_match_ids_by_puuid(self, puuid: str, region: str, count: int = 10, start: int = 0) -> List[str]:
+        """
+        Get list of match IDs for a player
+        
+        Args:
+            puuid: Player's PUUID
+            region: Regional routing value
+            count: Number of matches to return (max 100)
+            start: Starting index for pagination
+        """
         pass
     
     @abstractmethod

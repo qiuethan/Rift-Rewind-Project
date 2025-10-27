@@ -34,4 +34,4 @@ echo "   - Swagger UI: http://localhost:8000/docs"
 echo "   - ReDoc: http://localhost:8000/redoc"
 echo ""
 
-python main.py
+python3 main.py
