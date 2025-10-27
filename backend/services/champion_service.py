@@ -49,7 +49,6 @@ class ChampionService:
         request: ChampionRecommendationRequest
     ) -> ChampionRecommendationResponse:
         """Get champion recommendations for player"""
-        # Validate
         self.champion_domain.validate_recommendation_limit(request.limit)
         
         # Get player's champion pool
@@ -63,7 +62,6 @@ class ChampionService:
                 detail="No champion data found for this player"
             )
         
-        # Get recommendations based on most played champion
         main_champion = champion_pool[0]
         recommendations = await self.champion_repository.get_similar_champions(
             main_champion.lower(),
@@ -86,7 +84,6 @@ class ChampionService:
         request: ChampionSimilarityRequest
     ) -> ChampionSimilarityResponse:
         """Calculate similarity between two champions"""
-        # Validate
         self.champion_domain.validate_champion_id(request.champion_a)
         self.champion_domain.validate_champion_id(request.champion_b)
         
@@ -96,7 +93,6 @@ class ChampionService:
             request.champion_b
         )
         
-        # Validate score
         self.champion_domain.validate_similarity_score(similarity_score)
         
         response = ChampionSimilarityResponse(
@@ -106,7 +102,6 @@ class ChampionService:
         )
         
         if request.include_details:
-            # Get detailed similarity metrics
             response.ability_similarity = 0.8
             response.stat_similarity = 0.7
             response.playstyle_similarity = 0.75

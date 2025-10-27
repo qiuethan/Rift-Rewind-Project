@@ -4,6 +4,7 @@ Auth repository Supabase implementation
 from repositories.auth_repository import AuthRepository
 from models.auth import AuthResponse
 from infrastructure.database.database_client import DatabaseClient
+from constants.database import DatabaseTable
 from typing import Optional
 
 
@@ -21,8 +22,7 @@ class AuthRepositorySupabase(AuthRepository):
             user_id = auth_response.user.id
             token = auth_response.session.access_token
             
-            # Insert additional user data into users table
-            self.client.table('users').insert({
+            self.client.table(DatabaseTable.USERS).insert({
                 'id': user_id,
                 'email': email,
                 **user_data
@@ -40,7 +40,7 @@ class AuthRepositorySupabase(AuthRepository):
     async def get_user_by_email(self, email: str) -> Optional[dict]:
         """Get user by email from Supabase"""
         if self.client:
-            response = self.client.table('users').select('*').eq('email', email).limit(1).execute()
+            response = self.client.table(DatabaseTable.USERS).select('*').eq('email', email).limit(1).execute()
             if response.data:
                 return response.data[0]
         return None
@@ -48,7 +48,7 @@ class AuthRepositorySupabase(AuthRepository):
     async def get_user_by_id(self, user_id: str) -> Optional[dict]:
         """Get user by ID from Supabase"""
         if self.client:
-            response = self.client.table('users').select('*').eq('id', user_id).limit(1).execute()
+            response = self.client.table(DatabaseTable.USERS).select('*').eq('id', user_id).limit(1).execute()
             if response.data:
                 return response.data[0]
         return None
@@ -64,8 +64,6 @@ class AuthRepositorySupabase(AuthRepository):
         """Login user and return auth response with token"""
         if self.client:
             auth_response = self.client.auth_sign_in(email, password)
-            
-            # Get additional user data from users table
             user_data = await self.get_user_by_id(auth_response.user.id)
             
             return AuthResponse(
@@ -80,7 +78,7 @@ class AuthRepositorySupabase(AuthRepository):
     async def update_user(self, user_id: str, user_data: dict) -> Optional[dict]:
         """Update user data in Supabase"""
         if self.client:
-            response = self.client.table('users').update(user_data).eq('id', user_id).execute()
+            response = self.client.table(DatabaseTable.USERS).update(user_data).eq('id', user_id).execute()
             if response.data:
                 return response.data[0]
         return None

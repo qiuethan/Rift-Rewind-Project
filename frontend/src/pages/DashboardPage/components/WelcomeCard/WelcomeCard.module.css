@@ -1,0 +1,21 @@
+.welcome {
+  line-height: 1.6;
+}
+
+.welcome p {
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.features {
+  margin: 0;
+  padding-left: 1.5rem;
+  line-height: 1.8;
+  color: var(--text-primary);
+}
+
+.features li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
+  letter-spacing: -0.011em;
+}

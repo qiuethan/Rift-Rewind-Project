@@ -4,6 +4,7 @@ Factory functions for all services and repositories
 """
 from config.supabase import supabase_service
 from config.settings import settings
+from config.riot_api import riot_api_config
 
 # Domain
 from domain.auth_domain import AuthDomain
@@ -11,6 +12,7 @@ from domain.player_domain import PlayerDomain
 from domain.match_domain import MatchDomain
 from domain.champion_domain import ChampionDomain
 from domain.analytics_domain import AnalyticsDomain
+from domain.riot_api_domain import RiotAPIDomain
 
 # Repositories (Interfaces)
 from repositories.auth_repository import AuthRepository
@@ -18,6 +20,7 @@ from repositories.player_repository import PlayerRepository
 from repositories.match_repository import MatchRepository
 from repositories.champion_repository import ChampionRepository
 from repositories.analytics_repository import AnalyticsRepository
+from repositories.riot_api_repository import RiotAPIRepository
 
 # Infrastructure (Implementations)
 from infrastructure.auth_repository import AuthRepositorySupabase
@@ -25,6 +28,7 @@ from infrastructure.player_repository import PlayerRepositoryRiot
 from infrastructure.match_repository import MatchRepositoryRiot
 from infrastructure.champion_repository import ChampionRepositorySupabase
 from infrastructure.analytics_repository import AnalyticsRepositorySupabase
+from infrastructure.riot_api_repository import RiotAPIRepositoryImpl
 
 # Services
 from services.auth_service import AuthService
@@ -63,9 +67,20 @@ def get_analytics_domain() -> AnalyticsDomain:
     return AnalyticsDomain()
 
 
+def get_riot_api_domain() -> RiotAPIDomain:
+    """Factory for RiotAPIDomain"""
+    return RiotAPIDomain()
+
+
 # ============================================================================
 # REPOSITORY FACTORIES (Infrastructure Implementations)
 # ============================================================================
+
+def get_riot_api_repository() -> RiotAPIRepository:
+    """Factory for RiotAPIRepository"""
+    if not riot_api_config:
+        raise ValueError("Riot API configuration not initialized")
+    return RiotAPIRepositoryImpl(riot_api_config)
 
 def get_auth_repository() -> AuthRepository:
     """Factory for AuthRepository"""
@@ -74,7 +89,7 @@ def get_auth_repository() -> AuthRepository:
 
 def get_player_repository() -> PlayerRepository:
     """Get player repository instance"""
-    return PlayerRepositoryRiot(supabase_service, settings.RIOT_API_KEY)
+    return PlayerRepositoryRiot(supabase_service, get_riot_api_repository())
 
 
 def get_match_repository() -> MatchRepository:

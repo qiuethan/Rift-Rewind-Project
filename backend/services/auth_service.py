@@ -17,7 +17,6 @@ class AuthService:
     
     async def register(self, register_request: RegisterRequest) -> AuthResponse:
         """Register a new user"""
-        # Validate business rules - catch domain exceptions and convert to HTTP exceptions
         try:
             self.auth_domain.validate_email(register_request.email)
             self.auth_domain.validate_password(register_request.password)
@@ -33,15 +32,12 @@ class AuthService:
                 detail=e.message
             )
         
-        # Check if user already exists
         existing_user = await self.auth_repository.get_user_by_email(register_request.email)
         if existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User with this email already exists"
             )
-        
-        # Create user
         user_data = {
             'summoner_name': register_request.summoner_name,
             'region': register_request.region
@@ -69,7 +65,6 @@ class AuthService:
     
     async def login(self, login_request: LoginRequest) -> AuthResponse:
         """Login user"""
-        # Login with Supabase (this returns the session with token)
         try:
             result = await self.auth_repository.login(
                 login_request.email,
@@ -84,7 +79,6 @@ class AuthService:
             
             return result
         except Exception as e:
-            # Handle Supabase auth errors
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid email or password"
@@ -92,7 +86,6 @@ class AuthService:
     
     async def verify_token(self, token: str) -> TokenResponse:
         """Verify authentication token"""
-        # Demo implementation - would verify JWT
         return TokenResponse(
             user_id="demo_user_id",
             email="demo@example.com",

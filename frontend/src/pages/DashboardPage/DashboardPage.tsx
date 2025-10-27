@@ -1,10 +1,15 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DashboardPage.module.css';
-import { Button, Card, Modal, Input } from '@/components';
+import { Button, Modal, Input, Navbar, Spinner } from '@/components';
 import { authActions } from '@/actions/auth';
 import { playersActions } from '@/actions/players';
 import { ROUTES } from '@/config';
+import { REGION_NAMES } from '@/constants';
+import {
+  SummonerInfo,
+  TopChampions,
+} from './components';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -20,6 +25,7 @@ export default function DashboardPage() {
   const [gameName, setGameName] = useState('');
   const [tagLine, setTagLine] = useState('');
   const [region, setRegion] = useState('americas');
+
 
   useEffect(() => {
     loadData();
@@ -43,11 +49,6 @@ export default function DashboardPage() {
     }
 
     setLoading(false);
-  };
-
-  const handleLogout = async () => {
-    await authActions.logout();
-    navigate(ROUTES.LOGIN);
   };
 
   const handleOpenModal = () => {
@@ -95,86 +96,30 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Loading...</div>
+        <div className={styles.loading}>
+          <Spinner size="large" />
+          <span>Loading...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Dashboard</h1>
-        <Button variant="secondary" onClick={handleLogout}>
-          Logout
-        </Button>
-      </div>
+    <>
+      <Navbar user={user} summoner={summoner} />
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Dashboard</h1>
+        </div>
 
       <div className={styles.grid}>
-        <Card title="Account Info">
-          <div className={styles.info}>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>Email:</span>
-              <span className={styles.value}>{user?.email}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span className={styles.label}>User ID:</span>
-              <span className={styles.value}>{user?.user_id}</span>
-            </div>
-          </div>
-        </Card>
-
-        <Card title="Summoner Info">
-          {summoner ? (
-            <div className={styles.info}>
-              <div className={styles.infoRow}>
-                <span className={styles.label}>Summoner:</span>
-                <span className={styles.value}>{summoner.summoner_name}</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.label}>Region:</span>
-                <span className={styles.value}>{summoner.region}</span>
-              </div>
-              <div className={styles.infoRow}>
-                <span className={styles.label}>Level:</span>
-                <span className={styles.value}>{summoner.summoner_level}</span>
-              </div>
-            </div>
-          ) : (
-            <div className={styles.empty}>
-              <p>No summoner linked yet</p>
-              <Button onClick={handleOpenModal}>Link Account</Button>
-            </div>
-          )}
-        </Card>
-
-        <Card title="Quick Actions">
-          <div className={styles.actions}>
-            <Button fullWidth onClick={() => navigate(ROUTES.ANALYTICS)}>
-              View Analytics
-            </Button>
-            <Button fullWidth onClick={() => navigate(ROUTES.CHAMPIONS)}>
-              Champion Recommendations
-            </Button>
-            <Button fullWidth onClick={handleOpenModal}>
-              {summoner ? 'Update' : 'Link'} League Account
-            </Button>
-          </div>
-        </Card>
-
-        <Card title="Welcome to Rift Rewind! 🎮">
-          <div className={styles.welcome}>
-            <p>
-              Rift Rewind is your AI-powered League of Legends analytics platform. Get personalized
-              insights, champion recommendations, and performance analysis.
-            </p>
-            <ul className={styles.features}>
-              <li>📊 Match performance analysis</li>
-              <li>🏆 Champion recommendations based on your playstyle</li>
-              <li>📈 Skill progression tracking</li>
-              <li>🤖 AI-powered insights and tips</li>
-            </ul>
-          </div>
-        </Card>
+        <SummonerInfo summoner={summoner} onLinkAccount={handleOpenModal} />
+        <div className={styles.topChampionsWide}>
+          <TopChampions
+            topChampions={summoner?.top_champions}
+            totalMasteryScore={summoner?.total_mastery_score}
+          />
+        </div>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Link League Account">
@@ -217,10 +162,11 @@ export default function DashboardPage() {
               value={region}
               onChange={(e) => setRegion(e.target.value)}
             >
-              <option value="americas">Americas (NA, BR, LAN, LAS)</option>
-              <option value="europe">Europe (EUW, EUNE, TR, RU)</option>
-              <option value="asia">Asia (KR, JP)</option>
-              <option value="sea">SEA (OCE, PH, SG, TH, TW, VN)</option>
+              {Object.entries(REGION_NAMES).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -232,6 +178,7 @@ export default function DashboardPage() {
           </Button>
         </form>
       </Modal>
-    </div>
+      </div>
+    </>
   );
 }

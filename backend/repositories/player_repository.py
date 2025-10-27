@@ -40,6 +40,36 @@ class PlayerRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_match_history(self, puuid: str, count: int) -> List[str]:
+    async def get_match_history(self, puuid: str, count: int) -> 'MatchHistoryResponse':
         """Get match history for a player"""
+        pass
+    
+    @abstractmethod
+    async def get_ranked_data(self, summoner_id: str, region: str) -> 'RankedData':
+        """Get ranked data for a summoner (solo/flex tier, rank, LP, wins, losses)"""
+        pass
+    
+    @abstractmethod
+    async def get_mastery_data(self, puuid: str, region: str) -> 'MasteryData':
+        """Get champion mastery data (all masteries, top champions, total score)"""
+        pass
+    
+    @abstractmethod
+    async def get_champion_masteries(self, puuid: str, region: str) -> List['ChampionMasteryResponse']:
+        """Get all champion masteries for a summoner"""
+        pass
+    
+    @abstractmethod
+    async def get_top_champion_masteries(self, puuid: str, region: str, count: int) -> List['ChampionMasteryResponse']:
+        """Get top N champion masteries for a summoner"""
+        pass
+    
+    @abstractmethod
+    async def get_mastery_score(self, puuid: str, region: str) -> Optional[int]:
+        """Get total mastery score for a summoner"""
+        pass
+    
+    @abstractmethod
+    async def get_champion_mastery_by_champion(self, puuid: str, champion_id: int, region: str) -> Optional['ChampionMasteryResponse']:
+        """Get mastery data for a specific champion"""
         pass
