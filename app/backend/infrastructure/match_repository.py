@@ -66,12 +66,32 @@ class MatchRepositoryRiot(MatchRepository):
             "assists": 10
         }
     
-    async def save_match(self, match_id: str, match_data: Dict[str, Any]) -> bool:
-        """Save complete match data to database"""
+    async def save_match(self, match_id: str, match_data: Dict[str, Any], puuid: str = None) -> bool:
+        """
+        Save complete match data to database and optionally track which summoner played in it
+        
+        Args:
+            match_id: Match ID
+            match_data: Full match data
+            puuid: Optional PUUID of summoner to track
+        """
         try:
             if not self.client:
                 logger.error("Database client not available")
                 return False
+            
+            # Check if match exists and get current summoners list
+            existing = self.client.table(DatabaseTable.MATCHES).select('summoners').eq('match_id', match_id).limit(1).execute()
+            
+            summoners = []
+            if existing.data and len(existing.data) > 0:
+                # Match exists, get current summoners list
+                summoners = existing.data[0].get('summoners', [])
+            
+            # Add this summoner if provided and not already in list
+            if puuid and puuid not in summoners:
+                summoners.append(puuid)
+                logger.debug(f"Adding summoner {puuid} to match {match_id}")
             
             # Extract metadata from match_data
             info = match_data.get('info', {})
@@ -88,19 +108,14 @@ class MatchRepositoryRiot(MatchRepository):
                 'map_id': info.get('mapId', 0),
                 'platform_id': info.get('platformId', ''),
                 'queue_id': info.get('queueId', 0),
-                'tournament_code': info.get('tournamentCode'),
-                'match_data': match_data  # Store complete match data as JSONB
+                'match_data': match_data,
+                'summoners': summoners
             }
             
-            # Upsert match data (insert or update if exists)
-            result = self.client.table(str(DatabaseTable.MATCHES)).upsert(match_record).execute()
+            self.client.table(DatabaseTable.MATCHES).upsert(match_record).execute()
             
-            if result:
-                logger.info(f"Successfully saved match: {match_id}")
-                return True
-            
-            logger.error(f"Failed to save match: {match_id}")
-            return False
+            logger.info(f"Saved match: {match_id} (tracked summoners: {len(summoners)})")
+            return True
             
         except Exception as e:
             logger.error(f"Error saving match {match_id}: {e}")
@@ -131,15 +146,15 @@ class MatchRepositoryRiot(MatchRepository):
             return None
     
     async def match_exists(self, match_id: str) -> bool:
-        """Check if a match already exists in database"""
+        """Check if match exists in database"""
+        if not self.client:
+            return False
+        
         try:
-            if not self.client:
-                return False
-            
-            result = self.client.table(str(DatabaseTable.MATCHES))\
-                .select('match_id')\
-                .eq('match_id', match_id)\
-                .limit(1)\
+            result = self.client.table(DatabaseTable.MATCHES) \
+                .select('match_id') \
+                .eq('match_id', match_id) \
+                .limit(1) \
                 .execute()
             
             exists = result.data and len(result.data) > 0
@@ -147,7 +162,40 @@ class MatchRepositoryRiot(MatchRepository):
             return exists
             
         except Exception as e:
-            logger.error(f"Error checking match existence {match_id}: {e}")
+            logger.error(f"Error checking match existence: {e}")
+            return False
+    
+    async def match_exists_for_summoner(self, match_id: str, puuid: str) -> bool:
+        """
+        Check if match exists AND if this summoner is already tracked in it
+        
+        Args:
+            match_id: Match ID
+            puuid: Summoner PUUID
+            
+        Returns:
+            True if match exists and summoner is tracked, False otherwise
+        """
+        if not self.client:
+            return False
+        
+        try:
+            result = self.client.table(DatabaseTable.MATCHES) \
+                .select('summoners') \
+                .eq('match_id', match_id) \
+                .limit(1) \
+                .execute()
+            
+            if result.data and len(result.data) > 0:
+                summoners = result.data[0].get('summoners', [])
+                exists_for_summoner = puuid in summoners
+                logger.debug(f"Match {match_id} exists for summoner {puuid}: {exists_for_summoner}")
+                return exists_for_summoner
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error checking match for summoner: {e}")
             return False
     
     async def get_player_matches(self, puuid: str, limit: int = 20) -> List[Dict[str, Any]]:

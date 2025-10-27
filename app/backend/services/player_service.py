@@ -280,24 +280,34 @@ class PlayerService:
                 should_stop = False
                 
                 for i, match_id in enumerate(match_ids):
-                    # Check if match already exists
-                    exists = await self.match_repository.match_exists(match_id)
+                    # Check if match already exists for THIS summoner
+                    exists_for_summoner = await self.match_repository.match_exists_for_summoner(match_id, puuid)
                     
-                    if exists:
-                        logger.info(f"Background: Match {match_id} exists - stopping ({total_saved} total saved)")
+                    if exists_for_summoner:
+                        logger.info(f"Background: Match {match_id} already processed for this summoner - stopping")
                         should_stop = True
                         break
                     
-                    # Fetch and save match
-                    logger.info(f"Background: Fetching match {start_index + i + 1}: {match_id}")
-                    match_data = await self.riot_api.get_match_details(match_id, region)
+                    # Check if match exists at all
+                    match_exists = await self.match_repository.match_exists(match_id)
                     
-                    if match_data:
-                        # Save full match data
-                        if await self.match_repository.save_match(match_id, match_data):
-                            batch_saved += 1
-                            total_saved += 1
-                            logger.info(f"Background: Saved match {match_id} ({total_saved} total)")
+                    if match_exists:
+                        # Match exists, just add this summoner to it
+                        logger.info(f"Background: Match {match_id} exists, adding summoner")
+                        match_data = await self.match_repository.get_match(match_id)
+                        if match_data:
+                            await self.match_repository.save_match(match_id, match_data, puuid)
+                    else:
+                        # Fetch and save new match
+                        logger.info(f"Background: Fetching match {start_index + i + 1}: {match_id}")
+                        match_data = await self.riot_api.get_match_details(match_id, region)
+                        
+                        if match_data:
+                            # Save full match data with this summoner tracked
+                            if await self.match_repository.save_match(match_id, match_data, puuid):
+                                batch_saved += 1
+                                total_saved += 1
+                                logger.info(f"Background: Saved match {match_id} ({total_saved} total)")
                 
                 if should_stop:
                     break

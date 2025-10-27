@@ -26,6 +26,9 @@ def setup_logger(name: str = "rift_rewind") -> logging.Logger:
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(level)
     
+    # Print logging level on startup
+    print(f"Logger initialized: DEBUG={settings.DEBUG}, Level={logging.getLevelName(level)}")
+    
     # Create formatter
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',

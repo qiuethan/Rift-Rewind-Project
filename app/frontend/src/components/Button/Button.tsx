@@ -1,5 +1,6 @@
 import { ButtonHTMLAttributes } from 'react';
 import styles from './Button.module.css';
+import Spinner from '../Spinner/Spinner';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger';
@@ -28,7 +29,12 @@ export default function Button({
 
   return (
     <button className={classNames} disabled={disabled || loading} {...props}>
-      {loading ? 'Loading...' : children}
+      {loading ? (
+        <span className={styles.loadingContent}>
+          <Spinner size="small" />
+          <span>Loading...</span>
+        </span>
+      ) : children}
     </button>
   );
 }

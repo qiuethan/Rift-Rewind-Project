@@ -5,7 +5,7 @@
 
 set -e  # Exit on error
 
-echo "🎮 Rift Rewind Frontend - Starting Development Server"
+echo "🎮 Rift Rewind Frontend - Starting Production Preview Server"
 echo "=================================================="
 
 # Check if Node.js is installed
@@ -70,14 +70,27 @@ if grep -q "your-project.supabase.co" .env 2>/dev/null || grep -q "your-supabase
 fi
 
 echo ""
-echo "🚀 Starting Vite development server..."
+echo "🚀 Building and starting production preview server..."
 echo "=================================================="
 echo ""
-echo "📱 Frontend will be available at: http://localhost:5173"
-echo "🔧 Hot Module Replacement (HMR) enabled"
+
+# Build for production
+echo "📦 Building production bundle..."
+npm run build
+
+if [ $? -ne 0 ]; then
+    echo "❌ Build failed!"
+    exit 1
+fi
+
+echo ""
+echo "✅ Build complete!"
+echo ""
+echo "📱 Frontend will be available at: http://localhost:4173"
+echo "🏭 Production mode (no HMR)"
 echo ""
 echo "Press Ctrl+C to stop the server"
 echo ""
 
-# Start the development server
-npm run dev
+# Start the production preview server
+npm run preview

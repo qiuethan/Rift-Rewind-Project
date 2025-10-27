@@ -22,7 +22,7 @@ export default function LoginPage() {
     if (result.success) {
       navigate(ROUTES.DASHBOARD);
     } else {
-      setError(result.error);
+      setError(result.error || null);
     }
 
     setLoading(false);
