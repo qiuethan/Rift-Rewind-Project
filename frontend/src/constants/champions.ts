@@ -165,9 +165,10 @@ export const CHAMPION_ID_TO_KEY: { [key: number]: string } = {
   888: 'Renata',
   895: 'Nilah',
   897: 'KSante',
-  902: 'Milio',
+  901: 'Smolder',
+  902: 'Naafiri',
   910: 'Hwei',
-  950: 'Naafiri',
+  950: 'Briar',
 };
 
 /**
