@@ -103,6 +103,7 @@ class RiotAPIConfig:
     SUMMONER_API_BASE = "https://{region}.api.riotgames.com"
     LEAGUE_API_BASE = "https://{region}.api.riotgames.com"
     MASTERY_API_BASE = "https://{region}.api.riotgames.com"
+    MATCH_API_BASE = "https://{region}.api.riotgames.com"
     
     def __init__(self, api_key: str, requests_per_second: float = 20, requests_per_two_minutes: int = 100):
         """Initialize Riot API configuration with rate limiting"""

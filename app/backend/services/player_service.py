@@ -321,8 +321,19 @@ class PlayerService:
                         match_data = await self.riot_api.get_match_details(match_id, region)
                         
                         if match_data:
-                            # Save full match data with this summoner tracked
-                            if await self.match_repository.save_match(match_id, match_data, puuid):
+                            # Fetch timeline data
+                            try:
+                                timeline_data = await self.riot_api.get_match_timeline(match_id, region)
+                                if timeline_data:
+                                    logger.debug(f"Background: Fetched timeline for {match_id}")
+                                else:
+                                    logger.warning(f"Background: No timeline data returned for {match_id}")
+                            except Exception as timeline_error:
+                                logger.error(f"Background: Error fetching timeline for {match_id}: {timeline_error}")
+                                timeline_data = None
+                            
+                            # Save full match data with timeline and this summoner tracked
+                            if await self.match_repository.save_match(match_id, match_data, puuid, timeline_data):
                                 batch_saved += 1
                                 total_saved += 1
                                 logger.info(f"Background: Saved new match {match_id} ({total_saved} total)")

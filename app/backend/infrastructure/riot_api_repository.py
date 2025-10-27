@@ -156,3 +156,11 @@ class RiotAPIRepositoryImpl(RiotAPIRepository):
         url = f"{self.riot.MASTERY_API_BASE.format(region=platform_region)}/lol/champion-mastery/v4/champion-masteries/by-puuid/{puuid}/by-champion/{champion_id}"
         
         return await self.riot.request(url, f"Champion {champion_id} Mastery API")
+    
+    async def get_match_timeline(self, match_id: str, region: str) -> Optional[Dict[str, Any]]:
+        """Get match timeline data from Riot API"""
+        logger.info(f"Fetching timeline for match: {match_id}")
+        
+        url = f"{self.riot.MATCH_API_BASE.format(region=region)}/lol/match/v5/matches/{match_id}/timeline"
+        
+        return await self.riot.request(url, "Match Timeline API")

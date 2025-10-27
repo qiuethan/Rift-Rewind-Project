@@ -66,7 +66,7 @@ class MatchRepositoryRiot(MatchRepository):
             "assists": 10
         }
     
-    async def save_match(self, match_id: str, match_data: Dict[str, Any], puuid: str = None) -> bool:
+    async def save_match(self, match_id: str, match_data: Dict[str, Any], puuid: str = None, timeline_data: Dict[str, Any] = None) -> bool:
         """
         Save complete match data to database and optionally track which summoner played in it
         
@@ -74,6 +74,7 @@ class MatchRepositoryRiot(MatchRepository):
             match_id: Match ID
             match_data: Full match data
             puuid: Optional PUUID of summoner to track
+            timeline_data: Optional timeline data
         """
         try:
             if not self.client:
@@ -109,12 +110,14 @@ class MatchRepositoryRiot(MatchRepository):
                 'platform_id': info.get('platformId', ''),
                 'queue_id': info.get('queueId', 0),
                 'match_data': match_data,
+                'timeline_data': timeline_data,
                 'summoners': summoners
             }
             
             self.client.table(DatabaseTable.MATCHES).upsert(match_record).execute()
             
-            logger.info(f"Saved match: {match_id} (tracked summoners: {len(summoners)})")
+            timeline_status = "with timeline" if timeline_data else "without timeline"
+            logger.info(f"Saved match: {match_id} ({timeline_status}, tracked summoners: {len(summoners)})")
             return True
             
         except Exception as e:

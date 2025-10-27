@@ -240,8 +240,36 @@ class PlayerRepositoryRiot(PlayerRepository):
                 # Not in DB, fetch from API
                 logger.info(f"Fetching match details for: {match_id}")
                 match_data = await self.riot_api.get_match_details(match_id, region)
+                
+                # If fetched from API, also save it to DB with timeline
+                if match_data:
+                    try:
+                        # Fetch timeline data
+                        timeline_data = await self.riot_api.get_match_timeline(match_id, region)
+                        
+                        # Save to DB with this summoner tracked
+                        from infrastructure.match_repository import MatchRepositoryRiot
+                        # Get API key from riot_api's config
+                        api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
+                        match_repo = MatchRepositoryRiot(self.db, api_key)
+                        await match_repo.save_match(match_id, match_data, puuid, timeline_data)
+                        logger.debug(f"Saved match {match_id} to DB with timeline and tracked summoner {puuid}")
+                    except Exception as e:
+                        logger.error(f"Error saving match {match_id}: {e}")
             else:
+                # Match exists in DB - check if this summoner is already tracked
                 logger.debug(f"Using cached match: {match_id}")
+                
+                # Ensure this summoner is tracked in the match
+                try:
+                    from infrastructure.match_repository import MatchRepositoryRiot
+                    # Get API key from riot_api's config
+                    api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
+                    match_repo = MatchRepositoryRiot(self.db, api_key)
+                    await match_repo.save_match(match_id, match_data, puuid)
+                    logger.debug(f"Added summoner {puuid} to existing match {match_id}")
+                except Exception as e:
+                    logger.error(f"Error updating match {match_id} summoners: {e}")
             
             if match_data:
                 game_summary = self._extract_game_summary(match_data, puuid, match_id)

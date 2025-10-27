@@ -151,9 +151,11 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className={styles.recentGamesSection}>
-        <RecentGames recentGames={recentGames} loading={gamesLoading} />
-      </div>
+      {summoner && (
+        <div className={styles.recentGamesSection}>
+          <RecentGames recentGames={recentGames} loading={gamesLoading} />
+        </div>
+      )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Link League Account">
         <form onSubmit={handleSubmit} className={styles.modalForm}>
