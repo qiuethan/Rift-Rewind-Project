@@ -37,14 +37,9 @@ export default function RecentGames({ recentGames, loading }: RecentGamesProps) 
     );
   }
 
+  // Don't render anything if no games
   if (!recentGames || recentGames.length === 0) {
-    return (
-      <Card title="Recent Games">
-        <div className={styles.empty}>
-          <p>No recent games found</p>
-        </div>
-      </Card>
-    );
+    return null;
   }
 
   const formatDuration = (seconds: number) => {

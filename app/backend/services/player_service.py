@@ -354,16 +354,19 @@ class PlayerService:
                 # Move to next batch
                 start_index += batch_size
             
-            # Final cache update with all matches (up to 200)
+            # Final cache update only if we saved new matches
             logger.info(f"Background sync finished: {total_saved} total matches saved")
             
-            try:
-                all_match_ids = await self.riot_api.get_match_ids_by_puuid(puuid, region, count=max_total_matches, start=0)
-                all_games = await self.player_repository.get_matches_from_db(all_match_ids, puuid)
-                await self.player_repository.update_recent_games_cache(puuid, all_games)
-                logger.info(f"Background: Final cache update with {len(all_games)} total games (capped at {max_total_matches})")
-            except Exception as cache_error:
-                logger.error(f"Error updating final cache: {cache_error}")
+            if total_saved > 0:
+                try:
+                    all_match_ids = await self.riot_api.get_match_ids_by_puuid(puuid, region, count=max_total_matches, start=0)
+                    all_games = await self.player_repository.get_matches_from_db(all_match_ids, puuid)
+                    await self.player_repository.update_recent_games_cache(puuid, all_games)
+                    logger.info(f"Background: Final cache update with {len(all_games)} total games (capped at {max_total_matches})")
+                except Exception as cache_error:
+                    logger.error(f"Error updating final cache: {cache_error}")
+            else:
+                logger.info("Background: No new matches saved, skipping final cache update")
             
         except Exception as e:
             logger.error(f"Error in background match sync for {puuid}: {e}")
