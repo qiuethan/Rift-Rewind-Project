@@ -1,10 +1,11 @@
 """
-Supabase implementation of database client
+Supabase implementation of database client with async support
 """
 from infrastructure.database.database_client import (
     DatabaseClient, TableQuery, QueryResponse, AuthResponse, AuthUser, AuthSession
 )
 from typing import Optional, Dict, Any
+import asyncio
 
 
 class SupabaseTableQuery(TableQuery):
@@ -41,8 +42,19 @@ class SupabaseTableQuery(TableQuery):
         self._query = self._query.limit(count)
         return self
     
-    def execute(self) -> QueryResponse:
-        result = self._query.execute()
+    def contains(self, column: str, value: Any) -> 'SupabaseTableQuery':
+        """Filter rows where column contains value (for JSONB arrays)"""
+        self._query = self._query.contains(column, value)
+        return self
+    
+    def order(self, column: str, desc: bool = False) -> 'SupabaseTableQuery':
+        """Order results by column"""
+        self._query = self._query.order(column, desc=desc)
+        return self
+    
+    async def execute(self) -> QueryResponse:
+        """Execute query asynchronously to prevent blocking"""
+        result = await asyncio.to_thread(self._query.execute)
         return QueryResponse(data=result.data if hasattr(result, 'data') else [])
 
 
@@ -55,26 +67,29 @@ class SupabaseClient(DatabaseClient):
     def table(self, table_name: str) -> SupabaseTableQuery:
         return SupabaseTableQuery(self._client.table(table_name))
     
-    def auth_sign_up(self, email: str, password: str) -> AuthResponse:
-        response = self._client.auth.sign_up({
-            "email": email,
-            "password": password
-        })
+    async def auth_sign_up(self, email: str, password: str) -> AuthResponse:
+        """Sign up user asynchronously"""
+        response = await asyncio.to_thread(
+            self._client.auth.sign_up,
+            {"email": email, "password": password}
+        )
         return AuthResponse(
             user=AuthUser(id=response.user.id, email=response.user.email),
             session=AuthSession(access_token=response.session.access_token)
         )
     
-    def auth_sign_in(self, email: str, password: str) -> AuthResponse:
-        response = self._client.auth.sign_in_with_password({
-            "email": email,
-            "password": password
-        })
+    async def auth_sign_in(self, email: str, password: str) -> AuthResponse:
+        """Sign in user asynchronously"""
+        response = await asyncio.to_thread(
+            self._client.auth.sign_in_with_password,
+            {"email": email, "password": password}
+        )
         return AuthResponse(
             user=AuthUser(id=response.user.id, email=response.user.email),
             session=AuthSession(access_token=response.session.access_token)
         )
     
-    def auth_get_user(self, token: str) -> AuthUser:
-        response = self._client.auth.get_user(token)
+    async def auth_get_user(self, token: str) -> AuthUser:
+        """Get user by token asynchronously"""
+        response = await asyncio.to_thread(self._client.auth.get_user, token)
         return AuthUser(id=response.user.id, email=response.user.email)

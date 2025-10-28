@@ -6,6 +6,7 @@ import { authActions } from '@/actions/auth';
 import { playersActions } from '@/actions/players';
 import { ROUTES } from '@/config';
 import { REGION_NAMES } from '@/constants';
+import { useSummoner } from '@/contexts';
 import {
   SummonerInfo,
   TopChampions,
@@ -14,8 +15,8 @@ import {
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { summoner, loading: summonerLoading, refreshSummoner } = useSummoner();
   const [user, setUser] = useState<any>(null);
-  const [summoner, setSummoner] = useState<any>(null);
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [gamesLoading, setGamesLoading] = useState(false);
@@ -34,6 +35,13 @@ export default function DashboardPage() {
     loadData();
   }, []);
 
+  // Fetch recent games when summoner becomes available
+  useEffect(() => {
+    if (summoner && !summonerLoading) {
+      fetchRecentGames();
+    }
+  }, [summoner, summonerLoading]);
+
   const loadData = async () => {
     // Check if authenticated
     if (!authActions.isAuthenticated()) {
@@ -44,21 +52,8 @@ export default function DashboardPage() {
     // Get user data
     const userData = authActions.getCurrentUser();
     setUser(userData);
-
-    try {
-      // Try to get summoner data
-      const summonerResult = await playersActions.getSummoner();
-      if (summonerResult.success && summonerResult.data) {
-        setSummoner(summonerResult.data);
-        
-        // Fetch recent games separately
-        fetchRecentGames();
-      }
-    } catch (error) {
-      console.error('Error loading dashboard:', error);
-    } finally {
-      setLoading(false);
-    }
+    
+    setLoading(false);
   };
 
   const fetchRecentGames = async () => {
@@ -105,7 +100,9 @@ export default function DashboardPage() {
 
     if (result.success) {
       setSuccess('League of Legends account linked successfully!');
-      setSummoner(result.data);
+      
+      // Refresh summoner in context
+      await refreshSummoner();
       
       // Refetch recent games after updating account
       fetchRecentGames();
@@ -121,21 +118,20 @@ export default function DashboardPage() {
     setSaving(false);
   };
 
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>
-          <Spinner size="large" />
-          <span>Loading...</span>
-        </div>
-      </div>
-    );
-  }
+  const isLoading = loading || summonerLoading;
 
   return (
     <>
       <Navbar user={user} summoner={summoner} />
-      <div className={styles.container}>
+      {isLoading ? (
+        <div className={styles.container}>
+          <div className={styles.loading}>
+            <Spinner size="large" />
+            <span>Loading...</span>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>Dashboard</h1>
         </div>
@@ -213,7 +209,8 @@ export default function DashboardPage() {
           </Button>
         </form>
       </Modal>
-      </div>
+        </div>
+      )}
     </>
   );
 }

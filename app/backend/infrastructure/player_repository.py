@@ -183,7 +183,7 @@ class PlayerRepositoryRiot(PlayerRepository):
             return None
         
         try:
-            result = self.db.table(DatabaseTable.SUMMONERS).select('recent_games').eq('puuid', puuid).limit(1).execute()
+            result = await self.db.table(DatabaseTable.SUMMONERS).select('recent_games').eq('puuid', puuid).limit(1).execute()
             
             if result.data and len(result.data) > 0:
                 cached_games = result.data[0].get('recent_games', [])
@@ -202,7 +202,7 @@ class PlayerRepositoryRiot(PlayerRepository):
             return None
         
         try:
-            result = self.db.table(DatabaseTable.MATCHES).select('match_data').eq('match_id', match_id).limit(1).execute()
+            result = await self.db.table(DatabaseTable.MATCHES).select('match_data').eq('match_id', match_id).limit(1).execute()
             
             if result.data and len(result.data) > 0:
                 return result.data[0].get('match_data')
@@ -290,7 +290,7 @@ class PlayerRepositoryRiot(PlayerRepository):
             
             logger.info(f"Updating recent_games cache for {puuid} with {len(games_dicts)} games")
             
-            self.db.table(DatabaseTable.SUMMONERS).update(
+            await self.db.table(DatabaseTable.SUMMONERS).update(
                 {'recent_games': games_dicts}
             ).eq('puuid', puuid).execute()
             
@@ -426,13 +426,13 @@ class PlayerRepositoryRiot(PlayerRepository):
         logger.debug(f"Summoner record to save: {summoner_record.puuid}")
         logger.info(f"Saving summoner: {summoner_record.summoner_name}, Level: {summoner_record.summoner_level}")
         
-        self.db.table(DatabaseTable.SUMMONERS).upsert(summoner_record.to_db_dict()).execute()
+        await self.db.table(DatabaseTable.SUMMONERS).upsert(summoner_record.to_db_dict()).execute()
         logger.info(f"Successfully upserted summoner data for PUUID: {summoner_record.puuid}")
     
     async def _create_user_summoner_link(self, user_id: str, puuid: str) -> None:
         """Create or update user-summoner link"""
         # Check if user already has ANY summoner linked
-        existing_links = self.db.table(DatabaseTable.USER_SUMMONERS).select('id, puuid').eq('user_id', user_id).execute()
+        existing_links = await self.db.table(DatabaseTable.USER_SUMMONERS).select('id, puuid').eq('user_id', user_id).execute()
         
         if existing_links.data and len(existing_links.data) > 0:
             existing_link = existing_links.data[0]
@@ -443,12 +443,12 @@ class PlayerRepositoryRiot(PlayerRepository):
             else:
                 # Update existing link to new summoner
                 logger.info(f"Updating user {user_id} summoner link from {existing_puuid} to {puuid}")
-                self.db.table(DatabaseTable.USER_SUMMONERS).update({'puuid': puuid}).eq('user_id', user_id).execute()
+                await self.db.table(DatabaseTable.USER_SUMMONERS).update({'puuid': puuid}).eq('user_id', user_id).execute()
                 logger.info(f"Updated user-summoner link for user {user_id}")
         else:
             # Create new link
             link_record = {'user_id': user_id, 'puuid': puuid}
-            self.db.table(DatabaseTable.USER_SUMMONERS).insert(link_record).execute()
+            await self.db.table(DatabaseTable.USER_SUMMONERS).insert(link_record).execute()
             logger.info(f"Created new user-summoner link for user {user_id}")
     
     async def get_user_summoner_from_db(self, puuid: str) -> Optional[dict]:
@@ -456,7 +456,7 @@ class PlayerRepositoryRiot(PlayerRepository):
         if not self.db:
             return None
         
-        response = self.db.table(DatabaseTable.SUMMONERS).select('*').eq('puuid', puuid).limit(1).execute()
+        response = await self.db.table(DatabaseTable.SUMMONERS).select('*').eq('puuid', puuid).limit(1).execute()
         
         if response.data and len(response.data) > 0:
             return response.data[0]
@@ -467,7 +467,7 @@ class PlayerRepositoryRiot(PlayerRepository):
         if not self.db:
             return None
         
-        response = self.db.table(DatabaseTable.USER_SUMMONERS).select(
+        response = await self.db.table(DatabaseTable.USER_SUMMONERS).select(
             'puuid, summoners(region)'
         ).eq('user_id', user_id).limit(1).execute()
         
@@ -491,7 +491,7 @@ class PlayerRepositoryRiot(PlayerRepository):
             return None
         
         try:
-            response = self.db.table(DatabaseTable.USER_SUMMONERS).select(
+            response = await self.db.table(DatabaseTable.USER_SUMMONERS).select(
                 'updated_at'
             ).eq('user_id', user_id).limit(1).execute()
             
@@ -516,7 +516,7 @@ class PlayerRepositoryRiot(PlayerRepository):
             return None
         
         # Get user's linked PUUID and region from database
-        response = self.db.table(DatabaseTable.USER_SUMMONERS).select(
+        response = await self.db.table(DatabaseTable.USER_SUMMONERS).select(
             'puuid, summoners(region, summoner_name, game_name, tag_line)'
         ).eq('user_id', user_id).limit(1).execute()
         
@@ -535,33 +535,22 @@ class PlayerRepositoryRiot(PlayerRepository):
         
         logger.info(f"Fetching fresh data from Riot API for PUUID: {puuid}")
         
-        # Fetch fresh data from Riot API
+        # Just return cached data from DB - service layer handles fresh data fetching
         try:
-            fresh_summoner = await self.get_summoner_by_puuid(puuid, region)
+            cached_response = await self.db.table(DatabaseTable.SUMMONERS).select('*').eq('puuid', puuid).limit(1).execute()
+            if cached_response.data and len(cached_response.data) > 0:
+                cached_data = cached_response.data[0]
+                cached_data['id'] = cached_data.get('summoner_id') or cached_data.get('puuid')
+                logger.info(f"Returning cached summoner data for PUUID: {puuid}")
+                return SummonerResponse(**cached_data)
             
-            if not fresh_summoner:
-                logger.warning("Could not fetch fresh data, returning cached data")
-                # Fallback to cached data
-                cached_response = self.db.table(DatabaseTable.SUMMONERS).select('*').eq('puuid', puuid).limit(1).execute()
-                if cached_response.data and len(cached_response.data) > 0:
-                    cached_data = cached_response.data[0]
-                    cached_data['id'] = cached_data.get('summoner_id') or cached_data.get('puuid')
-                    return SummonerResponse(**cached_data)
-                return None
-            
-            # Update database with fresh data
-            summoner_dict = fresh_summoner.dict()
-            await self._save_summoner_to_db(summoner_dict)
-            
-            logger.info(f"Successfully fetched fresh data - Masteries: {len(fresh_summoner.champion_masteries) if fresh_summoner.champion_masteries else 0}, Recent Games: {len(fresh_summoner.recent_games) if fresh_summoner.recent_games else 0}")
-            logger.debug(f"Top champions: {len(fresh_summoner.top_champions) if fresh_summoner.top_champions else 0}")
-            
-            return fresh_summoner
+            logger.warning(f"No cached data found for PUUID: {puuid}")
+            return None
             
         except Exception as e:
             logger.error(f"Error fetching fresh summoner data: {str(e)}")
             # Fallback to cached data
-            cached_response = self.db.table(DatabaseTable.SUMMONERS).select('*').eq('puuid', puuid).limit(1).execute()
+            cached_response = await self.db.table(DatabaseTable.SUMMONERS).select('*').eq('puuid', puuid).limit(1).execute()
             if cached_response.data and len(cached_response.data) > 0:
                 logger.info("Returning cached data due to API error")
                 cached_data = cached_response.data[0]

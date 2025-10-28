@@ -1,5 +1,5 @@
 /**
- * Champion ID to Key mapping
+ * Champion ID to Key mapping (Updated for Patch 15.21.1)
  * Used to fetch champion images from Data Dragon
  */
 export const CHAMPION_ID_TO_KEY: { [key: number]: string } = {
@@ -159,16 +159,18 @@ export const CHAMPION_ID_TO_KEY: { [key: number]: string } = {
   555: 'Pyke',
   711: 'Vex',
   777: 'Yone',
+  799: 'Ambessa',
+  804: 'Yunara',
   875: 'Sett',
   876: 'Lillia',
   887: 'Gwen',
   888: 'Renata',
+  893: 'Aurora',
   895: 'Nilah',
   897: 'KSante',
   901: 'Smolder',
   902: 'Naafiri',
   910: 'Hwei',
-  950: 'Briar',
 };
 
 /**

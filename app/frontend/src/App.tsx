@@ -3,8 +3,10 @@ import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import DashboardPage from '@/pages/DashboardPage';
+import GamesPage from '@/pages/GamesPage';
 import { ROUTES } from '@/config';
 import { authActions } from '@/actions/auth';
+import { SummonerProvider } from '@/contexts';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = authActions.isAuthenticated();
@@ -19,7 +21,8 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+      <SummonerProvider>
+        <Routes>
         <Route path={ROUTES.HOME} element={<LandingPage />} />
         <Route
           path={ROUTES.LOGIN}
@@ -45,8 +48,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path={ROUTES.GAMES}
+          element={
+            <ProtectedRoute>
+              <GamesPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<Navigate to={ROUTES.HOME} />} />
-      </Routes>
+        </Routes>
+      </SummonerProvider>
     </BrowserRouter>
   );
 }

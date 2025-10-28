@@ -18,6 +18,7 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   DASHBOARD: '/dashboard',
+  GAMES: '/games',
   ANALYTICS: '/analytics',
   CHAMPIONS: '/champions',
   PROFILE: '/profile',

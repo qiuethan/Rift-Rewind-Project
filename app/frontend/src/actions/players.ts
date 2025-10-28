@@ -90,4 +90,19 @@ export const playersActions = {
       };
     }
   },
+
+  /**
+   * Get games with full match and timeline data (paginated)
+   */
+  getGames: async (startIndex: number = 0, count: number = 10) => {
+    try {
+      const games = await playersApi.getGames(startIndex, count);
+      return { success: true, data: games };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get games',
+      };
+    }
+  },
 };

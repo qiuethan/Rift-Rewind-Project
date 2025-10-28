@@ -7,7 +7,7 @@ from repositories.riot_api_repository import RiotAPIRepository
 from domain.player_domain import PlayerDomain
 from domain.exceptions import DomainException
 from models.players import SummonerRequest, SummonerResponse, PlayerStatsResponse
-from models.match import RecentGameSummary
+from models.match import RecentGameSummary, FullGameData
 from fastapi import HTTPException, status
 from typing import List
 from datetime import datetime, timezone
@@ -504,14 +504,52 @@ class PlayerService:
         first_match_data = await self.player_repository.get_match_from_db(first_match_id)
         
         if first_match_data:
-            # Matches are in DB, query from there
-            logger.info(f"✅ First match in DB - querying all from DB")
-            match_ids = await self.riot_api.get_match_ids_by_puuid(puuid, region, count)
-            games = await self.player_repository.get_matches_from_db(match_ids, puuid)
+            # Matches are in DB, query from there directly
+            logger.info(f"✅ First match in DB - querying directly from matches table")
             
-            # Update cache
-            await self.player_repository.update_recent_games_cache(puuid, games)
-            return games
+            # Use the new direct query method to get matches
+            full_games = await self.match_repository.get_matches_for_puuid(puuid, start_index=0, count=count)
+            
+            if full_games:
+                # Convert FullGameData to RecentGameSummary for consistency
+                games = []
+                for full_game in full_games:
+                    participants = full_game.match_data.get('info', {}).get('participants', [])
+                    player_data = next((p for p in participants if p.get('puuid') == puuid), None)
+                    
+                    if player_data:
+                        game_info = full_game.match_data.get('info', {})
+                        from models.match import RecentGameSummary
+                        game = RecentGameSummary(
+                            match_id=full_game.match_id,
+                            game_mode=game_info.get('gameMode', 'CLASSIC'),
+                            game_duration=game_info.get('gameDuration', 0),
+                            game_creation=game_info.get('gameCreation', 0),
+                            champion_id=player_data.get('championId'),
+                            champion_name=player_data.get('championName'),
+                            kills=player_data.get('kills', 0),
+                            deaths=player_data.get('deaths', 0),
+                            assists=player_data.get('assists', 0),
+                            win=player_data.get('win', False),
+                            cs=(player_data.get('totalMinionsKilled', 0) + player_data.get('neutralMinionsKilled', 0)),
+                            gold=player_data.get('goldEarned', 0),
+                            damage=player_data.get('totalDamageDealtToChampions', 0),
+                            vision_score=player_data.get('visionScore', 0),
+                            items=[
+                                player_data.get('item0', 0),
+                                player_data.get('item1', 0),
+                                player_data.get('item2', 0),
+                                player_data.get('item3', 0),
+                                player_data.get('item4', 0),
+                                player_data.get('item5', 0),
+                                player_data.get('item6', 0),
+                            ]
+                        )
+                        games.append(game)
+                
+                # Update cache
+                await self.player_repository.update_recent_games_cache(puuid, games)
+                return games
         
         # Step 4: Fetch from API (checking DB for each match)
         logger.info(f"First match not in DB - fetching with API fallback")
@@ -521,3 +559,38 @@ class PlayerService:
         # Update cache
         await self.player_repository.update_recent_games_cache(puuid, games)
         return games
+    
+    async def get_games(self, user_id: str, start_index: int = 0, count: int = 10) -> List[FullGameData]:
+        """
+        Get games with full match and timeline data from DB only (no API calls).
+        Uses pagination with start_index and count.
+        
+        Args:
+            user_id: User ID
+            start_index: Starting index (0-based) for pagination
+            count: Number of games to fetch (default 10)
+            
+        Returns:
+            List of FullGameData with match_data and timeline_data
+        """
+        logger.info(f"Fetching games for user: {user_id}, start_index: {start_index}, count: {count}")
+        
+        # Get user's PUUID and region from DB
+        user_summoner = await self.player_repository.get_user_summoner_basic(user_id)
+        
+        if not user_summoner:
+            logger.warning(f"No summoner linked for user: {user_id}")
+            return []
+        
+        puuid = user_summoner.get('puuid')
+        
+        # Query matches table directly for this PUUID with pagination
+        # This gets ALL matches for the summoner, not just cached recent_games
+        full_games = await self.match_repository.get_matches_for_puuid(
+            puuid=puuid,
+            start_index=start_index,
+            count=count
+        )
+        
+        logger.info(f"Successfully fetched {len(full_games)} games from matches table")
+        return full_games

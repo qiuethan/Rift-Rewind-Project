@@ -1,14 +1,15 @@
 """
 Player routes
 """
-from fastapi import APIRouter, status, Depends
+from fastapi import APIRouter, status, Depends, Query
 from models.players import SummonerRequest, SummonerResponse, PlayerStatsResponse
-from models.match import RecentGameSummary
+from models.match import RecentGameSummary, FullGameData
 from services.player_service import PlayerService
 from dependency.dependencies import get_player_service
 from middleware.auth import get_current_user
 from typing import List
 from utils.logger import logger
+import asyncio
 
 
 router = APIRouter(prefix="/api/players", tags=["players"])
@@ -69,25 +70,46 @@ async def get_recent_games(
     return await player_service.get_recent_games(current_user, count)
 
 
+@router.get("/games", response_model=List[FullGameData])
+async def get_games(
+    start_index: int = Query(0, ge=0, description="Starting index for pagination (0-based)"),
+    count: int = Query(10, ge=1, le=50, description="Number of games to fetch (1-50)"),
+    current_user: str = Depends(get_current_user),
+    player_service: PlayerService = Depends(get_player_service)
+):
+    """
+    Get games with full match and timeline data from DB only (no API calls).
+    Uses pagination with start_index and count.
+    
+    - **start_index**: Starting index (0-based) for pagination
+    - **count**: Number of games to fetch (default 10, max 50)
+    
+    Returns full match data and timeline data for each game.
+    """
+    logger.info(f"GET /api/players/games - User: {current_user}, start_index: {start_index}, count: {count}")
+    return await player_service.get_games(current_user, start_index, count)
+
+
 @router.post("/sync-matches")
 async def sync_match_history(
     current_user: str = Depends(get_current_user),
     player_service: PlayerService = Depends(get_player_service)
 ):
     """
-    Manually sync match history for the current user.
-    Fetches all new matches from Riot API.
+    Manually sync match history for the current user (non-blocking).
+    Triggers background sync and returns immediately.
     """
     # Get user's summoner
     summoner = await player_service.get_summoner(current_user)
     
-    # Sync matches
-    saved_count = await player_service.sync_match_history(summoner.puuid, summoner.region)
+    # Trigger background sync (non-blocking)
+    asyncio.create_task(
+        player_service.sync_match_history(summoner.puuid, summoner.region)
+    )
     
     return {
         "success": True,
-        "matches_synced": saved_count,
-        "message": f"Successfully synced {saved_count} new matches"
+        "message": "Match history sync started in background. Check /sync-status for progress."
     }
 
 

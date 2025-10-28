@@ -23,18 +23,21 @@ interface RecentGame {
 interface RecentGamesProps {
   recentGames?: RecentGame[];
   loading?: boolean;
+  showCard?: boolean; // Whether to wrap in Card component
 }
 
-export default function RecentGames({ recentGames, loading }: RecentGamesProps) {
+export default function RecentGames({ recentGames, loading, showCard = true }: RecentGamesProps) {
   if (loading) {
-    return (
-      <Card title="Recent Games">
-        <div className={styles.loading}>
-          <Spinner />
-          <p>Loading recent games...</p>
-        </div>
-      </Card>
+    const loadingContent = (
+      <div className={styles.loading}>
+        <Spinner />
+        <p>Loading recent games...</p>
+      </div>
     );
+    
+    return showCard ? (
+      <Card title="Recent Games">{loadingContent}</Card>
+    ) : loadingContent;
   }
 
   // Don't render anything if no games
@@ -103,63 +106,65 @@ export default function RecentGames({ recentGames, loading }: RecentGamesProps) 
     return `https://ddragon.leagueoflegends.com/cdn/15.21.1/img/item/${itemId}.png`;
   };
 
-  return (
-    <Card title="Recent Games">
-      <div className={styles.gamesContainer}>
-        {recentGames.map((game) => {
-          const championKey = getChampionKey(game.champion_id);
-          const kdaColor = getKDAColor(game.kills, game.deaths, game.assists);
+  const gamesContent = (
+    <div className={styles.gamesContainer}>
+      {recentGames.map((game) => {
+        const championKey = getChampionKey(game.champion_id);
+        const kdaColor = getKDAColor(game.kills, game.deaths, game.assists);
 
-          return (
-            <div
-              key={game.match_id}
-              className={`${styles.gameCard} ${game.win ? styles.win : styles.loss}`}
-            >
-              <div className={styles.gameResult}>
-                <span className={styles.resultText}>{game.win ? 'Victory' : 'Defeat'}</span>
-                <span className={styles.gameMode}>{formatGameMode(game.game_mode)}</span>
-                <span className={styles.duration}>{formatDuration(game.game_duration)}</span>
-                <span className={styles.gameTime}>{formatGameTime(game.game_creation)}</span>
+        return (
+          <div
+            key={game.match_id}
+            className={`${styles.gameCard} ${game.win ? styles.win : styles.loss}`}
+          >
+            <div className={styles.gameResult}>
+              <span className={styles.resultText}>{game.win ? 'Victory' : 'Defeat'}</span>
+              <span className={styles.gameMode}>{formatGameMode(game.game_mode)}</span>
+              <span className={styles.duration}>{formatDuration(game.game_duration)}</span>
+              <span className={styles.gameTime}>{formatGameTime(game.game_creation)}</span>
+            </div>
+
+            <div className={styles.gameDetails}>
+              <div className={styles.championSection}>
+                <img
+                  src={getChampionIconUrl(championKey)}
+                  alt={game.champion_name}
+                  className={styles.championIcon}
+                />
+                <span className={styles.championName}>{game.champion_name}</span>
               </div>
 
-              <div className={styles.gameDetails}>
-                <div className={styles.championSection}>
-                  <img
-                    src={getChampionIconUrl(championKey)}
-                    alt={game.champion_name}
-                    className={styles.championIcon}
-                  />
-                  <span className={styles.championName}>{game.champion_name}</span>
+              <div className={styles.statsSection}>
+                <div className={styles.kda}>
+                  <span className={kdaColor}>{formatKDA(game.kills, game.deaths, game.assists)}</span>
                 </div>
+                <div className={styles.stats}>
+                  <span>{game.cs} CS</span>
+                  <span>{(game.gold / 1000).toFixed(1)}k Gold</span>
+                </div>
+              </div>
 
-                <div className={styles.statsSection}>
-                  <div className={styles.kda}>
-                    <span className={kdaColor}>{formatKDA(game.kills, game.deaths, game.assists)}</span>
+              <div className={styles.itemsSection}>
+                {game.items.slice(0, 6).map((itemId, index) => (
+                  <div key={index} className={styles.itemSlot}>
+                    {itemId !== 0 && (
+                      <img
+                        src={getItemIconUrl(itemId)!}
+                        alt={`Item ${itemId}`}
+                        className={styles.itemIcon}
+                      />
+                    )}
                   </div>
-                  <div className={styles.stats}>
-                    <span>{game.cs} CS</span>
-                    <span>{(game.gold / 1000).toFixed(1)}k Gold</span>
-                  </div>
-                </div>
-
-                <div className={styles.itemsSection}>
-                  {game.items.slice(0, 6).map((itemId, index) => (
-                    <div key={index} className={styles.itemSlot}>
-                      {itemId !== 0 && (
-                        <img
-                          src={getItemIconUrl(itemId)!}
-                          alt={`Item ${itemId}`}
-                          className={styles.itemIcon}
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
-          );
-        })}
-      </div>
-    </Card>
+          </div>
+        );
+      })}
+    </div>
   );
+
+  return showCard ? (
+    <Card title="Recent Games">{gamesContent}</Card>
+  ) : gamesContent;
 }

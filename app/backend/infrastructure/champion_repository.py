@@ -76,7 +76,7 @@ class ChampionRepositorySupabase(ChampionRepository):
     async def save_champion_data(self, champion_data: dict) -> Optional[ChampionData]:
         """Save champion data to database"""
         if self.client:
-            self.client.table('champions').upsert(champion_data).execute()
+            await self.client.table('champions').upsert(champion_data).execute()
             return ChampionData(**champion_data)
         return None
     

@@ -30,6 +30,12 @@ export interface PlayerStatsResponse {
   average_cs_per_min: number;
 }
 
+export interface FullGameData {
+  match_id: string;
+  match_data: any; // Full Riot API match data
+  timeline_data?: any; // Timeline data
+}
+
 export const playersApi = {
   linkSummoner: async (data: SummonerRequest): Promise<SummonerResponse> => {
     return apiClient.post<SummonerResponse>('/api/players/summoner', data);
@@ -49,5 +55,9 @@ export const playersApi = {
 
   getRecentGames: async (count: number = 5): Promise<any[]> => {
     return apiClient.get<any[]>(`/api/players/recent-games?count=${count}`);
+  },
+
+  getGames: async (startIndex: number = 0, count: number = 10): Promise<FullGameData[]> => {
+    return apiClient.get<FullGameData[]>(`/api/players/games?start_index=${startIndex}&count=${count}`);
   },
 };

@@ -29,7 +29,7 @@ async def get_current_user(
         
         # Verify token with auth service
         if supabase_service:
-            user = supabase_service.auth_get_user(token)
+            user = await supabase_service.auth_get_user(token)
             if not user:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

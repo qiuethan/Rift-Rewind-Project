@@ -51,6 +51,12 @@ export default function Navbar({ user, summoner }: NavbarProps) {
           </button>
           <button 
             className={styles.navLink} 
+            onClick={() => navigate(ROUTES.GAMES)}
+          >
+            Games
+          </button>
+          <button 
+            className={styles.navLink} 
             onClick={() => navigate(ROUTES.ANALYTICS)}
           >
             Analytics
@@ -108,6 +114,15 @@ export default function Navbar({ user, summoner }: NavbarProps) {
                 }}
               >
                 Dashboard
+              </button>
+              <button 
+                className={styles.dropdownItem}
+                onClick={() => {
+                  navigate(ROUTES.GAMES);
+                  setIsDropdownOpen(false);
+                }}
+              >
+                Games
               </button>
               <button 
                 className={styles.dropdownItem}

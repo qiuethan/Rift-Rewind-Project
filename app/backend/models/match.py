@@ -2,7 +2,7 @@
 Match data models for Match v5 API
 """
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 
 class MatchParticipant(BaseModel):
@@ -56,6 +56,16 @@ class RecentGameSummary(BaseModel):
     damage: int
     vision_score: int
     items: List[int]
+    
+    class Config:
+        extra = "allow"
+
+
+class FullGameData(BaseModel):
+    """Full game data including match data and timeline"""
+    match_id: str
+    match_data: Dict[str, Any]  # Full match data from Riot API
+    timeline_data: Optional[Dict[str, Any]] = None  # Timeline data from Riot API
     
     class Config:
         extra = "allow"

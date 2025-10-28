@@ -43,14 +43,14 @@ class MatchRepositoryRiot(MatchRepository):
         """Save match timeline to database"""
         if self.client:
             timeline_data['match_id'] = match_id
-            self.client.table('match_timelines').upsert(timeline_data).execute()
+            await self.client.table('match_timelines').upsert(timeline_data).execute()
             return MatchTimelineResponse(**timeline_data)
         return None
     
     async def get_cached_timeline(self, match_id: str) -> Optional[MatchTimelineResponse]:
         """Get cached match timeline from database"""
         if self.client:
-            response = self.client.table('match_timelines').select('*').eq('match_id', match_id).limit(1).execute()
+            response = await self.client.table('match_timelines').select('*').eq('match_id', match_id).limit(1).execute()
             if response.data:
                 return MatchTimelineResponse(**response.data[0])
         return None
@@ -82,7 +82,7 @@ class MatchRepositoryRiot(MatchRepository):
                 return False
             
             # Check if match exists and get current summoners list
-            existing = self.client.table(DatabaseTable.MATCHES).select('summoners').eq('match_id', match_id).limit(1).execute()
+            existing = await self.client.table(DatabaseTable.MATCHES).select('summoners').eq('match_id', match_id).limit(1).execute()
             
             summoners = []
             if existing.data and len(existing.data) > 0:
@@ -114,7 +114,7 @@ class MatchRepositoryRiot(MatchRepository):
                 'summoners': summoners
             }
             
-            self.client.table(DatabaseTable.MATCHES).upsert(match_record).execute()
+            await self.client.table(DatabaseTable.MATCHES).upsert(match_record).execute()
             
             timeline_status = "with timeline" if timeline_data else "without timeline"
             logger.info(f"Saved match: {match_id} ({timeline_status}, tracked summoners: {len(summoners)})")
@@ -131,7 +131,7 @@ class MatchRepositoryRiot(MatchRepository):
                 logger.error("Database client not available")
                 return None
             
-            result = self.client.table(str(DatabaseTable.MATCHES))\
+            result = await self.client.table(str(DatabaseTable.MATCHES))\
                 .select('match_data')\
                 .eq('match_id', match_id)\
                 .limit(1)\
@@ -148,13 +148,84 @@ class MatchRepositoryRiot(MatchRepository):
             logger.error(f"Error retrieving match {match_id}: {e}")
             return None
     
+    async def get_match_with_timeline(self, match_id: str) -> Optional[Dict[str, Any]]:
+        """Get complete match data with timeline from database"""
+        try:
+            if not self.client:
+                logger.error("Database client not available")
+                return None
+            
+            result = await self.client.table(str(DatabaseTable.MATCHES))\
+                .select('match_data, timeline_data')\
+                .eq('match_id', match_id)\
+                .limit(1)\
+                .execute()
+            
+            if result.data and len(result.data) > 0:
+                logger.debug(f"Retrieved match with timeline from database: {match_id}")
+                return result.data[0]
+            
+            logger.info(f"Match not found in database: {match_id}")
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error retrieving match with timeline {match_id}: {e}")
+            return None
+    
+    async def get_matches_for_puuid(self, puuid: str, start_index: int = 0, count: int = 10) -> List[Any]:
+        """
+        Get matches for a specific PUUID with pagination by querying matches table directly.
+        Returns matches ordered by game_creation descending (newest first).
+        """
+        try:
+            if not self.client:
+                logger.error("Database client not available")
+                return []
+            
+            # Query matches where the PUUID exists in participants
+            # Use JSONB containment operator to find matches
+            # Note: Supabase uses .limit() for pagination, we'll fetch more and slice in Python
+            result = await self.client.table(str(DatabaseTable.MATCHES))\
+                .select('match_id, match_data, timeline_data, game_creation')\
+                .contains('match_data', {'info': {'participants': [{'puuid': puuid}]}})\
+                .order('game_creation', desc=True)\
+                .limit(start_index + count)\
+                .execute()
+            
+            # Slice the results to get the correct page
+            if result.data:
+                result.data = result.data[start_index:start_index + count]
+            
+            if not result.data:
+                logger.info(f"No matches found for PUUID: {puuid} at index {start_index}")
+                return []
+            
+            logger.info(f"Found {len(result.data)} matches for PUUID: {puuid} (indices {start_index}-{start_index + len(result.data) - 1})")
+            
+            # Convert to FullGameData format
+            from models.match import FullGameData
+            full_games = []
+            for match in result.data:
+                full_game = FullGameData(
+                    match_id=match['match_id'],
+                    match_data=match.get('match_data', {}),
+                    timeline_data=match.get('timeline_data')
+                )
+                full_games.append(full_game)
+            
+            return full_games
+            
+        except Exception as e:
+            logger.error(f"Error retrieving matches for PUUID {puuid}: {e}")
+            return []
+    
     async def match_exists(self, match_id: str) -> bool:
         """Check if match exists in database"""
         if not self.client:
             return False
         
         try:
-            result = self.client.table(DatabaseTable.MATCHES) \
+            result = await self.client.table(DatabaseTable.MATCHES) \
                 .select('match_id') \
                 .eq('match_id', match_id) \
                 .limit(1) \
@@ -183,7 +254,7 @@ class MatchRepositoryRiot(MatchRepository):
             return False
         
         try:
-            result = self.client.table(DatabaseTable.MATCHES) \
+            result = await self.client.table(DatabaseTable.MATCHES) \
                 .select('summoners') \
                 .eq('match_id', match_id) \
                 .limit(1) \
@@ -210,7 +281,7 @@ class MatchRepositoryRiot(MatchRepository):
             
             # Query matches where the player's PUUID is in the participants array
             # This uses PostgreSQL's JSONB containment operator
-            result = self.client.table(str(DatabaseTable.MATCHES))\
+            result = await self.client.table(str(DatabaseTable.MATCHES))\
                 .select('*')\
                 .contains('match_data->metadata->participants', [puuid])\
                 .order('game_creation', desc=True)\

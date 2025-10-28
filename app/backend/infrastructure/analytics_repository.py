@@ -18,7 +18,7 @@ class AnalyticsRepositorySupabase(AnalyticsRepository):
         """Save performance metrics to database"""
         if self.client:
             metrics['match_id'] = match_id
-            self.client.table('performance_metrics').upsert(metrics).execute()
+            await self.client.table('performance_metrics').upsert(metrics).execute()
             return PerformanceMetrics(**metrics)
         return None
     
@@ -77,14 +77,14 @@ class AnalyticsRepositorySupabase(AnalyticsRepository):
         if self.client:
             analysis_data['match_id'] = match_id
             analysis_data['summoner_id'] = summoner_id
-            self.client.table('performance_analysis').upsert(analysis_data).execute()
+            await self.client.table('performance_analysis').upsert(analysis_data).execute()
             return analysis_data
         return None
     
     async def get_cached_analysis(self, match_id: str, summoner_id: str) -> Optional[dict]:
         """Get cached performance analysis from database"""
         if self.client:
-            response = self.client.table('performance_analysis').select('*').eq('match_id', match_id).eq('summoner_id', summoner_id).limit(1).execute()
+            response = await self.client.table('performance_analysis').select('*').eq('match_id', match_id).eq('summoner_id', summoner_id).limit(1).execute()
             if response.data:
                 return response.data[0]
         return None
