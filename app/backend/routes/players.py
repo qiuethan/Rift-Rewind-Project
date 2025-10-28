@@ -129,3 +129,18 @@ async def check_sync_status(
         "is_synced": is_synced,
         "message": "Match history is up to date" if is_synced else "New matches available to sync"
     }
+
+
+@router.get("/match/{match_id}", response_model=FullGameData)
+async def get_match(
+    match_id: str,
+    current_user: str = Depends(get_current_user),
+    player_service: PlayerService = Depends(get_player_service)
+):
+    """
+    Get a specific match by match_id with full match data and timeline.
+    Returns match data and timeline for the specified match.
+    User must have participated in the match.
+    """
+    logger.info(f"GET /api/players/match/{match_id} - User: {current_user}")
+    return await player_service.get_match_by_id(current_user, match_id)

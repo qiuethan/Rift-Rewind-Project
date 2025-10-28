@@ -163,7 +163,11 @@ class MatchRepositoryRiot(MatchRepository):
             
             if result.data and len(result.data) > 0:
                 logger.debug(f"Retrieved match with timeline from database: {match_id}")
-                return result.data[0]
+                record = result.data[0]
+                # Log the actual timeline_data value
+                timeline_val = record.get('timeline_data')
+                logger.info(f"Raw timeline_data type: {type(timeline_val)}, is None: {timeline_val is None}, value preview: {str(timeline_val)[:100] if timeline_val else 'None'}")
+                return record
             
             logger.info(f"Match not found in database: {match_id}")
             return None

@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import { Card, Spinner } from '@/components';
 import { getChampionKey, getChampionIconUrl } from '@/constants';
 import styles from './RecentGames.module.css';
+import championData from '@/data/champion.json';
 
 interface RecentGame {
   match_id: string;
@@ -27,6 +29,8 @@ interface RecentGamesProps {
 }
 
 export default function RecentGames({ recentGames, loading, showCard = true }: RecentGamesProps) {
+  const navigate = useNavigate();
+
   if (loading) {
     const loadingContent = (
       <div className={styles.loading}>
@@ -44,6 +48,10 @@ export default function RecentGames({ recentGames, loading, showCard = true }: R
   if (!recentGames || recentGames.length === 0) {
     return null;
   }
+
+  const handleGameClick = (matchId: string) => {
+    navigate(`/match/${matchId}`);
+  };
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -116,6 +124,8 @@ export default function RecentGames({ recentGames, loading, showCard = true }: R
           <div
             key={game.match_id}
             className={`${styles.gameCard} ${game.win ? styles.win : styles.loss}`}
+            onClick={() => handleGameClick(game.match_id)}
+            style={{ cursor: 'pointer' }}
           >
             <div className={styles.gameResult}>
               <span className={styles.resultText}>{game.win ? 'Victory' : 'Defeat'}</span>

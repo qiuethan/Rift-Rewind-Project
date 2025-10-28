@@ -105,4 +105,19 @@ export const playersActions = {
       };
     }
   },
+
+  /**
+   * Get a specific match by match_id with full match data and timeline
+   */
+  getMatch: async (matchId: string) => {
+    try {
+      const match = await playersApi.getMatch(matchId);
+      return { success: true, data: match };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get match',
+      };
+    }
+  },
 };

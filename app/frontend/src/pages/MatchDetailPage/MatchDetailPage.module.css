@@ -1,0 +1,147 @@
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: calc(100vh - 80px);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 400px;
+  color: var(--text-secondary);
+}
+
+.error,
+.notFound {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 400px;
+  text-align: center;
+}
+
+.error h2,
+.notFound h2 {
+  color: var(--error);
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.error p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.error button,
+.notFound button {
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.error button:hover,
+.notFound button:hover {
+  background: var(--primary-dark);
+}
+
+.matchContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.backButton {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.backButton:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+}
+
+.title {
+  font-size: 2rem;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.matchId {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-family: monospace;
+  margin: 0;
+}
+
+.matchInfo,
+.timelineInfo {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.matchInfo h2,
+.timelineInfo h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.jsonData {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.noData {
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .jsonData {
+    font-size: 0.75rem;
+    max-height: 400px;
+  }
+}

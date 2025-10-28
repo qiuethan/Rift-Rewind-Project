@@ -594,3 +594,60 @@ class PlayerService:
         
         logger.info(f"Successfully fetched {len(full_games)} games from matches table")
         return full_games
+    
+    async def get_match_by_id(self, user_id: str, match_id: str) -> FullGameData:
+        """
+        Get a specific match by match_id with full match data and timeline.
+        Verifies that the user participated in the match.
+        
+        Args:
+            user_id: User ID making the request
+            match_id: The match ID (e.g., "NA1_5395458525")
+            
+        Returns:
+            FullGameData with match_data and timeline_data
+            
+        Raises:
+            ValueError if match not found or user didn't participate
+        """
+        logger.info(f"Fetching match: {match_id} for user: {user_id}")
+        
+        # Get user's PUUID to verify they participated
+        user_summoner = await self.player_repository.get_user_summoner_basic(user_id)
+        
+        if not user_summoner:
+            logger.warning(f"No summoner linked for user: {user_id}")
+            raise ValueError("No summoner account linked")
+        
+        puuid = user_summoner.get('puuid')
+        
+        # Get match data and timeline from DB
+        match_record = await self.match_repository.get_match_with_timeline(match_id)
+        
+        if not match_record:
+            logger.warning(f"Match not found: {match_id}")
+            raise ValueError(f"Match {match_id} not found")
+        
+        # Verify user participated in this match
+        match_data = match_record.get('match_data', {})
+        participants = match_data.get('info', {}).get('participants', [])
+        user_participated = any(p.get('puuid') == puuid for p in participants)
+        
+        if not user_participated:
+            logger.warning(f"User {user_id} (PUUID: {puuid}) did not participate in match {match_id}")
+            raise ValueError("You do not have access to this match")
+        
+        # Log what we got from the database
+        has_match_data = 'match_data' in match_record and match_record['match_data'] is not None
+        has_timeline = 'timeline_data' in match_record and match_record['timeline_data'] is not None
+        logger.info(f"Match record keys: {match_record.keys()}")
+        logger.info(f"Has match_data: {has_match_data}, Has timeline_data: {has_timeline}")
+        
+        full_game = FullGameData(
+            match_id=match_id,
+            match_data=match_record.get('match_data', {}),
+            timeline_data=match_record.get('timeline_data')
+        )
+        
+        logger.info(f"Successfully fetched match {match_id} - Timeline included: {full_game.timeline_data is not None}")
+        return full_game

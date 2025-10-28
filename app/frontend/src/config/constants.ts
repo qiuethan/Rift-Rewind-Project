@@ -19,6 +19,7 @@ export const ROUTES = {
   REGISTER: '/register',
   DASHBOARD: '/dashboard',
   GAMES: '/games',
+  MATCH: '/match/:matchId',
   ANALYTICS: '/analytics',
   CHAMPIONS: '/champions',
   PROFILE: '/profile',

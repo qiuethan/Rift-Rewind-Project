@@ -4,6 +4,7 @@ import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import DashboardPage from '@/pages/DashboardPage';
 import GamesPage from '@/pages/GamesPage';
+import MatchDetailPage from '@/pages/MatchDetailPage';
 import { ROUTES } from '@/config';
 import { authActions } from '@/actions/auth';
 import { SummonerProvider } from '@/contexts';
@@ -53,6 +54,14 @@ function App() {
           element={
             <ProtectedRoute>
               <GamesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.MATCH}
+          element={
+            <ProtectedRoute>
+              <MatchDetailPage />
             </ProtectedRoute>
           }
         />

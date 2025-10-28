@@ -60,4 +60,8 @@ export const playersApi = {
   getGames: async (startIndex: number = 0, count: number = 10): Promise<FullGameData[]> => {
     return apiClient.get<FullGameData[]>(`/api/players/games?start_index=${startIndex}&count=${count}`);
   },
+
+  getMatch: async (matchId: string): Promise<FullGameData> => {
+    return apiClient.get<FullGameData>(`/api/players/match/${matchId}`);
+  },
 };

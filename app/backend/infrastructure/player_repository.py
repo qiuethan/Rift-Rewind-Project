@@ -229,52 +229,63 @@ class PlayerRepositoryRiot(PlayerRepository):
         return games
     
     async def fetch_and_build_games(self, match_ids: List[str], puuid: str, region: str) -> List[RecentGameSummary]:
-        """Fetch match details (checking DB first) and build game summaries"""
-        games = []
+        """Fetch match details (checking DB first) and build game summaries - CONCURRENT"""
+        logger.info(f"🔄 fetch_and_build_games called with {len(match_ids)} match IDs for PUUID: {puuid}")
         
-        for match_id in match_ids:
-            # Try DB first
-            match_data = await self.get_match_from_db(match_id)
-            
-            if not match_data:
-                # Not in DB, fetch from API
-                logger.info(f"Fetching match details for: {match_id}")
-                match_data = await self.riot_api.get_match_details(match_id, region)
+        async def process_match(match_id: str) -> Optional[RecentGameSummary]:
+            """Process a single match"""
+            try:
+                # Try DB first
+                match_data = await self.get_match_from_db(match_id)
                 
-                # If fetched from API, also save it to DB with timeline
-                if match_data:
+                if not match_data:
+                    # Not in DB, fetch from API
+                    logger.info(f"⬇️ Match {match_id} NOT in DB - fetching from API")
+                    match_data = await self.riot_api.get_match_details(match_id, region)
+                    
+                    # If fetched from API, also save it to DB with timeline
+                    if match_data:
+                        try:
+                            # Fetch timeline data concurrently with match data
+                            timeline_data = await self.riot_api.get_match_timeline(match_id, region)
+                            logger.info(f"✅ Match + Timeline fetched for {match_id}")
+                            
+                            # Save to DB with this summoner tracked
+                            from infrastructure.match_repository import MatchRepositoryRiot
+                            api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
+                            match_repo = MatchRepositoryRiot(self.db, api_key)
+                            await match_repo.save_match(match_id, match_data, puuid, timeline_data)
+                            logger.info(f"✅ Saved match {match_id} to DB")
+                        except Exception as e:
+                            logger.error(f"❌ Error saving match {match_id}: {e}")
+                    else:
+                        logger.warning(f"⚠️ No match data returned from API for {match_id}")
+                else:
+                    # Match exists in DB - ensure this summoner is tracked
+                    logger.debug(f"Using cached match: {match_id}")
                     try:
-                        # Fetch timeline data
-                        timeline_data = await self.riot_api.get_match_timeline(match_id, region)
-                        
-                        # Save to DB with this summoner tracked
                         from infrastructure.match_repository import MatchRepositoryRiot
-                        # Get API key from riot_api's config
                         api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
                         match_repo = MatchRepositoryRiot(self.db, api_key)
-                        await match_repo.save_match(match_id, match_data, puuid, timeline_data)
-                        logger.debug(f"Saved match {match_id} to DB with timeline and tracked summoner {puuid}")
+                        await match_repo.save_match(match_id, match_data, puuid)
                     except Exception as e:
-                        logger.error(f"Error saving match {match_id}: {e}")
-            else:
-                # Match exists in DB - check if this summoner is already tracked
-                logger.debug(f"Using cached match: {match_id}")
+                        logger.error(f"Error updating match {match_id} summoners: {e}")
                 
-                # Ensure this summoner is tracked in the match
-                try:
-                    from infrastructure.match_repository import MatchRepositoryRiot
-                    # Get API key from riot_api's config
-                    api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
-                    match_repo = MatchRepositoryRiot(self.db, api_key)
-                    await match_repo.save_match(match_id, match_data, puuid)
-                    logger.debug(f"Added summoner {puuid} to existing match {match_id}")
-                except Exception as e:
-                    logger.error(f"Error updating match {match_id} summoners: {e}")
-            
-            if match_data:
-                game_summary = self._extract_game_summary(match_data, puuid, match_id)
-                if game_summary:
-                    games.append(game_summary)
+                if match_data:
+                    return self._extract_game_summary(match_data, puuid, match_id)
+                return None
+            except Exception as e:
+                logger.error(f"❌ Error processing match {match_id}: {e}")
+                return None
+        
+        # Process all matches concurrently
+        logger.info(f"🚀 Processing {len(match_ids)} matches CONCURRENTLY")
+        tasks = [process_match(match_id) for match_id in match_ids]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Filter out None and exceptions
+        games = [game for game in results if game is not None and not isinstance(game, Exception)]
+        logger.info(f"✅ Completed: {len(games)}/{len(match_ids)} matches processed successfully")
         
         return games
     
