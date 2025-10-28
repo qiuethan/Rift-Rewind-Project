@@ -11,6 +11,7 @@ from constants.database import DatabaseTable
 from typing import Optional, List, Dict, Any
 from utils.logger import logger
 from datetime import datetime
+import asyncio
 
 
 class PlayerRepositoryRiot(PlayerRepository):
