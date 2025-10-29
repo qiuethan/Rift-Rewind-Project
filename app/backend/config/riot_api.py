@@ -13,13 +13,13 @@ from utils.logger import logger
 class RateLimiter:
     """Token bucket rate limiter for Riot API with concurrent request support"""
     
-    def __init__(self, requests_per_second: int = 100, requests_per_two_minutes: int = 500):
+    def __init__(self, requests_per_second: int = 20, requests_per_two_minutes: int = 200):
         """
         Initialize rate limiter with token buckets
         
         Args:
-            requests_per_second: Maximum requests per second (default 100)
-            requests_per_two_minutes: Maximum requests per 2 minutes (default 500)
+            requests_per_second: Maximum requests per second (default 20)
+            requests_per_two_minutes: Maximum requests per 2 minutes (default 200)
         """
         self.requests_per_second = requests_per_second
         self.requests_per_two_minutes = requests_per_two_minutes
