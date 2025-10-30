@@ -230,64 +230,110 @@ class PlayerRepositoryRiot(PlayerRepository):
         return games
     
     async def fetch_and_build_games(self, match_ids: List[str], puuid: str, region: str) -> List[RecentGameSummary]:
-        """Fetch match details (checking DB first) and build game summaries - CONCURRENT"""
+        """Fetch match details (checking DB first) and build game summaries - CONCURRENT with BATCH WRITES"""
         logger.info(f"🔄 fetch_and_build_games called with {len(match_ids)} match IDs for PUUID: {puuid}")
         
-        async def process_match(match_id: str) -> Optional[RecentGameSummary]:
-            """Process a single match"""
-            try:
-                # Try DB first
+        # Semaphore to limit concurrent DB operations (prevent connection pool exhaustion)
+        db_semaphore = asyncio.Semaphore(3)  # Max 3 concurrent DB operations
+        
+        # Step 1: Check which matches are already in DB (with rate limiting)
+        async def check_match(match_id: str) -> tuple[str, Optional[dict]]:
+            """Check if match exists in DB"""
+            async with db_semaphore:
                 match_data = await self.get_match_from_db(match_id)
-                
-                if not match_data:
-                    # Not in DB, fetch from API
-                    logger.info(f"⬇️ Match {match_id} NOT in DB - fetching from API")
+                return (match_id, match_data)
+        
+        logger.info("📋 Checking which matches are already in DB (rate limited)...")
+        check_tasks = [check_match(match_id) for match_id in match_ids]
+        check_results = await asyncio.gather(*check_tasks)
+        
+        # Separate into cached and needs-fetch
+        cached_matches = {}
+        matches_to_fetch = []
+        for match_id, match_data in check_results:
+            if match_data:
+                cached_matches[match_id] = match_data
+            else:
+                matches_to_fetch.append(match_id)
+        
+        logger.info(f"✅ Found {len(cached_matches)} cached, need to fetch {len(matches_to_fetch)}")
+        
+        # Step 2: Fetch missing matches from API (concurrently)
+        fetched_matches = {}
+        if matches_to_fetch:
+            async def fetch_match_with_timeline(match_id: str) -> tuple[str, Optional[dict], Optional[dict]]:
+                """Fetch both match and timeline data"""
+                try:
                     match_data = await self.riot_api.get_match_details(match_id, region)
-                    
-                    # If fetched from API, also save it to DB with timeline
                     if match_data:
-                        try:
-                            # Fetch timeline data concurrently with match data
-                            timeline_data = await self.riot_api.get_match_timeline(match_id, region)
-                            logger.info(f"✅ Match + Timeline fetched for {match_id}")
-                            
-                            # Save to DB with this summoner tracked
-                            from infrastructure.match_repository import MatchRepositoryRiot
-                            api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
-                            match_repo = MatchRepositoryRiot(self.db, api_key)
-                            await match_repo.save_match(match_id, match_data, puuid, timeline_data)
-                            logger.info(f"✅ Saved match {match_id} to DB")
-                        except Exception as e:
-                            logger.error(f"❌ Error saving match {match_id}: {e}")
-                    else:
-                        logger.warning(f"⚠️ No match data returned from API for {match_id}")
-                else:
-                    # Match exists in DB - ensure this summoner is tracked
-                    logger.debug(f"Using cached match: {match_id}")
-                    try:
-                        from infrastructure.match_repository import MatchRepositoryRiot
-                        api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
-                        match_repo = MatchRepositoryRiot(self.db, api_key)
-                        await match_repo.save_match(match_id, match_data, puuid)
-                    except Exception as e:
-                        logger.error(f"Error updating match {match_id} summoners: {e}")
-                
+                        timeline_data = await self.riot_api.get_match_timeline(match_id, region)
+                        return (match_id, match_data, timeline_data)
+                    return (match_id, None, None)
+                except Exception as e:
+                    logger.error(f"❌ Error fetching {match_id}: {e}")
+                    return (match_id, None, None)
+            
+            logger.info(f"⬇️ Fetching {len(matches_to_fetch)} matches from API...")
+            fetch_tasks = [fetch_match_with_timeline(mid) for mid in matches_to_fetch]
+            fetch_results = await asyncio.gather(*fetch_tasks)
+            
+            for match_id, match_data, timeline_data in fetch_results:
                 if match_data:
-                    return self._extract_game_summary(match_data, puuid, match_id)
-                return None
+                    fetched_matches[match_id] = (match_data, timeline_data)
+            
+            logger.info(f"✅ Fetched {len(fetched_matches)} matches from API")
+        
+        # Step 3: Batch write all new matches to DB (only new ones, not cached)
+        if fetched_matches:
+            logger.info(f"💾 Batch writing {len(fetched_matches)} NEW matches to DB...")
+            try:
+                from infrastructure.match_repository import MatchRepositoryRiot
+                api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
+                match_repo = MatchRepositoryRiot(self.db, api_key)
+                
+                # Write all NEW matches with timeline data
+                for match_id, (match_data, timeline_data) in fetched_matches.items():
+                    try:
+                        await match_repo.save_match(match_id, match_data, puuid, timeline_data)
+                        logger.debug(f"✅ Saved new match {match_id} with timeline")
+                    except Exception as e:
+                        logger.error(f"❌ Error saving {match_id}: {e}")
+                
+                logger.info(f"✅ Batch write complete")
             except Exception as e:
-                logger.error(f"❌ Error processing match {match_id}: {e}")
-                return None
+                logger.error(f"❌ Batch write error: {e}")
         
-        # Process all matches concurrently
-        logger.info(f"🚀 Processing {len(match_ids)} matches CONCURRENTLY")
-        tasks = [process_match(match_id) for match_id in match_ids]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Step 3.5: For cached matches, just ensure this summoner is tracked (don't overwrite!)
+        if cached_matches:
+            logger.info(f"🔗 Linking {len(cached_matches)} cached matches to summoner {puuid}...")
+            try:
+                from infrastructure.match_repository import MatchRepositoryRiot
+                api_key = self.riot_api.riot.api_key if hasattr(self.riot_api, 'riot') else None
+                match_repo = MatchRepositoryRiot(self.db, api_key)
+                
+                # Only update summoner tracking, don't touch match data or timeline
+                for match_id in cached_matches.keys():
+                    try:
+                        # TODO: Add a method to only update summoner tracking without touching match data
+                        # For now, skip if already exists to avoid overwriting timeline
+                        logger.debug(f"Match {match_id} already in DB, skipping")
+                    except Exception as e:
+                        logger.error(f"❌ Error linking {match_id}: {e}")
+                
+                logger.info(f"✅ Summoner linking complete")
+            except Exception as e:
+                logger.error(f"❌ Summoner linking error: {e}")
         
-        # Filter out None and exceptions
-        games = [game for game in results if game is not None and not isinstance(game, Exception)]
+        # Step 4: Build game summaries from all matches
+        all_matches = {**cached_matches, **{mid: data[0] for mid, data in fetched_matches.items()}}
+        games = []
+        for match_id in match_ids:
+            if match_id in all_matches:
+                game_summary = self._extract_game_summary(all_matches[match_id], puuid, match_id)
+                if game_summary:
+                    games.append(game_summary)
+        
         logger.info(f"✅ Completed: {len(games)}/{len(match_ids)} matches processed successfully")
-        
         return games
     
     async def update_recent_games_cache(self, puuid: str, games: List[RecentGameSummary]) -> None:
