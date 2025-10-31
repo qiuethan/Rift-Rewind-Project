@@ -40,8 +40,15 @@ export function SummonerProvider({ children }: { children: ReactNode }) {
       if (result.success && result.data) {
         setSummoner(result.data);
       } else {
-        setError(result.error || 'Failed to load summoner');
-        setSummoner(null);
+        // Check if it's an auth error (401)
+        if (result.error?.includes('401') || result.error?.includes('Unauthorized')) {
+          // Don't show error, user will be redirected to login by ProtectedRoute
+          console.log('Auth error, session likely expired');
+          setSummoner(null);
+        } else {
+          setError(result.error || 'Failed to load summoner');
+          setSummoner(null);
+        }
       }
     } catch (err) {
       setError('Failed to load summoner');

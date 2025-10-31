@@ -1,13 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import DashboardPage from '@/pages/DashboardPage';
 import GamesPage from '@/pages/GamesPage';
 import MatchDetailPage from '@/pages/MatchDetailPage';
-import { ROUTES } from '@/config';
+import { ROUTES, STORAGE_KEYS } from '@/config';
 import { authActions } from '@/actions/auth';
 import { SummonerProvider } from '@/contexts';
+import { supabase } from '@/lib/supabase';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = authActions.isAuthenticated();
@@ -20,6 +22,54 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  // Verify session on app mount and listen for auth changes
+  useEffect(() => {
+    const verifySession = async () => {
+      if (authActions.isAuthenticated()) {
+        const result = await authActions.verifyToken();
+        if (!result.success) {
+          // Token expired, clear auth state
+          console.log('Session expired, logging out');
+          await authActions.logout();
+        }
+      }
+      setSessionChecked(true);
+    };
+
+    verifySession();
+
+    // Listen for auth state changes (token refresh, logout, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event);
+      
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        if (session?.access_token) {
+          // Update stored token on refresh
+          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, session.access_token);
+        } else {
+          // Clear on sign out
+          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Show loading while checking session
+  if (!sessionChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <SummonerProvider>
