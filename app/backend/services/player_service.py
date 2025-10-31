@@ -235,7 +235,8 @@ class PlayerService:
     
     async def sync_initial_matches(self, puuid: str, region: str, count: int = 10) -> List[RecentGameSummary]:
         """
-        Sync initial matches for immediate display (non-blocking).
+        Sync initial matches for immediate display.
+        Orchestrates: check DB → fetch missing → save → build summaries
         
         Args:
             puuid: Player's PUUID
@@ -247,16 +248,40 @@ class PlayerService:
         """
         logger.info(f"Syncing initial {count} matches for {puuid}")
         
-        # Fetch match IDs
+        # Step 1: Get match IDs from Riot API
         match_ids = await self.riot_api.get_match_ids_by_puuid(puuid, region, count=count, start=0)
-        
         if not match_ids:
+            logger.info("No match IDs found")
             return []
         
-        # Fetch and build games (checking DB first)
-        games = await self.player_repository.fetch_and_build_games(match_ids, puuid, region)
+        # Step 2: Check which matches are already in DB
+        cached_matches = await self.player_repository.check_matches_in_db(match_ids)
+        cached_ids = {mid for mid, data in cached_matches.items() if data is not None}
+        missing_ids = [mid for mid in match_ids if mid not in cached_ids]
         
-        logger.info(f"Synced {len(games)} initial matches")
+        logger.info(f"Found {len(cached_ids)} cached, need to fetch {len(missing_ids)}")
+        
+        # Step 3: Fetch missing matches from API
+        fetched_matches = {}
+        if missing_ids:
+            fetched_matches = await self.player_repository.fetch_matches_from_api(missing_ids, region)
+            
+            # Step 4: Save newly fetched matches to DB
+            if fetched_matches:
+                await self.player_repository.save_matches_batch(fetched_matches, puuid)
+        
+        # Step 5: Combine cached and fetched matches
+        all_matches = {}
+        for mid, data in cached_matches.items():
+            if data:
+                all_matches[mid] = data
+        for mid, (match_data, _) in fetched_matches.items():
+            all_matches[mid] = match_data
+        
+        # Step 6: Build game summaries
+        games = await self.player_repository.build_game_summaries(match_ids, all_matches, puuid)
+        
+        logger.info(f"Synced {len(games)}/{len(match_ids)} initial matches")
         return games
     
     async def _sync_all_matches_with_rate_limit(self, puuid: str, region: str) -> None:
@@ -490,7 +515,7 @@ class PlayerService:
         # Step 2: Check recent_games cache
         cached_games = await self.player_repository.get_cached_recent_games(puuid, count)
         
-        if cached_games and len(cached_games) > 0:
+        if cached_games:
             if cached_games[0].match_id == first_match_id and len(cached_games) >= count:
                 logger.info(f"✅ Cache hit! Returning {len(cached_games)} cached games")
                 return cached_games

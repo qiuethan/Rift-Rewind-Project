@@ -81,18 +81,23 @@ class MatchRepositoryRiot(MatchRepository):
                 logger.error("Database client not available")
                 return False
             
-            # Check if match exists and get current summoners list
-            existing = await self.client.table(DatabaseTable.MATCHES).select('summoners').eq('match_id', match_id).limit(1).execute()
+            # Check if match exists and get current summoners list + timeline
+            existing = await self.client.table(DatabaseTable.MATCHES).select('summoners, timeline_data').eq('match_id', match_id).limit(1).execute()
             
             summoners = []
+            existing_timeline = None
             if existing.data and len(existing.data) > 0:
-                # Match exists, get current summoners list
+                # Match exists, get current summoners list and timeline
                 summoners = existing.data[0].get('summoners', [])
+                existing_timeline = existing.data[0].get('timeline_data')
             
             # Add this summoner if provided and not already in list
             if puuid and puuid not in summoners:
                 summoners.append(puuid)
                 logger.debug(f"Adding summoner {puuid} to match {match_id}")
+            
+            # Preserve existing timeline if not provided (don't overwrite with None!)
+            final_timeline = timeline_data if timeline_data is not None else existing_timeline
             
             # Extract metadata from match_data
             info = match_data.get('info', {})
@@ -110,14 +115,17 @@ class MatchRepositoryRiot(MatchRepository):
                 'platform_id': info.get('platformId', ''),
                 'queue_id': info.get('queueId', 0),
                 'match_data': match_data,
-                'timeline_data': timeline_data,
+                'timeline_data': final_timeline,  # Use preserved timeline
                 'summoners': summoners
             }
             
             await self.client.table(DatabaseTable.MATCHES).upsert(match_record).execute()
             
-            timeline_status = "with timeline" if timeline_data else "without timeline"
-            logger.info(f"Saved match: {match_id} ({timeline_status}, tracked summoners: {len(summoners)})")
+            timeline_status = "with timeline" if final_timeline else "without timeline"
+            if existing_timeline and not timeline_data:
+                logger.info(f"Updated match: {match_id} (preserved existing timeline, tracked summoners: {len(summoners)})")
+            else:
+                logger.info(f"Saved match: {match_id} ({timeline_status}, tracked summoners: {len(summoners)})")
             return True
             
         except Exception as e:
