@@ -297,7 +297,7 @@ class PlayerRepositoryRiot(PlayerRepository):
                     break  # Success, exit retry loop
                 except Exception as e:
                     error_msg = str(e)
-                    is_connection_error = any(err in error_msg.lower() for err in ['ssl', 'eof', 'connection', 'disconnected'])
+                    is_connection_error = any(err in error_msg.lower() for err in ['ssl', 'eof', 'connection', 'disconnected', 'server'])
                     
                     if is_connection_error and attempt < DB_RETRY_MAX_ATTEMPTS - 1:
                         logger.warning(f"Connection error saving {match_id} (attempt {attempt + 1}/{DB_RETRY_MAX_ATTEMPTS}): {e}")
