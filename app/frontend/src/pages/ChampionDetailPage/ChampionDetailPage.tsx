@@ -14,12 +14,12 @@ const CHAMPION_REGIONS: { [key: string]: string } = {
   'kayn': 'ionia', 'kennen': 'ionia', 'leesin': 'ionia', 'lillia': 'ionia', 'masteryi': 'ionia',
   'rakan': 'ionia', 'sett': 'ionia', 'shen': 'ionia', 'syndra': 'ionia', 'varus': 'ionia',
   'wukong': 'ionia', 'xayah': 'ionia', 'yasuo': 'ionia', 'yone': 'ionia', 'zed': 'ionia',
-  'ivern': 'ionia',
+  'ivern': 'ionia', 'jax': 'ionia',
   
   // Demacia
   'fiora': 'demacia', 'galio': 'demacia', 'garen': 'demacia', 'jarvaniv': 'demacia', 'kayle': 'demacia',
   'lux': 'demacia', 'poppy': 'demacia', 'quinn': 'demacia', 'shyvana': 'demacia', 'sona': 'demacia',
-  'sylas': 'demacia', 'vayne': 'demacia', 'xinzhao': 'demacia',
+  'sylas': 'demacia', 'vayne': 'demacia', 'xinzhao': 'demacia', 'lucian': 'demacia',
   
   // Noxus
   'annie': 'noxus', 'cassiopeia': 'noxus', 'darius': 'noxus', 'draven': 'noxus', 'katarina': 'noxus',
@@ -31,21 +31,28 @@ const CHAMPION_REGIONS: { [key: string]: string } = {
   'jayce': 'piltover', 'jinx': 'piltover', 'orianna': 'piltover', 'seraphine': 'piltover',
   'vi': 'piltover', 'blitzcrank': 'piltover', 'ekko': 'piltover', 'janna': 'piltover',
   'twitch': 'piltover', 'urgot': 'piltover', 'warwick': 'piltover', 'zac': 'piltover',
-  'zeri': 'piltover', 'ziggs': 'piltover', 'zilean': 'piltover',
+  'zeri': 'piltover', 'ziggs': 'piltover', 'zilean': 'piltover', 'singed': 'piltover',
+  'dr. mundo': 'piltover', 'drmundo': 'piltover',
   
   // Freljord
   'anivia': 'freljord', 'ashe': 'freljord', 'braum': 'freljord', 'gnar': 'freljord', 'gragas': 'freljord',
   'lissandra': 'freljord', 'nunu': 'freljord', 'olaf': 'freljord', 'ornn': 'freljord', 'sejuani': 'freljord',
   'trundle': 'freljord', 'tryndamere': 'freljord', 'udyr': 'freljord', 'volibear': 'freljord',
+  'brand': 'freljord',
   
   // Shadow Isles
   'elise': 'shadowisles', 'gwen': 'shadowisles', 'hecarim': 'shadowisles', 'kalista': 'shadowisles',
   'karthus': 'shadowisles', 'maokai': 'shadowisles', 'thresh': 'shadowisles', 'vex': 'shadowisles',
-  'viego': 'shadowisles', 'yorick': 'shadowisles',
+  'viego': 'shadowisles', 'yorick': 'shadowisles', 'nocturne': 'shadowisles',
   
   // Shurima
   'amumu': 'shurima', 'azir': 'shurima', 'nasus': 'shurima', 'rammus': 'shurima', 'renekton': 'shurima',
   'skarner': 'shurima', 'sivir': 'shurima', 'taliyah': 'shurima', 'xerath': 'shurima',
+  'akshan': 'shurima', 'aatrox': 'shurima',
+  // Void champions (associated with Shurima)
+  'belveth': 'shurima', 'chogath': 'shurima', 'kassadin': 'shurima', 'kaisa': 'shurima',
+  'khazix': 'shurima', 'kogmaw': 'shurima', 'malzahar': 'shurima', 'reksai': 'shurima',
+  'velkoz': 'shurima',
   
   // Targon
   'aphelios': 'targon', 'aurelionsol': 'targon', 'diana': 'targon', 'leona': 'targon',
@@ -54,26 +61,18 @@ const CHAMPION_REGIONS: { [key: string]: string } = {
   // Bilgewater
   'fizz': 'bilgewater', 'gangplank': 'bilgewater', 'graves': 'bilgewater', 'illaoi': 'bilgewater',
   'missfortune': 'bilgewater', 'nautilus': 'bilgewater', 'nilah': 'bilgewater', 'pyke': 'bilgewater',
-  'twistedfate': 'bilgewater',
+  'twistedfate': 'bilgewater', 'nami': 'bilgewater', 'tahmkench': 'bilgewater',
   
   // Ixtal
   'malphite': 'ixtal', 'neeko': 'ixtal', 'nidalee': 'ixtal', 'qiyana': 'ixtal',
-  'rengar': 'ixtal', 'zyra': 'ixtal',
-  
-  // Void (default to Shurima)
-  'belveth': 'shurima', 'chogath': 'shurima', 'kassadin': 'shurima', 'kaisa': 'shurima',
-  'khazix': 'shurima', 'kogmaw': 'shurima', 'malzahar': 'shurima', 'reksai': 'shurima',
-  'velkoz': 'shurima',
+  'rengar': 'ixtal', 'zyra': 'ixtal', 'milio': 'ixtal',
   
   // Bandle City
-  'corki': 'bandlecity', 'lulu': 'bandlecity',
-  'rumble': 'bandlecity', 'teemo': 'bandlecity', 'tristana': 'bandlecity', 'veigar': 'bandlecity',
-  'yuumi': 'bandlecity', 'gnar': 'bandlecity', 'kennen': 'bandlecity',
+  'corki': 'bandlecity', 'lulu': 'bandlecity', 'rumble': 'bandlecity', 'teemo': 'bandlecity', 
+  'tristana': 'bandlecity', 'veigar': 'bandlecity', 'yuumi': 'bandlecity',
   
-  // Other
-  'aatrox': 'shurima', 'alistar': 'demacia', 'brand': 'freljord', 'dr. mundo': 'piltover',
-  'drmundo': 'piltover', 'fiddlesticks': 'demacia', 'jax': 'ionia', 'nocturne': 'demacia',
-  'nami': 'bilgewater', 'ryze': 'demacia', 'shaco': 'piltover', 'singed': 'piltover',
+  // Runeterra (no specific region - default to Piltover)
+  'ryze': 'piltover', 'alistar': 'piltover', 'fiddlesticks': 'shadowisles', 'shaco': 'piltover',
 };
 
 export default function ChampionDetailPage() {
