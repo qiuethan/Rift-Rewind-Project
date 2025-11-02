@@ -7,6 +7,13 @@ export default function RegionSelector() {
   const { theme, setTheme } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const allThemeIds = getAllThemeIds();
+  
+  // Sort themes alphabetically by name
+  const sortedThemeIds = [...allThemeIds].sort((a, b) => {
+    const themeA = getThemeById(a);
+    const themeB = getThemeById(b);
+    return themeA.name.localeCompare(themeB.name);
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setTheme(e.target.value);
@@ -27,7 +34,7 @@ export default function RegionSelector() {
           onChange={handleChange}
           className={styles.select}
         >
-          {allThemeIds.map((id) => {
+          {sortedThemeIds.map((id) => {
             const regionTheme = getThemeById(id);
             return (
               <option key={id} value={id}>
