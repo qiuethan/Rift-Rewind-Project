@@ -46,6 +46,7 @@
   color: var(--region-secondary);
   border: 2px solid var(--region-primary);
   box-shadow: var(--region-shadow-primary);
+  opacity: 1;
 }
 
 .primary:hover:not(:disabled) {
@@ -60,9 +61,11 @@
 }
 
 .secondary {
-  background: var(--region-panel);
+  background: var(--region-secondary);
+  background-image: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, var(--region-secondary) 100%);
   color: var(--region-text);
   border: 2px solid var(--region-panel-border);
+  opacity: 0.95;
 }
 
 .secondary:hover:not(:disabled) {
@@ -81,6 +84,7 @@
   color: var(--region-text);
   border: 2px solid var(--region-danger);
   box-shadow: 0 0 20px rgba(255, 77, 77, 0.3);
+  opacity: 1;
 }
 
 .danger:hover:not(:disabled) {
