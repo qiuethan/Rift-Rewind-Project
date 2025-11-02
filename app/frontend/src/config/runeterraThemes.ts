@@ -372,6 +372,39 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
     tagline: 'Nature reclaims all.',
     particles: '/particles/ixtal-leaves.webm',
   },
+
+  bandlecity: {
+    id: 'bandlecity',
+    name: 'Bandle City',
+    palette: {
+      primary: '#FF6B9D',
+      secondary: '#1A0A28',
+      accent: '#FFD93D',
+      text: '#FFF5F7',
+      textSecondary: '#E5C4D5',
+      textDim: '#B594A8',
+      bgGradient: 'linear-gradient(160deg, #1A0A28 0%, #3D1F4A 90%)',
+      panel: 'rgba(255, 107, 157, 0.08)',
+      panelBorder: 'rgba(255, 107, 157, 0.35)',
+      panelHover: 'rgba(255, 107, 157, 0.12)',
+      danger: '#FF4D6D',
+      success: '#FFD93D',
+      warning: '#FF9A56',
+    },
+    shadows: {
+      primary: '0 0 25px rgba(255, 107, 157, 0.35)',
+      secondary: '0 0 40px rgba(255, 217, 61, 0.3)',
+      glow: 'inset 0 0 20px rgba(255, 107, 157, 0.1)',
+    },
+    images: {
+      hero: '/img/regions/ionia-hero.jpg', // Temporary fallback
+      background: '/img/regions/ionia-bg.jpg', // Temporary fallback
+      pattern: '/img/regions/ionia-brush.svg', // Temporary fallback
+      decorative: '/img/regions/ionia-spirit.svg',
+    },
+    tagline: 'Where whimsy and wonder collide!',
+    particles: '/particles/bandlecity-sparkles.webm',
+  },
 };
 
 /**

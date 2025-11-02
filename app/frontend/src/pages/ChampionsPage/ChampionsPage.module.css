@@ -118,6 +118,8 @@
   border-radius: 8px;
   border: 2px solid var(--region-primary);
   box-shadow: var(--region-shadow-primary);
+  opacity: 1;
+  background: var(--region-secondary);
 }
 
 .masteryBadge {

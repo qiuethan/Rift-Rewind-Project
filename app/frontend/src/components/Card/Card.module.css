@@ -1,5 +1,6 @@
 .card {
-  background: var(--region-panel);
+  background: var(--region-secondary);
+  background-image: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, var(--region-secondary) 100%);
   border-radius: 8px;
   padding: 2rem;
   border: 2px solid var(--region-panel-border);
@@ -7,6 +8,7 @@
   transition: var(--transition-slow);
   position: relative;
   overflow: hidden;
+  opacity: 0.98;
 }
 
 .card::before {

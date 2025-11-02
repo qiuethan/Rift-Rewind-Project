@@ -166,6 +166,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
+/* Ensure all images are fully opaque */
+img {
+  opacity: 1 !important;
+  background: var(--region-secondary);
+}
+
 #root {
   min-height: 100vh;
   position: relative;
