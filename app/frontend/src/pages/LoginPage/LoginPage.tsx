@@ -3,10 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import styles from './LoginPage.module.css';
 import { Button, Input, Card, RegionBanner } from '@/components';
 import { authActions } from '@/actions/auth';
+import { useSummoner } from '@/contexts';
 import { ROUTES } from '@/config';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { refreshSummoner } = useSummoner();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,6 +22,8 @@ export default function LoginPage() {
     const result = await authActions.login({ email, password });
 
     if (result.success) {
+      // Refresh summoner data after successful login
+      await refreshSummoner();
       navigate(ROUTES.DASHBOARD);
     } else {
       setError(result.error || null);

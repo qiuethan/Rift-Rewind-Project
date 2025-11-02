@@ -44,6 +44,13 @@ export default function DashboardPage() {
     loadData();
   }, []);
 
+  // Set loading to false once summoner context finishes loading
+  useEffect(() => {
+    if (!summonerLoading) {
+      setLoading(false);
+    }
+  }, [summonerLoading]);
+
   // Fetch recent games when summoner becomes available
   useEffect(() => {
     if (summoner && !summonerLoading) {
@@ -62,7 +69,8 @@ export default function DashboardPage() {
     const userData = authActions.getCurrentUser();
     setUser(userData);
     
-    setLoading(false);
+    // Don't set loading to false yet - wait for summoner context to finish loading
+    // This will be handled by the isLoading computed value below
   };
 
   const loadRecentGamesFromCache = (puuid: string): any[] | null => {

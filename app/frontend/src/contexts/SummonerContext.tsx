@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { playersActions } from '@/actions/players';
+import { authActions } from '@/actions/auth';
 
 interface SummonerData {
   id: string;
@@ -28,7 +29,7 @@ const SummonerContext = createContext<SummonerContextType | undefined>(undefined
 
 export function SummonerProvider({ children }: { children: ReactNode }) {
   const [summoner, setSummoner] = useState<SummonerData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start as true since we load on mount
   const [error, setError] = useState<string | null>(null);
 
   const refreshSummoner = async () => {
@@ -58,9 +59,14 @@ export function SummonerProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Load summoner on mount
+  // Load summoner on mount only if authenticated
   useEffect(() => {
-    refreshSummoner();
+    if (authActions.isAuthenticated()) {
+      refreshSummoner();
+    } else {
+      // Not authenticated, set loading to false immediately
+      setLoading(false);
+    }
   }, []);
 
   return (
