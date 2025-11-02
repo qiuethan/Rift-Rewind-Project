@@ -5,7 +5,10 @@ import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';
 import DashboardPage from '@/pages/DashboardPage';
 import GamesPage from '@/pages/GamesPage';
+import ChampionsPage from '@/pages/ChampionsPage';
+import ChampionDetailPage from '@/pages/ChampionDetailPage';
 import MatchDetailPage from '@/pages/MatchDetailPage';
+import { Footer } from '@/components';
 import { ROUTES, STORAGE_KEYS } from '@/config';
 import { authActions } from '@/actions/auth';
 import { SummonerProvider, ThemeProvider } from '@/contexts';
@@ -109,6 +112,22 @@ function App() {
             }
           />
           <Route
+            path={ROUTES.CHAMPIONS}
+            element={
+              <ProtectedRoute>
+                <ChampionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/champion/:championName"
+            element={
+              <ProtectedRoute>
+                <ChampionDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path={ROUTES.MATCH}
             element={
               <ProtectedRoute>
@@ -118,6 +137,7 @@ function App() {
           />
           <Route path="*" element={<Navigate to={ROUTES.HOME} />} />
           </Routes>
+          <Footer />
         </SummonerProvider>
       </ThemeProvider>
     </BrowserRouter>

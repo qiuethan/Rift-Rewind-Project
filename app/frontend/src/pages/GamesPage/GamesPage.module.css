@@ -25,10 +25,22 @@
 .title {
   margin: 0 0 0.5rem 0;
   font-size: 2.25rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--region-primary);
-  letter-spacing: -0.022em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   text-shadow: var(--region-shadow-primary);
+  position: relative;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--region-primary), transparent);
 }
 
 .subtitle {

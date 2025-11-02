@@ -12,6 +12,7 @@ interface SummonerData {
   summoner_level: number;
   profile_icon_id: number;
   last_updated: string;
+  champion_masteries?: any[];
   top_champions?: any[];
   total_mastery_score?: number;
   total_mastery_level?: number;

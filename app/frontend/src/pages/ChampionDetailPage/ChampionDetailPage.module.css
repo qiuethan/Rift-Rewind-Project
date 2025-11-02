@@ -1,0 +1,242 @@
+.container {
+  min-height: 100vh;
+  background: transparent;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.backButton {
+  margin-bottom: 2rem;
+}
+
+.championHeader {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: var(--region-panel);
+  border-radius: 12px;
+  border: 2px solid var(--region-panel-border);
+  box-shadow: var(--region-shadow-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.championHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(90deg, var(--region-primary) 0%, transparent 30%) top left / 80px 2px,
+    linear-gradient(0deg, var(--region-primary) 0%, transparent 30%) top left / 2px 80px,
+    linear-gradient(90deg, transparent 70%, var(--region-accent) 100%) top right / 80px 2px,
+    linear-gradient(0deg, transparent 70%, var(--region-accent) 100%) top right / 2px 80px;
+  background-repeat: no-repeat;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.championIcon {
+  position: relative;
+  z-index: 1;
+}
+
+.championImage {
+  width: 150px;
+  height: 150px;
+  border-radius: 12px;
+  border: 3px solid var(--region-primary);
+  box-shadow: var(--region-shadow-primary);
+}
+
+.masteryBadge {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  background: linear-gradient(135deg, var(--region-primary) 0%, var(--region-accent) 100%);
+  color: var(--region-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: 2px solid var(--region-secondary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.championInfo {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.championName {
+  margin: 0 0 0.5rem 0;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--region-primary);
+  letter-spacing: -0.02em;
+  text-shadow: var(--region-shadow-primary);
+}
+
+.championSubtitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.statsContent {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--region-panel);
+  border-radius: 8px;
+  border: 1px solid var(--region-panel-border);
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--region-primary);
+  text-shadow: var(--region-shadow-primary);
+}
+
+.positive {
+  color: var(--region-success);
+}
+
+.negative {
+  color: var(--region-danger);
+}
+
+.masteryContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.masteryLevel,
+.masteryPoints {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: var(--region-panel);
+  border-radius: 8px;
+  border: 1px solid var(--region-panel-border);
+}
+
+.masteryLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.masteryValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--region-primary);
+  text-shadow: var(--region-shadow-primary);
+}
+
+.masteryBar {
+  height: 12px;
+  background: var(--region-panel);
+  border-radius: 6px;
+  border: 1px solid var(--region-panel-border);
+  overflow: hidden;
+  position: relative;
+}
+
+.masteryProgress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--region-primary) 0%, var(--region-accent) 100%);
+  border-radius: 6px;
+  transition: width 0.3s ease;
+  box-shadow: var(--region-shadow-primary);
+}
+
+.masteryNote {
+  margin: 0;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.matchHistory {
+  padding: 2rem;
+  text-align: center;
+}
+
+.comingSoon {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.notFound {
+  padding: 3rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.notFound h2 {
+  margin: 0;
+  color: var(--region-primary);
+  font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .championHeader {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .championName {
+    font-size: 2rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsContent {
+    grid-template-columns: 1fr;
+  }
+}

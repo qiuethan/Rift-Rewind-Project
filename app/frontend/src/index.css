@@ -145,13 +145,7 @@ body::after {
   opacity: 0.5;
   pointer-events: none;
   z-index: 0;
-  animation: patternFloat 60s linear infinite;
   mix-blend-mode: overlay;
-}
-
-@keyframes patternFloat {
-  0% { background-position: 0 0; }
-  100% { background-position: 200px 200px; }
 }
 
 /* Bottom right accent */

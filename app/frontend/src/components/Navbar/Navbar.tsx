@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
-import RegionSelector from '../RegionSelector';
 
 interface NavbarProps {
   user?: any;
@@ -39,7 +38,7 @@ export default function Navbar({ user, summoner }: NavbarProps) {
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
-        <div className={styles.logo} onClick={() => navigate(ROUTES.DASHBOARD)}>
+        <div className={styles.logo} onClick={() => navigate(ROUTES.HOME)}>
           <span className={styles.logoText}>Rift Rewind</span>
         </div>
 
@@ -58,12 +57,6 @@ export default function Navbar({ user, summoner }: NavbarProps) {
           </button>
           <button 
             className={styles.navLink} 
-            onClick={() => navigate(ROUTES.ANALYTICS)}
-          >
-            Analytics
-          </button>
-          <button 
-            className={styles.navLink} 
             onClick={() => navigate(ROUTES.CHAMPIONS)}
           >
             Champions
@@ -71,8 +64,6 @@ export default function Navbar({ user, summoner }: NavbarProps) {
         </div>
 
         <div className={styles.rightSection}>
-          <RegionSelector />
-          
           <div className={styles.profile} ref={dropdownRef}>
           <button 
             className={styles.profileButton}
@@ -127,15 +118,6 @@ export default function Navbar({ user, summoner }: NavbarProps) {
                 }}
               >
                 Games
-              </button>
-              <button 
-                className={styles.dropdownItem}
-                onClick={() => {
-                  navigate(ROUTES.ANALYTICS);
-                  setIsDropdownOpen(false);
-                }}
-              >
-                Analytics
               </button>
               <button 
                 className={styles.dropdownItem}

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import styles from './LandingPage.module.css';
-import { Button, RegionSelector } from '@/components';
+import { Button } from '@/components';
 import { ROUTES } from '@/config';
 
 export default function LandingPage() {
@@ -11,16 +11,13 @@ export default function LandingPage() {
       <nav className={styles.nav}>
         <div className={styles.navContent}>
           <h2 className={styles.logo}>Rift Rewind</h2>
-          <div className={styles.navRight}>
-            <RegionSelector />
-            <div className={styles.navButtons}>
-              <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)}>
-                Login
-              </Button>
-              <Button onClick={() => navigate(ROUTES.REGISTER)}>
-                Get Started
-              </Button>
-            </div>
+          <div className={styles.navButtons}>
+            <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)}>
+              Login
+            </Button>
+            <Button onClick={() => navigate(ROUTES.REGISTER)}>
+              Get Started
+            </Button>
           </div>
         </div>
       </nav>
@@ -94,12 +91,6 @@ export default function LandingPage() {
           </Button>
         </section>
       </main>
-
-      <footer className={styles.footer}>
-        <p className={styles.footerText}>
-          © 2025 Rift Rewind. All rights reserved.
-        </p>
-      </footer>
     </div>
   );
 }
