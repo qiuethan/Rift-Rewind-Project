@@ -77,6 +77,16 @@ const convertToRecentGames = (fullGames: FullGameData[], summonerPuuid: string):
   return converted;
 };
 
+const CACHE_KEY = 'rift_rewind_games_cache';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+interface CachedGamesData {
+  games: RecentGame[];
+  timestamp: number;
+  puuid: string;
+  currentIndex: number;
+}
+
 export default function GamesPage() {
   const navigate = useNavigate();
   const { summoner, loading: summonerLoading } = useSummoner();
@@ -109,8 +119,19 @@ export default function GamesPage() {
     }
 
     if (summoner?.puuid) {
-      // Load initial games
-      await loadGames(0, summoner.puuid);
+      // Try to load from cache first
+      const cachedData = loadFromCache(summoner.puuid);
+      if (cachedData) {
+        console.log('Loading games from cache:', cachedData.games.length);
+        setRecentGames(cachedData.games);
+        setCurrentIndex(cachedData.currentIndex);
+        setLoading(false);
+        // Still fetch fresh data in background
+        loadGames(0, summoner.puuid, true);
+      } else {
+        // Load initial games
+        await loadGames(0, summoner.puuid);
+      }
     } else {
       // No summoner linked, redirect to dashboard
       navigate(ROUTES.DASHBOARD);
@@ -119,11 +140,49 @@ export default function GamesPage() {
     setLoading(false);
   };
 
-  const loadGames = async (startIndex: number, summonerPuuid?: string) => {
-    if (startIndex === 0) {
-      setLoading(true);
-    } else {
-      setLoadingMore(true);
+  const loadFromCache = (puuid: string): CachedGamesData | null => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) return null;
+
+      const data: CachedGamesData = JSON.parse(cached);
+      const now = Date.now();
+
+      // Check if cache is valid (same user and not expired)
+      if (data.puuid === puuid && (now - data.timestamp) < CACHE_DURATION) {
+        return data;
+      }
+
+      // Cache expired or different user
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    } catch (error) {
+      console.error('Error loading from cache:', error);
+      return null;
+    }
+  };
+
+  const saveToCache = (games: RecentGame[], puuid: string, index: number) => {
+    try {
+      const cacheData: CachedGamesData = {
+        games,
+        timestamp: Date.now(),
+        puuid,
+        currentIndex: index
+      };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error('Error saving to cache:', error);
+    }
+  };
+
+  const loadGames = async (startIndex: number, summonerPuuid?: string, backgroundUpdate = false) => {
+    if (!backgroundUpdate) {
+      if (startIndex === 0) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
     }
 
     // Use provided puuid or fall back to state
@@ -153,12 +212,15 @@ export default function GamesPage() {
         const convertedGames = convertToRecentGames(result.data, puuid);
         console.log('Converted games:', convertedGames.length);
         
+        let updatedGames: RecentGame[];
         if (startIndex === 0) {
+          updatedGames = convertedGames;
           setRecentGames(convertedGames);
         } else {
           setRecentGames(prev => {
             console.log('Adding to existing games. Previous:', prev.length, 'New:', convertedGames.length);
-            return [...prev, ...convertedGames];
+            updatedGames = [...prev, ...convertedGames];
+            return updatedGames;
           });
         }
         
@@ -171,12 +233,21 @@ export default function GamesPage() {
         const newIndex = startIndex + result.data.length;
         console.log('Setting currentIndex to:', newIndex);
         setCurrentIndex(newIndex);
+
+        // Save to cache (only for initial load or when adding more)
+        if (startIndex === 0) {
+          saveToCache(convertedGames, puuid, newIndex);
+        } else if (updatedGames!) {
+          saveToCache(updatedGames, puuid, newIndex);
+        }
       }
     } catch (error) {
       console.error('Error loading games:', error);
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      if (!backgroundUpdate) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   };
 

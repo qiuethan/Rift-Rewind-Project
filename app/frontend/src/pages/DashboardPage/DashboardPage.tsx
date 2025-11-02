@@ -13,6 +13,15 @@ import {
   RecentGames,
 } from './components';
 
+const RECENT_GAMES_CACHE_KEY = 'rift_rewind_recent_games_cache';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+interface CachedRecentGamesData {
+  games: any[];
+  timestamp: number;
+  puuid: string;
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { summoner, loading: summonerLoading, refreshSummoner } = useSummoner();
@@ -56,17 +65,73 @@ export default function DashboardPage() {
     setLoading(false);
   };
 
-  const fetchRecentGames = async () => {
-    setGamesLoading(true);
+  const loadRecentGamesFromCache = (puuid: string): any[] | null => {
+    try {
+      const cached = localStorage.getItem(RECENT_GAMES_CACHE_KEY);
+      if (!cached) return null;
+
+      const data: CachedRecentGamesData = JSON.parse(cached);
+      const now = Date.now();
+
+      // Check if cache is valid (same user and not expired)
+      if (data.puuid === puuid && (now - data.timestamp) < CACHE_DURATION) {
+        return data.games;
+      }
+
+      // Cache expired or different user
+      localStorage.removeItem(RECENT_GAMES_CACHE_KEY);
+      return null;
+    } catch (error) {
+      console.error('Error loading recent games from cache:', error);
+      return null;
+    }
+  };
+
+  const saveRecentGamesToCache = (games: any[], puuid: string) => {
+    try {
+      const cacheData: CachedRecentGamesData = {
+        games,
+        timestamp: Date.now(),
+        puuid
+      };
+      localStorage.setItem(RECENT_GAMES_CACHE_KEY, JSON.stringify(cacheData));
+    } catch (error) {
+      console.error('Error saving recent games to cache:', error);
+    }
+  };
+
+  const fetchRecentGames = async (backgroundUpdate = false) => {
+    if (!summoner?.puuid) return;
+
+    // Try to load from cache first
+    if (!backgroundUpdate) {
+      const cachedGames = loadRecentGamesFromCache(summoner.puuid);
+      if (cachedGames) {
+        console.log('Loading recent games from cache:', cachedGames.length);
+        setRecentGames(cachedGames);
+        // Still fetch fresh data in background
+        fetchRecentGames(true);
+        return;
+      }
+    }
+
+    if (!backgroundUpdate) {
+      setGamesLoading(true);
+    }
+
     try {
       const gamesResult = await playersActions.getRecentGames(10);
       if (gamesResult.success && gamesResult.data) {
         setRecentGames(gamesResult.data);
+        // Save to cache
+        saveRecentGamesToCache(gamesResult.data, summoner.puuid);
       }
     } catch (error) {
       console.error('Error loading recent games:', error);
     } finally {
-      setGamesLoading(false);
+      if (!backgroundUpdate) {
+        setGamesLoading(false);
+      }
     }
   };
 
@@ -104,7 +169,8 @@ export default function DashboardPage() {
       // Refresh summoner in context
       await refreshSummoner();
       
-      // Refetch recent games after updating account
+      // Clear cache and refetch recent games after updating account
+      localStorage.removeItem(RECENT_GAMES_CACHE_KEY);
       fetchRecentGames();
       
       setTimeout(() => {
