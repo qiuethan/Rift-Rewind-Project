@@ -232,8 +232,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       glow: 'inset 0 0 20px rgba(53, 255, 218, 0.1)',
     },
     images: {
-      hero: '/img/regions/shadowisles-hero.jpg',
-      background: '/img/regions/shadowisles-bg.jpg',
+      hero: '/img/regions/shadow-mist-hero.jpg',
+      background: '/img/regions/shadow-mist-bg.jpg',
       pattern: '/img/regions/shadow-mist.svg',
       decorative: '/img/regions/shadow-chains.svg',
     },
@@ -331,8 +331,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       glow: 'inset 0 0 20px rgba(249, 115, 22, 0.1)',
     },
     images: {
-      hero: '/img/regions/bilgewater-hero.jpg',
-      background: '/img/regions/bilgewater-bg.jpg',
+      hero: '/img/regions/bilgewater-waves-hero.jpg',
+      background: '/img/regions/bilgewater-waves-bg.jpg',
       pattern: '/img/regions/bilgewater-waves.svg',
       decorative: '/img/regions/bilgewater-anchor.svg',
     },
@@ -364,8 +364,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       glow: 'inset 0 0 20px rgba(16, 185, 129, 0.1)',
     },
     images: {
-      hero: '/img/regions/ixtal-hero.jpg',
-      background: '/img/regions/ixtal-bg.jpg',
+      hero: '/img/regions/ixtal-jungle-hero.png',
+      background: '/img/regions/ixtal-jungle-bg.png',
       pattern: '/img/regions/ixtal-jungle.svg',
       decorative: '/img/regions/ixtal-elemental.svg',
     },

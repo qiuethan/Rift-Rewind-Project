@@ -89,8 +89,8 @@ function applyThemeToDOM(theme: RegionTheme) {
   root.style.setProperty('--region-shadow-secondary', theme.shadows.secondary);
   root.style.setProperty('--region-shadow-glow', theme.shadows.glow);
 
-  // Apply background image
-  root.style.setProperty('--region-bg-image', `url('${theme.images.background}')`);
+  // Apply background image (use hero image for main background overlay)
+  root.style.setProperty('--region-bg-image', `url('${theme.images.hero}')`);
   root.style.setProperty('--region-pattern', `url('${theme.images.pattern}')`);
 
   // Update body background

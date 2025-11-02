@@ -88,7 +88,7 @@ body {
 }
 
 /* Vignette effect with scan lines */
-body::after {
+body::before {
   content: '';
   position: fixed;
   top: 0;
@@ -109,13 +109,30 @@ body::after {
   animation: scanlines 8s linear infinite;
 }
 
+/* Region hero image background overlay */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--region-bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 1;
+}
+
 @keyframes scanlines {
   0% { background-position: 0 0, 0 0; }
   100% { background-position: 0 0, 0 100px; }
 }
 
 /* Region pattern overlay */
-body::before {
+#root::before {
   content: '';
   position: fixed;
   top: 0;
@@ -135,20 +152,6 @@ body::before {
 @keyframes patternFloat {
   0% { background-position: 0 0; }
   100% { background-position: 200px 200px; }
-}
-
-/* Decorative corner accents */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle at top left, var(--region-primary) 0%, transparent 70%);
-  opacity: 0.1;
-  pointer-events: none;
-  z-index: 0;
 }
 
 /* Bottom right accent */

@@ -33,17 +33,18 @@ REGION_CHAMPIONS = {
 
 # Placeholder hero images (using Unsplash)
 REGION_HERO_URLS = {
-    "piltover": "https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=1920&h=1080&fit=crop",
-    "ionia": "https://images.unsplash.com/photo-1528164344705-47542687000d?w=1920&h=1080&fit=crop",
-    "demacia": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&h=1080&fit=crop",
-    "noxus": "https://images.unsplash.com/photo-1509803874385-db7c23652552?w=1920&h=1080&fit=crop",
-    "freljord": "https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=1920&h=1080&fit=crop",
-    "shadowisles": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&h=1080&fit=crop",
-    "shurima": "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1920&h=1080&fit=crop",
-    "targon": "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=1920&h=1080&fit=crop",
+    "piltover": "https://wiki.leagueoflegends.com/en-us/images/Piltover_Arcane_02.jpg",
+    "ionia": "https://cdnportal.mobalytics.gg/production/1969/10/Ionia-Splash.jpg",
+    "demacia": "https://wiki.leagueoflegends.com/en-us/images/Demacia_The_Grand_Plaza.jpg",
+    "noxus": "https://wiki.leagueoflegends.com/en-us/images/thumb/Noxus_LoR_Background.jpg/800px-Noxus_LoR_Background.jpg",
+    "freljord": "https://wiki.leagueoflegends.com/en-us/images/thumb/Freljord_LoR_Background.jpg/800px-Freljord_LoR_Background.jpg",
+    "shadowisles": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/universe/a16b2a6f1de9d71d750ed8b14ebfcc8f07c8b6a4-1920x721.jpg",
+    "shurima": "https://wiki.leagueoflegends.com/en-us/images/thumb/Shurima_The_Ruins_Of_Shurima.jpg/1200px-Shurima_The_Ruins_Of_Shurima.jpg",
+    "targon": "https://64.media.tumblr.com/da10d0926b2364d1c1360f007bfeb454/7e2a959ade29a81c-6a/s1280x1920/fe5bff1bd7ae36cdb5aafc12c0573d130ec2ce64.png",
     "bilgewater": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&h=1080&fit=crop",
-    "ixtal": "https://images.unsplash.com/photo-1511497584788-876760111969?w=1920&h=1080&fit=crop"
+    "ixtal": "https://cdnb.artstation.com/p/assets/images/images/029/672/207/large/lucas-parolin-ixtal-v01-2.jpg?1598264084"
 }
+
 
 def download_file(url, filepath):
     """Download a file from URL to filepath"""
