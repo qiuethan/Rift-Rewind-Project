@@ -1,9 +1,23 @@
 .navbar {
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-200);
+  background: var(--region-secondary);
+  background-image: linear-gradient(180deg, var(--region-secondary) 0%, rgba(0,0,0,0.3) 100%);
+  border-bottom: 2px solid var(--region-panel-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), var(--region-shadow-primary);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.navbar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--region-primary) 50%, transparent 100%);
+  opacity: 0.5;
 }
 
 .container {
@@ -24,9 +38,17 @@
 
 .logoText {
   font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--black);
-  letter-spacing: -0.022em;
+  font-weight: 700;
+  color: var(--region-primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-shadow: var(--region-shadow-primary);
+  transition: var(--transition);
+}
+
+.logo:hover .logoText {
+  color: var(--region-accent);
+  text-shadow: var(--region-shadow-secondary);
 }
 
 .nav {
@@ -37,21 +59,47 @@
 
 .navLink {
   padding: 0.5rem 1rem;
-  background: none;
-  border: none;
-  color: var(--text-secondary);
+  background: transparent;
+  border: 2px solid transparent;
+  color: var(--region-text-secondary);
   font-size: 0.9375rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  border-radius: 0.375rem;
+  border-radius: 6px;
   transition: var(--transition);
-  letter-spacing: -0.011em;
+  letter-spacing: 0.02em;
   font-family: inherit;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.navLink::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--region-primary);
+  transition: width var(--transition);
 }
 
 .navLink:hover {
-  background: var(--gray-50);
-  color: var(--black);
+  background: var(--region-panel-hover);
+  color: var(--region-primary);
+  border-color: var(--region-panel-border);
+  box-shadow: var(--region-shadow-primary);
+}
+
+.navLink:hover::before {
+  width: 80%;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .profile {
@@ -63,17 +111,19 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 0.75rem;
-  background: none;
-  border: 1px solid var(--gray-200);
-  border-radius: 0.5rem;
+  background: var(--region-panel);
+  border: 2px solid var(--region-panel-border);
+  border-radius: 6px;
   cursor: pointer;
   transition: var(--transition);
   font-family: inherit;
+  box-shadow: var(--region-shadow-primary);
 }
 
 .profileButton:hover {
-  border-color: var(--gray-300);
-  background: var(--gray-50);
+  border-color: var(--region-primary);
+  background: var(--region-panel-hover);
+  box-shadow: var(--region-shadow-secondary);
 }
 
 .profileIcon {
@@ -81,13 +131,15 @@
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid var(--region-primary);
+  box-shadow: var(--region-shadow-primary);
 }
 
 .profileName {
   font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--black);
-  letter-spacing: -0.011em;
+  font-weight: 600;
+  color: var(--region-text);
+  letter-spacing: 0.01em;
 }
 
 .dropdown {
@@ -95,11 +147,19 @@
   top: calc(100% + 0.5rem);
   right: 0;
   min-width: 240px;
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: var(--region-secondary);
+  background-image: var(--region-bg-gradient);
+  border: 2px solid var(--region-panel-border);
+  border-radius: 8px;
+  box-shadow: var(--region-shadow-secondary), 0 20px 40px rgba(0, 0, 0, 0.8);
   padding: 0.5rem;
+  backdrop-filter: blur(10px);
+  animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdownHeader {
@@ -114,6 +174,8 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid var(--region-primary);
+  box-shadow: var(--region-shadow-primary);
 }
 
 .dropdownInfo {
@@ -123,46 +185,49 @@
 
 .dropdownName {
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--black);
-  letter-spacing: -0.011em;
+  font-weight: 700;
+  color: var(--region-primary);
+  letter-spacing: 0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-shadow: var(--region-shadow-primary);
 }
 
 .dropdownLevel {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--region-text-secondary);
   font-weight: 500;
-  letter-spacing: -0.011em;
+  letter-spacing: 0.01em;
 }
 
 .dropdownDivider {
-  height: 1px;
-  background: var(--gray-200);
+  height: 2px;
+  background: var(--region-panel-border);
   margin: 0.5rem 0;
 }
 
 .dropdownItem {
   width: 100%;
   padding: 0.75rem;
-  background: none;
-  border: none;
+  background: transparent;
+  border: 2px solid transparent;
   text-align: left;
   font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--region-text);
   cursor: pointer;
-  border-radius: 0.375rem;
+  border-radius: 6px;
   transition: var(--transition);
-  letter-spacing: -0.011em;
+  letter-spacing: 0.01em;
   font-family: inherit;
 }
 
 .dropdownItem:hover {
-  background: var(--gray-50);
-  color: var(--black);
+  background: var(--region-panel-hover);
+  color: var(--region-primary);
+  border-color: var(--region-panel-border);
+  box-shadow: var(--region-shadow-primary);
 }
 
 @media (max-width: 768px) {

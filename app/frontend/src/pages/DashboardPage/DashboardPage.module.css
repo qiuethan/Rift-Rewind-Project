@@ -1,7 +1,30 @@
 .container {
   min-height: 100vh;
-  background: var(--white);
+  background: var(--region-secondary);
+  background-image: var(--region-bg-gradient);
   padding: 2rem;
+  position: relative;
+}
+
+.container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: var(--region-pattern);
+  background-repeat: repeat;
+  background-size: 128px 128px;
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 0;
+  animation: patternFloat 60s linear infinite;
+}
+
+@keyframes patternFloat {
+  0% { background-position: 0 0; }
+  100% { background-position: 256px 256px; }
 }
 
 .loading {
@@ -23,14 +46,29 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 .title {
   margin: 0;
   font-size: 2.25rem;
-  font-weight: 600;
-  color: var(--black);
-  letter-spacing: -0.022em;
+  font-weight: 700;
+  color: var(--region-primary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-shadow: var(--region-shadow-primary);
+  position: relative;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--region-primary), transparent);
 }
 
 .grid {
@@ -39,6 +77,8 @@
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 968px) {

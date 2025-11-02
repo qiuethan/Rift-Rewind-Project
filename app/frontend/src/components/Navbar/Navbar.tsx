@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
+import RegionSelector from '../RegionSelector';
 
 interface NavbarProps {
   user?: any;
@@ -69,7 +70,10 @@ export default function Navbar({ user, summoner }: NavbarProps) {
           </button>
         </div>
 
-        <div className={styles.profile} ref={dropdownRef}>
+        <div className={styles.rightSection}>
+          <RegionSelector />
+          
+          <div className={styles.profile} ref={dropdownRef}>
           <button 
             className={styles.profileButton}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -153,6 +157,7 @@ export default function Navbar({ user, summoner }: NavbarProps) {
               </button>
             </div>
           )}
+        </div>
         </div>
       </div>
     </nav>

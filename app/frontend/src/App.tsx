@@ -8,7 +8,7 @@ import GamesPage from '@/pages/GamesPage';
 import MatchDetailPage from '@/pages/MatchDetailPage';
 import { ROUTES, STORAGE_KEYS } from '@/config';
 import { authActions } from '@/actions/auth';
-import { SummonerProvider } from '@/contexts';
+import { SummonerProvider, ThemeProvider } from '@/contexts';
 import { supabase } from '@/lib/supabase';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -72,52 +72,54 @@ function App() {
 
   return (
     <BrowserRouter>
-      <SummonerProvider>
-        <Routes>
-        <Route path={ROUTES.HOME} element={<LandingPage />} />
-        <Route
-          path={ROUTES.LOGIN}
-          element={
-            <PublicRoute>
-              <LoginPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path={ROUTES.REGISTER}
-          element={
-            <PublicRoute>
-              <RegisterPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path={ROUTES.DASHBOARD}
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTES.GAMES}
-          element={
-            <ProtectedRoute>
-              <GamesPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={ROUTES.MATCH}
-          element={
-            <ProtectedRoute>
-              <MatchDetailPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to={ROUTES.HOME} />} />
-        </Routes>
-      </SummonerProvider>
+      <ThemeProvider>
+        <SummonerProvider>
+          <Routes>
+          <Route path={ROUTES.HOME} element={<LandingPage />} />
+          <Route
+            path={ROUTES.LOGIN}
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path={ROUTES.REGISTER}
+            element={
+              <PublicRoute>
+                <RegisterPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path={ROUTES.DASHBOARD}
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.GAMES}
+            element={
+              <ProtectedRoute>
+                <GamesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.MATCH}
+            element={
+              <ProtectedRoute>
+                <MatchDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to={ROUTES.HOME} />} />
+          </Routes>
+        </SummonerProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

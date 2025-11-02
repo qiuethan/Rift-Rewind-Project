@@ -1,21 +1,85 @@
 .card {
-  background: var(--white);
-  border-radius: 0.5rem;
+  background: var(--region-panel);
+  border-radius: 8px;
   padding: 2rem;
-  box-shadow: none;
-  border: 1px solid var(--gray-200);
+  border: 2px solid var(--region-panel-border);
+  box-shadow: var(--region-shadow-primary), var(--region-shadow-glow);
   transition: var(--transition-slow);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--region-pattern);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, var(--region-primary), var(--region-accent));
+  opacity: 0;
+  border-radius: 8px;
+  z-index: -1;
+  transition: opacity var(--transition);
+}
+
+/* Corner decorations */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(90deg, var(--region-primary) 0%, transparent 30%) top left / 60px 2px,
+    linear-gradient(0deg, var(--region-primary) 0%, transparent 30%) top left / 2px 60px,
+    linear-gradient(90deg, transparent 70%, var(--region-accent) 100%) top right / 60px 2px,
+    linear-gradient(0deg, transparent 70%, var(--region-accent) 100%) top right / 2px 60px,
+    linear-gradient(90deg, var(--region-accent) 0%, transparent 30%) bottom left / 60px 2px,
+    linear-gradient(0deg, var(--region-accent) 0%, transparent 30%) bottom left / 2px 60px,
+    linear-gradient(90deg, transparent 70%, var(--region-primary) 100%) bottom right / 60px 2px,
+    linear-gradient(0deg, transparent 70%, var(--region-primary) 100%) bottom right / 2px 60px;
+  background-repeat: no-repeat;
+  opacity: 0.3;
+  pointer-events: none;
+  border-radius: 8px;
 }
 
 .card:hover {
-  border-color: var(--gray-300);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--region-primary);
+  box-shadow: var(--region-shadow-secondary);
+  transform: translateY(-2px);
+}
+
+.card:hover::after {
+  opacity: 0.15;
+}
+
+.card:hover::before {
+  opacity: 0.6;
 }
 
 .title {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.022em;
+  color: var(--region-primary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+  text-shadow: var(--region-shadow-primary);
 }

@@ -1,0 +1,102 @@
+.banner {
+  background: var(--region-panel);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--region-shadow-primary);
+  transition: var(--transition);
+}
+
+.banner:hover {
+  background: var(--region-panel-hover);
+  box-shadow: var(--region-shadow-secondary);
+}
+
+.banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--region-pattern);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.label {
+  color: var(--region-text-secondary);
+  font-weight: 400;
+}
+
+.regionName {
+  color: var(--region-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: var(--region-shadow-primary);
+}
+
+.separator {
+  color: var(--region-text-dim);
+  font-weight: 300;
+}
+
+.tagline {
+  color: var(--region-text);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.decorative {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 80%;
+  opacity: 0.15;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px var(--region-primary));
+}
+
+@media (max-width: 768px) {
+  .banner {
+    padding: 0.625rem 1rem;
+  }
+
+  .content {
+    font-size: 0.75rem;
+  }
+
+  .regionName {
+    font-size: 0.875rem;
+  }
+
+  .decorative {
+    display: none;
+  }
+
+  .separator {
+    display: none;
+  }
+
+  .tagline {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+}

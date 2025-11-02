@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './RegisterPage.module.css';
-import { Button, Input, Card } from '@/components';
+import { Button, Input, Card, RegionBanner } from '@/components';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
 
@@ -52,8 +52,20 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <Card className={styles.card}>
+    <>
+      <nav className={styles.nav}>
+        <div className={styles.navContent}>
+          <h2 className={styles.logo} onClick={() => navigate(ROUTES.HOME)}>Rift Rewind</h2>
+          <div className={styles.navButtons}>
+            <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)}>
+              Login
+            </Button>
+          </div>
+        </div>
+      </nav>
+      
+      <div className={styles.container}>
+        <Card className={styles.card}>
         <div className={styles.header}>
           <h1 className={styles.title}>Create Account</h1>
           <p className={styles.subtitle}>Join Rift Rewind</p>
@@ -142,5 +154,6 @@ export default function RegisterPage() {
         </div>
       </Card>
     </div>
+    </>
   );
 }

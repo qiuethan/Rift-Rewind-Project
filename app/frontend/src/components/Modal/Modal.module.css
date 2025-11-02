@@ -4,23 +4,51 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 2rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal {
-  background: var(--white);
-  border-radius: 0.5rem;
-  border: 1px solid var(--gray-200);
+  background: var(--region-secondary);
+  background-image: var(--region-bg-gradient);
+  border-radius: 8px;
+  border: 2px solid var(--region-panel-border);
   max-width: 600px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--region-shadow-secondary), 0 20px 60px rgba(0, 0, 0, 0.8);
+  position: relative;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--region-pattern);
+  opacity: 0.05;
+  pointer-events: none;
+  border-radius: 8px;
 }
 
 .header {
@@ -28,41 +56,49 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  border-bottom: 1px solid var(--gray-200);
+  border-bottom: 2px solid var(--region-panel-border);
+  position: relative;
+  z-index: 1;
 }
 
 .title {
   margin: 0;
   font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--black);
-  letter-spacing: -0.022em;
+  font-weight: 700;
+  color: var(--region-primary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-shadow: var(--region-shadow-primary);
 }
 
 .closeButton {
-  background: none;
-  border: none;
-  font-size: 2rem;
+  background: var(--region-panel);
+  border: 2px solid var(--region-panel-border);
+  font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
-  color: var(--text-secondary);
+  color: var(--region-text-secondary);
   padding: 0;
   width: 2rem;
   height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.25rem;
+  border-radius: 6px;
   transition: var(--transition);
 }
 
 .closeButton:hover {
-  background: var(--gray-100);
-  color: var(--black);
+  background: var(--region-panel-hover);
+  color: var(--region-primary);
+  border-color: var(--region-primary);
+  box-shadow: var(--region-shadow-primary);
 }
 
 .content {
   padding: 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 768px) {

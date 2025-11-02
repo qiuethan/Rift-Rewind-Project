@@ -1,0 +1,82 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem;
+  background: transparent;
+  border-radius: 6px;
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+}
+
+.container:hover {
+  background: var(--region-panel);
+  box-shadow: var(--region-shadow-primary);
+}
+
+.icon {
+  font-size: 1.25rem;
+  opacity: 0.5;
+  transition: var(--transition);
+  filter: grayscale(0.5);
+}
+
+.container:hover .icon {
+  opacity: 1;
+  filter: grayscale(0);
+  transform: scale(1.1);
+}
+
+.select {
+  padding: 0.375rem 0.5rem;
+  background: var(--region-panel);
+  border: 2px solid var(--region-panel-border);
+  border-radius: 4px;
+  color: var(--region-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+  animation: slideIn 0.2s ease-out;
+  box-shadow: var(--region-shadow-secondary);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.select:hover {
+  border-color: var(--region-primary);
+  background: var(--region-panel-hover);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--region-accent);
+  box-shadow: 0 0 0 3px rgba(111, 212, 255, 0.2), var(--region-shadow-secondary);
+}
+
+.select option {
+  background: var(--region-secondary);
+  color: var(--region-text);
+  padding: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .icon {
+    font-size: 1rem;
+  }
+  
+  .select {
+    font-size: 0.75rem;
+  }
+}

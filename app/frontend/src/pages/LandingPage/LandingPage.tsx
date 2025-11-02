@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import styles from './LandingPage.module.css';
-import { Button } from '@/components';
+import { Button, RegionSelector } from '@/components';
 import { ROUTES } from '@/config';
 
 export default function LandingPage() {
@@ -11,13 +11,16 @@ export default function LandingPage() {
       <nav className={styles.nav}>
         <div className={styles.navContent}>
           <h2 className={styles.logo}>Rift Rewind</h2>
-          <div className={styles.navButtons}>
-            <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)}>
-              Login
-            </Button>
-            <Button onClick={() => navigate(ROUTES.REGISTER)}>
-              Get Started
-            </Button>
+          <div className={styles.navRight}>
+            <RegionSelector />
+            <div className={styles.navButtons}>
+              <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)}>
+                Login
+              </Button>
+              <Button onClick={() => navigate(ROUTES.REGISTER)}>
+                Get Started
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
