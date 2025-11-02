@@ -397,9 +397,9 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       glow: 'inset 0 0 20px rgba(255, 107, 157, 0.1)',
     },
     images: {
-      hero: '/img/regions/ionia-hero.jpg', // Temporary fallback
-      background: '/img/regions/ionia-bg.jpg', // Temporary fallback
-      pattern: '/img/regions/ionia-brush.svg', // Temporary fallback
+      hero: '/img/regions/bandlecity-hero.png',
+      background: '/img/regions/bandlecity-bg.png',
+      pattern: '/img/regions/ionia-brush.svg', // Using Ionia pattern temporarily
       decorative: '/img/regions/ionia-spirit.svg',
     },
     tagline: 'Where whimsy and wonder collide!',

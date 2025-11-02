@@ -42,22 +42,6 @@
   box-shadow: 0 0 20px rgba(85, 242, 206, 0.15);
 }
 
-.gameCard.win::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    linear-gradient(90deg, var(--region-success) 0%, transparent 30%) top left / 60px 2px,
-    linear-gradient(0deg, var(--region-success) 0%, transparent 30%) top left / 2px 60px,
-    linear-gradient(90deg, transparent 70%, var(--region-success) 100%) top right / 60px 2px,
-    linear-gradient(0deg, transparent 70%, var(--region-success) 100%) top right / 2px 60px;
-  background-repeat: no-repeat;
-  opacity: 1.2;
-  pointer-events: none;
-}
 
 /* Defeat card styling */
 .gameCard.loss {
@@ -68,22 +52,6 @@
   box-shadow: 0 0 20px rgba(255, 77, 77, 0.15);
 }
 
-.gameCard.loss::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    linear-gradient(90deg, var(--region-danger) 0%, transparent 30%) top left / 60px 2px,
-    linear-gradient(0deg, var(--region-danger) 0%, transparent 30%) top left / 2px 60px,
-    linear-gradient(90deg, transparent 70%, var(--region-danger) 100%) top right / 60px 2px,
-    linear-gradient(0deg, transparent 70%, var(--region-danger) 100%) top right / 2px 60px;
-  background-repeat: no-repeat;
-  opacity: 1.2;
-  pointer-events: none;
-}
 
 .gameCard:hover {
   transform: translateY(-2px);

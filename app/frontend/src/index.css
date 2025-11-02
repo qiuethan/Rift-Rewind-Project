@@ -63,6 +63,9 @@
   --background: var(--region-secondary);
   --background-alt: var(--region-panel);
   
+  /* Ensure minimum contrast ratios for accessibility */
+  color-scheme: dark;
+  
   /* Shadows (region-mapped) */
   --shadow-sm: var(--region-shadow-primary);
   --shadow: var(--region-shadow-primary);

@@ -8,7 +8,7 @@ import GamesPage from '@/pages/GamesPage';
 import ChampionsPage from '@/pages/ChampionsPage';
 import ChampionDetailPage from '@/pages/ChampionDetailPage';
 import MatchDetailPage from '@/pages/MatchDetailPage';
-import { Footer } from '@/components';
+import { Footer, ScrollToTop } from '@/components';
 import { ROUTES, STORAGE_KEYS } from '@/config';
 import { authActions } from '@/actions/auth';
 import { SummonerProvider, ThemeProvider } from '@/contexts';
@@ -75,6 +75,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <ThemeProvider>
         <SummonerProvider>
           <Routes>
