@@ -10,8 +10,6 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [summonerName, setSummonerName] = useState('');
-  const [region, setRegion] = useState('NA1');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -32,8 +30,6 @@ export default function RegisterPage() {
     const result = await authActions.register({
       email,
       password,
-      summoner_name: summonerName || undefined,
-      region: region || undefined,
     });
 
     if (result.success) {
@@ -101,40 +97,6 @@ export default function RegisterPage() {
             required
             fullWidth
           />
-
-          <div className={styles.divider}>
-            <span>Optional: Link your League account</span>
-          </div>
-
-          <Input
-            label="Summoner Name (Optional)"
-            type="text"
-            value={summonerName}
-            onChange={(e) => setSummonerName(e.target.value)}
-            placeholder="Hide on bush"
-            fullWidth
-          />
-
-          <div className={styles.selectContainer}>
-            <label className={styles.selectLabel}>Region (Optional)</label>
-            <select
-              className={styles.select}
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-            >
-              <option value="NA1">North America</option>
-              <option value="EUW1">Europe West</option>
-              <option value="EUN1">Europe Nordic & East</option>
-              <option value="KR">Korea</option>
-              <option value="BR1">Brazil</option>
-              <option value="JP1">Japan</option>
-              <option value="LA1">Latin America North</option>
-              <option value="LA2">Latin America South</option>
-              <option value="OC1">Oceania</option>
-              <option value="TR1">Turkey</option>
-              <option value="RU">Russia</option>
-            </select>
-          </div>
 
           {error && <div className={styles.error}>{error}</div>}
           {success && <div className={styles.success}>{success}</div>}
