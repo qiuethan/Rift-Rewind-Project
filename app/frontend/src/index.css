@@ -174,7 +174,6 @@ code {
 /* Ensure all images are fully opaque */
 img {
   opacity: 1 !important;
-  background: var(--region-secondary);
 }
 
 #root {
