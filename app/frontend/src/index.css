@@ -150,7 +150,7 @@ body::after {
   opacity: 0.5;
   pointer-events: none;
   z-index: 0;
-  mix-blend-mode: overlay;
+  mix-blend-mode: screen;
 }
 
 /* Bottom right accent */
