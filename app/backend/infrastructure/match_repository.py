@@ -65,7 +65,9 @@ class MatchRepositoryRiot(MatchRepository):
             "deaths": 3,
             "assists": 10
         }
-    
+
+    # TODO: Implement match calculations either in this file or in another file
+
     async def save_match(self, match_id: str, match_data: Dict[str, Any], puuid: str = None, timeline_data: Dict[str, Any] = None) -> bool:
         """
         Save complete match data to database and optionally track which summoner played in it
@@ -99,6 +101,8 @@ class MatchRepositoryRiot(MatchRepository):
             # Preserve existing timeline if not provided (don't overwrite with None!)
             final_timeline = timeline_data if timeline_data is not None else existing_timeline
             
+            # TODO: Call new function here
+            
             # Extract metadata from match_data
             info = match_data.get('info', {})
             metadata = match_data.get('metadata', {})
@@ -117,8 +121,10 @@ class MatchRepositoryRiot(MatchRepository):
                 'match_data': match_data,
                 'timeline_data': final_timeline,  # Use preserved timeline
                 'summoners': summoners
+                # TODO: Add match data here
             }
             
+            # TODO: Check if match schema needs updating, if yes, ask GPT
             await self.client.table(DatabaseTable.MATCHES).upsert(match_record).execute()
             
             timeline_status = "with timeline" if final_timeline else "without timeline"

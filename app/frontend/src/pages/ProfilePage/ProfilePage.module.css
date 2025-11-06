@@ -134,29 +134,30 @@
   border-radius: 6px;
   font-size: 0.9375rem;
   font-family: inherit;
-  background: rgba(0, 0, 0, 0.6);
-  color: var(--region-primary);
+  background: var(--region-secondary);
+  background-image: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, var(--region-secondary) 100%);
+  color: var(--region-text);
   cursor: pointer;
   transition: var(--transition);
   letter-spacing: 0.01em;
-  font-weight: 600;
+  opacity: 0.95;
 }
 
 .select option {
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--region-secondary);
   color: var(--region-text);
 }
 
 .select:hover {
   border-color: var(--region-primary);
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--region-panel-hover);
 }
 
 .select:focus {
   outline: none;
   border-color: var(--region-accent);
   box-shadow: var(--region-shadow-primary);
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--region-panel-hover);
 }
 
 .error {
