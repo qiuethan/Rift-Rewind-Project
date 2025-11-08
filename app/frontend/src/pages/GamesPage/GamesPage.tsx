@@ -29,21 +29,14 @@ interface RecentGame {
 
 // Helper function to convert FullGameData to RecentGame format
 const convertToRecentGames = (fullGames: FullGameData[], summonerPuuid: string): RecentGame[] => {
-  console.log('Converting games. Input:', fullGames.length, 'Summoner PUUID:', summonerPuuid);
-  
-  const converted = fullGames.map((game, index) => {
-    console.log(`Processing game ${index}:`, game.match_id);
+  const converted = fullGames.map((game) => {
     const participants = game.match_data?.info?.participants || [];
-    console.log(`  Participants:`, participants.length);
-    
     const playerData = participants.find((p: any) => p.puuid === summonerPuuid);
     
     if (!playerData) {
-      console.log(`  Player not found in game ${game.match_id}`);
       return null;
     }
     
-    console.log(`  Found player data for ${playerData.championName}`);
     const gameInfo = game.match_data?.info || {};
     
     return {
@@ -73,7 +66,6 @@ const convertToRecentGames = (fullGames: FullGameData[], summonerPuuid: string):
     };
   }).filter((game): game is RecentGame => game !== null);
   
-  console.log('Conversion complete. Output:', converted.length, 'games');
   return converted;
 };
 
@@ -122,7 +114,6 @@ export default function GamesPage() {
       // Try to load from cache first
       const cachedData = loadFromCache(summoner.puuid);
       if (cachedData) {
-        console.log('Loading games from cache:', cachedData.games.length);
         setRecentGames(cachedData.games);
         setCurrentIndex(cachedData.currentIndex);
         setLoading(false);
@@ -199,18 +190,14 @@ export default function GamesPage() {
       const result = await playersActions.getGames(startIndex, GAMES_PER_PAGE);
       
       if (result.success && result.data) {
-        console.log('Loaded games:', result.data.length, 'starting at index:', startIndex);
-        
         // If we got 0 games, there are no more to load
         if (result.data.length === 0) {
-          console.log('No more games available (received 0 games)');
           setHasMore(false);
           return;
         }
         
         // Convert FullGameData to RecentGame format
         const convertedGames = convertToRecentGames(result.data, puuid);
-        console.log('Converted games:', convertedGames.length);
         
         let updatedGames: RecentGame[];
         if (startIndex === 0) {
@@ -218,7 +205,6 @@ export default function GamesPage() {
           setRecentGames(convertedGames);
         } else {
           setRecentGames(prev => {
-            console.log('Adding to existing games. Previous:', prev.length, 'New:', convertedGames.length);
             updatedGames = [...prev, ...convertedGames];
             return updatedGames;
           });
@@ -226,12 +212,10 @@ export default function GamesPage() {
         
         // Check if there are more games
         if (result.data.length < GAMES_PER_PAGE) {
-          console.log('No more games available (received less than requested)');
           setHasMore(false);
         }
         
         const newIndex = startIndex + result.data.length;
-        console.log('Setting currentIndex to:', newIndex);
         setCurrentIndex(newIndex);
 
         // Save to cache (only for initial load or when adding more)
@@ -252,12 +236,8 @@ export default function GamesPage() {
   };
 
   const handleLoadMore = () => {
-    console.log('Load More clicked, currentIndex:', currentIndex);
     loadGames(currentIndex);
   };
-
-  // Debug logging
-  console.log('GamesPage render - recentGames:', recentGames.length, 'hasMore:', hasMore, 'currentIndex:', currentIndex);
 
   return (
     <>
