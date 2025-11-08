@@ -34,6 +34,19 @@ Creates the `matches` table to store complete match data from Riot API.
 - GIN index on JSONB for fast JSON queries
 - Row Level Security policies
 
+### 006_add_summoners_to_matches.sql
+Adds `summoners` column (TEXT[]) to track which summoners have been processed for each match.
+
+### 009_add_timeline_to_matches.sql
+Adds `timeline_data` column (JSONB) to store match timeline data from Riot API for detailed analysis.
+
+### 010_add_analysis_to_matches.sql
+Adds `analysis` column (JSONB) to store computed match analysis including:
+- Chart.js visualization configurations
+- Power score timelines
+- EPS (End-of-Game Performance Score) breakdowns
+- Gold efficiency metrics
+
 **Table Structure:**
 ```sql
 matches (
@@ -49,6 +62,9 @@ matches (
     queue_id INTEGER NOT NULL,
     tournament_code TEXT,
     match_data JSONB NOT NULL,
+    timeline_data JSONB,
+    summoners TEXT[] DEFAULT '{}',
+    analysis JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 )

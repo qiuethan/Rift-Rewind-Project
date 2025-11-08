@@ -8,6 +8,7 @@ from infrastructure.database.database_client import DatabaseClient
 from constants.database import DatabaseTable
 from typing import Optional, Dict, Any, List
 from utils.logger import logger
+from infrastructure.league_of_legends_hackathon import generate_match_analysis
 
 
 class MatchRepositoryRiot(MatchRepository):
@@ -101,7 +102,14 @@ class MatchRepositoryRiot(MatchRepository):
             # Preserve existing timeline if not provided (don't overwrite with None!)
             final_timeline = timeline_data if timeline_data is not None else existing_timeline
             
-            # TODO: Call new function here
+            # Build analysis JSON when both match and timeline data are present
+            analysis = None
+            try:
+                if match_data and final_timeline:
+                    analysis = generate_match_analysis(match_id, match_data, final_timeline)
+                    logger.debug(f"Generated analysis for match {match_id}")
+            except Exception as gen_err:
+                logger.error(f"Failed to generate analysis for match {match_id}: {gen_err}")
             
             # Extract metadata from match_data
             info = match_data.get('info', {})
@@ -120,11 +128,10 @@ class MatchRepositoryRiot(MatchRepository):
                 'queue_id': info.get('queueId', 0),
                 'match_data': match_data,
                 'timeline_data': final_timeline,  # Use preserved timeline
-                'summoners': summoners
-                # TODO: Add match data here
+                'summoners': summoners,
+                'analysis': analysis  # Computed analysis with Chart.js visualizations
             }
             
-            # TODO: Check if match schema needs updating, if yes, ask GPT
             await self.client.table(DatabaseTable.MATCHES).upsert(match_record).execute()
             
             timeline_status = "with timeline" if final_timeline else "without timeline"

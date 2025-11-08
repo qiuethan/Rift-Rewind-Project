@@ -3,7 +3,8 @@ Configuration settings for Rift Rewind API
 Loads environment variables and provides app configuration
 """
 from pydantic_settings import BaseSettings
-from typing import Optional
+from pydantic import field_validator
+from typing import Optional, Union
 
 
 class Settings(BaseSettings):
@@ -18,8 +19,17 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     
-    # CORS
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    # CORS - can be set as comma-separated string in env or list
+    ALLOWED_ORIGINS: Union[str, list[str]] = ["http://localhost:3000", "http://localhost:5173"]
+    
+    @field_validator('ALLOWED_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parse CORS origins from string or list"""
+        if isinstance(v, str):
+            # Split by comma and strip whitespace
+            return [origin.strip() for origin in v.split(',') if origin.strip()]
+        return v
     
     # Supabase
     SUPABASE_URL: Optional[str] = None

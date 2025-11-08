@@ -2,6 +2,7 @@
 Player routes
 """
 from fastapi import APIRouter, status, Depends, Query
+from fastapi.responses import Response
 from models.players import SummonerRequest, SummonerResponse, PlayerStatsResponse
 from models.match import RecentGameSummary, FullGameData
 from services.player_service import PlayerService
@@ -14,6 +15,20 @@ import asyncio
 
 router = APIRouter(prefix="/api/players", tags=["players"])
 
+@router.options("/summoner")
+async def options_summoner(request):
+    """Handle OPTIONS preflight requests"""
+    origin = request.headers.get("origin", "*")
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Max-Age": "3600",
+        }
+    )
 
 @router.post("/summoner", response_model=SummonerResponse, status_code=status.HTTP_201_CREATED)
 async def link_summoner(
