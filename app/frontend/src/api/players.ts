@@ -34,6 +34,7 @@ export interface FullGameData {
   match_id: string;
   match_data: any; // Full Riot API match data
   timeline_data?: any; // Timeline data
+  analysis?: any; // Computed analysis with Chart.js visualizations
 }
 
 export const playersApi = {

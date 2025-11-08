@@ -287,12 +287,12 @@ def _build_participant_lookup(match_data: Dict[str, Any]) -> Dict[int, Dict[str,
 def _compute_power_score_chart(
     match_data: Dict[str, Any],
     timeline_data: Dict[str, Any]
-) -> Tuple[Dict[str, Any], Dict[int, float]]:
+) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[int, float]]:
     """
     Computes power score timeline chart data.
     
     Returns:
-        Tuple of (chart_config, power_efficiency_dict)
+        Tuple of (cumulative_chart_config, ranking_chart_config, power_efficiency_dict)
     """
     participant_lookup = _build_participant_lookup(match_data)
 
@@ -325,11 +325,12 @@ def _compute_power_score_chart(
             })
 
     if not rows:
-        return {
+        empty_chart = {
             'type': 'line',
             'data': {'labels': [], 'datasets': []},
             'options': {'responsive': True, 'plugins': {'title': {'text': 'Power Score Over Time'}}}
-        }, {}
+        }
+        return empty_chart, empty_chart, {}
 
     df = pd.DataFrame(rows)
     df = calculate_power_score(df)
@@ -337,13 +338,27 @@ def _compute_power_score_chart(
     # Build Chart.js datasets
     minutes_labels = sorted(df['minutes'].unique().tolist())
 
-    # Team colors
+    # Team colors - more varied and distinct colors for better visibility
     team_colors = {
-        100: ['#1E88E5', '#42A5F5', '#64B5F6', '#1976D2', '#90CAF9'],
-        200: ['#E53935', '#EF5350', '#E57373', '#C62828', '#FF8A80']
+        100: [
+            '#1E88E5',  # Deep Blue
+            '#00BCD4',  # Cyan
+            '#4FC3F7',  # Light Blue
+            '#0277BD',  # Dark Blue
+            '#80DEEA'   # Light Cyan
+        ],
+        200: [
+            '#E53935',  # Deep Red
+            '#FF6F00',  # Orange
+            '#F06292',  # Pink
+            '#C62828',  # Dark Red
+            '#FFB74D'   # Light Orange
+        ]
     }
 
-    datasets = []
+    cumulative_datasets = []
+    ranking_datasets = []
+    
     for pid, group in df.groupby('participantId'):
         meta = participant_lookup.get(pid, {})
         team_id = meta.get('teamId', 100)
@@ -351,24 +366,120 @@ def _compute_power_score_chart(
         color = team_palette[(pid - 1) % len(team_palette)]
         series = group.sort_values('minutes')[['minutes', 'power_score']]
         series = series.drop_duplicates(subset=['minutes'], keep='last')
-        value_by_min = {int(m): float(v) for m, v in zip(series['minutes'], series['power_score'])}
-        data_points = [round(value_by_min.get(m, None) or 0.0, 4) for m in minutes_labels]
-        datasets.append({
-            'label': f"{meta.get('championName', 'Unknown')} ({meta.get('teamPosition', 'UNKNOWN')})",
-            'data': data_points,
+        
+        # Make power score cumulative
+        cumulative_power = 0.0
+        cumulative_by_min = {}
+        for minute in sorted(series['minutes'].unique()):
+            power_at_minute = series[series['minutes'] == minute]['power_score'].iloc[0]
+            cumulative_power += power_at_minute
+            cumulative_by_min[int(minute)] = cumulative_power
+        
+        # Fill in all minutes with cumulative values
+        cumulative_data_points = []
+        last_cumulative = 0.0
+        for m in minutes_labels:
+            if m in cumulative_by_min:
+                last_cumulative = cumulative_by_min[m]
+            cumulative_data_points.append(round(last_cumulative, 4))
+        
+        # Create label - only include role if it's not UNKNOWN or empty
+        role = meta.get('teamPosition', '')
+        if role and role != 'UNKNOWN':
+            label = f"{meta.get('championName', 'Unknown')} ({role})"
+        else:
+            label = meta.get('championName', 'Unknown')
+        
+        cumulative_datasets.append({
+            'label': label,
+            'data': cumulative_data_points,
             'borderColor': color,
-            'fill': False
+            'fill': False,
+            'tension': 0.4  # Smooth curves
+        })
+    
+    # Create ranking chart (normalized power score showing relative performance)
+    for minute in minutes_labels:
+        minute_data = df[df['minutes'] == minute]
+        if not minute_data.empty:
+            # Normalize power scores for this minute (0-100 percentile)
+            min_score = minute_data['power_score'].min()
+            max_score = minute_data['power_score'].max()
+            if max_score > min_score:
+                minute_data = minute_data.copy()
+                minute_data['percentile'] = ((minute_data['power_score'] - min_score) / (max_score - min_score)) * 100
+            else:
+                minute_data = minute_data.copy()
+                minute_data['percentile'] = 50.0
+            
+            # Store percentiles back to main df
+            for idx, row in minute_data.iterrows():
+                df.loc[idx, 'percentile'] = row['percentile']
+    
+    # Build ranking datasets
+    for pid, group in df.groupby('participantId'):
+        meta = participant_lookup.get(pid, {})
+        team_id = meta.get('teamId', 100)
+        team_palette = team_colors[100] if team_id == 100 else team_colors[200]
+        color = team_palette[(pid - 1) % len(team_palette)]
+        series = group.sort_values('minutes')[['minutes', 'percentile']]
+        series = series.drop_duplicates(subset=['minutes'], keep='last')
+        
+        # Fill in all minutes with percentile values
+        percentile_data_points = []
+        last_percentile = 50.0
+        for m in minutes_labels:
+            minute_rows = series[series['minutes'] == m]
+            if not minute_rows.empty:
+                last_percentile = minute_rows.iloc[0]['percentile']
+            percentile_data_points.append(round(last_percentile, 1))
+        
+        # Create label
+        role = meta.get('teamPosition', '')
+        if role and role != 'UNKNOWN':
+            label = f"{meta.get('championName', 'Unknown')} ({role})"
+        else:
+            label = meta.get('championName', 'Unknown')
+        
+        ranking_datasets.append({
+            'label': label,
+            'data': percentile_data_points,
+            'borderColor': color,
+            'fill': False,
+            'tension': 0.4
         })
 
-    chart = {
+    cumulative_chart = {
         'type': 'line',
         'data': {
             'labels': minutes_labels,
-            'datasets': datasets
+            'datasets': cumulative_datasets
         },
         'options': {
             'responsive': True,
-            'plugins': {'title': {'text': 'Power Score Over Time'}}
+            'plugins': {'title': {'text': 'Cumulative Power Score Over Time'}},
+            'scales': {
+                'y': {'title': {'text': 'Cumulative Power Score', 'display': True}}
+            }
+        }
+    }
+    
+    ranking_chart = {
+        'type': 'line',
+        'data': {
+            'labels': minutes_labels,
+            'datasets': ranking_datasets
+        },
+        'options': {
+            'responsive': True,
+            'plugins': {'title': {'text': 'Power Ranking Over Time'}},
+            'scales': {
+                'y': {
+                    'title': {'text': 'Percentile Ranking', 'display': True},
+                    'min': 0,
+                    'max': 100
+                }
+            }
         }
     }
 
@@ -379,7 +490,7 @@ def _compute_power_score_chart(
     )
     avg_eff = df.groupby('participantId')['power_per_1k_gold'].mean().to_dict()
 
-    return chart, avg_eff
+    return cumulative_chart, ranking_chart, avg_eff
 
 
 def _build_eps_chart(match_data: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, float]]:
@@ -397,15 +508,18 @@ def _build_eps_chart(match_data: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[s
             'options': {'indexAxis': 'y', 'scales': {'x': {'stacked': True}, 'y': {'stacked': True}}}
         }, {}
 
-    # Labels: player names (prefer summonerName if available)
+    # Labels: use champion names (summonerName/riotIdGameName are often empty in match data)
     participants = match_data.get('info', {}).get('participants', [])
     name_by_champion = {
-        p.get('championName'): p.get('summonerName', p.get('riotIdGameName', p.get('championName')))
+        p.get('championName'): p.get('championName')  # Just use champion name
         for p in participants
     }
 
     eps_sorted = eps_df.sort_values('EPS', ascending=False)
     labels = [name_by_champion.get(ch, ch) for ch in eps_sorted['championName'].tolist()]
+    
+    # Debug logging
+    logger.debug(f"EPS labels created: {labels}")
 
     datasets = [
         {'label': 'Combat Score', 'data': eps_sorted['Combat'].round(1).tolist(), 'backgroundColor': '#e74c3c'},
@@ -456,7 +570,8 @@ def _build_gold_efficiency_chart(
     colors = []
     for pid, val in power_eff_by_pid.items():
         meta = by_pid_meta.get(pid, {})
-        labels.append(meta.get('summonerName', meta.get('riotIdGameName', meta.get('championName', f'P{pid}'))))
+        # Use champion name directly (summonerName is often empty)
+        labels.append(meta.get('championName', f'P{pid}'))
         pct = 100.0 * (val / mean_val) if mean_val else 0.0
         data_vals.append(round(pct, 1))
         colors.append('#3498db' if meta.get('teamId', 100) == 100 else '#e74c3c')
@@ -534,8 +649,9 @@ def analyze_match(
     if timeline_data:
         try:
             logger.debug("Computing power score timeline...")
-            power_chart, power_eff = _compute_power_score_chart(match_data, timeline_data)
-            result['charts']['powerScoreTimeline'] = power_chart
+            cumulative_chart, ranking_chart, power_eff = _compute_power_score_chart(match_data, timeline_data)
+            result['charts']['powerScoreTimeline'] = cumulative_chart
+            result['charts']['powerRankingTimeline'] = ranking_chart
             result['rawStats']['powerEfficiency'] = power_eff
             
             logger.debug("Computing gold efficiency...")

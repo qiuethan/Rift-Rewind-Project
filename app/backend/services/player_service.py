@@ -665,14 +665,16 @@ class PlayerService:
         # Log what we got from the database
         has_match_data = 'match_data' in match_record and match_record['match_data'] is not None
         has_timeline = 'timeline_data' in match_record and match_record['timeline_data'] is not None
+        has_analysis = 'analysis' in match_record and match_record['analysis'] is not None
         logger.info(f"Match record keys: {match_record.keys()}")
-        logger.info(f"Has match_data: {has_match_data}, Has timeline_data: {has_timeline}")
+        logger.info(f"Has match_data: {has_match_data}, Has timeline_data: {has_timeline}, Has analysis: {has_analysis}")
         
         full_game = FullGameData(
             match_id=match_id,
             match_data=match_record.get('match_data', {}),
-            timeline_data=match_record.get('timeline_data')
+            timeline_data=match_record.get('timeline_data'),
+            analysis=match_record.get('analysis')
         )
         
-        logger.info(f"Successfully fetched match {match_id} - Timeline included: {full_game.timeline_data is not None}")
+        logger.info(f"Successfully fetched match {match_id} - Timeline: {full_game.timeline_data is not None}, Analysis: {full_game.analysis is not None}")
         return full_game

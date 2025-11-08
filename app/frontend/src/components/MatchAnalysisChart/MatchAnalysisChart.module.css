@@ -1,0 +1,42 @@
+.chartContainer {
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  background: var(--region-panel); /* Subtle panel background */
+  border: 1px solid var(--region-panel-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  box-shadow: var(--region-shadow-glow); /* Subtle inner glow */
+  transition: var(--transition);
+  overflow: hidden; /* Prevent overflow */
+  box-sizing: border-box;
+}
+
+.chartContainer:hover {
+  border-color: var(--region-primary); /* Accent on hover */
+  box-shadow: var(--region-shadow-primary); /* Glow effect on hover */
+}
+
+/* Ensure canvas fills container properly */
+.chartContainer canvas {
+  display: block;
+  width: 100% !important;
+}
+
+.noChart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .chartContainer {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}

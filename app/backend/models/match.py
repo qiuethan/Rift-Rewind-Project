@@ -62,10 +62,11 @@ class RecentGameSummary(BaseModel):
 
 
 class FullGameData(BaseModel):
-    """Full game data including match data and timeline"""
+    """Full game data including match data, timeline, and analysis"""
     match_id: str
     match_data: Dict[str, Any]  # Full match data from Riot API
     timeline_data: Optional[Dict[str, Any]] = None  # Timeline data from Riot API
+    analysis: Optional[Dict[str, Any]] = None  # Computed analysis with Chart.js visualizations
     
     class Config:
         extra = "allow"

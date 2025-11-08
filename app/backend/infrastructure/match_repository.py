@@ -170,31 +170,33 @@ class MatchRepositoryRiot(MatchRepository):
             return None
     
     async def get_match_with_timeline(self, match_id: str) -> Optional[Dict[str, Any]]:
-        """Get complete match data with timeline from database"""
+        """Get complete match data with timeline and analysis from database"""
         try:
             if not self.client:
                 logger.error("Database client not available")
                 return None
             
             result = await self.client.table(str(DatabaseTable.MATCHES))\
-                .select('match_data, timeline_data')\
+                .select('match_data, timeline_data, analysis')\
                 .eq('match_id', match_id)\
                 .limit(1)\
                 .execute()
             
             if result.data and len(result.data) > 0:
-                logger.debug(f"Retrieved match with timeline from database: {match_id}")
+                logger.debug(f"Retrieved match with timeline and analysis from database: {match_id}")
                 record = result.data[0]
-                # Log the actual timeline_data value
+                # Log the actual data values
                 timeline_val = record.get('timeline_data')
+                analysis_val = record.get('analysis')
                 logger.info(f"Raw timeline_data type: {type(timeline_val)}, is None: {timeline_val is None}, value preview: {str(timeline_val)[:100] if timeline_val else 'None'}")
+                logger.info(f"Raw analysis type: {type(analysis_val)}, is None: {analysis_val is None}")
                 return record
             
             logger.info(f"Match not found in database: {match_id}")
             return None
             
         except Exception as e:
-            logger.error(f"Error retrieving match with timeline {match_id}: {e}")
+            logger.error(f"Error retrieving match with timeline and analysis {match_id}: {e}")
             return None
     
     async def get_matches_for_puuid(self, puuid: str, start_index: int = 0, count: int = 10) -> List[Any]:
@@ -211,7 +213,7 @@ class MatchRepositoryRiot(MatchRepository):
             # Use JSONB containment operator to find matches
             # Note: Supabase uses .limit() for pagination, we'll fetch more and slice in Python
             result = await self.client.table(str(DatabaseTable.MATCHES))\
-                .select('match_id, match_data, timeline_data, game_creation')\
+                .select('match_id, match_data, timeline_data, analysis, game_creation')\
                 .contains('match_data', {'info': {'participants': [{'puuid': puuid}]}})\
                 .order('game_creation', desc=True)\
                 .limit(start_index + count)\
@@ -234,7 +236,8 @@ class MatchRepositoryRiot(MatchRepository):
                 full_game = FullGameData(
                     match_id=match['match_id'],
                     match_data=match.get('match_data', {}),
-                    timeline_data=match.get('timeline_data')
+                    timeline_data=match.get('timeline_data'),
+                    analysis=match.get('analysis')
                 )
                 full_games.append(full_game)
             

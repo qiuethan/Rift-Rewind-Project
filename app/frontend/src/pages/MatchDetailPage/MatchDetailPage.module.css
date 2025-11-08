@@ -61,6 +61,586 @@
   gap: 2rem;
 }
 
+/* Match Summary */
+.matchSummary {
+  background: var(--region-panel);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.matchSummary h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.winnerBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
+  border: 3px solid;
+}
+
+.victoryBanner {
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(39, 174, 96, 0.15));
+  border-color: #2ECC71;
+  box-shadow: 0 0 20px rgba(46, 204, 113, 0.3);
+}
+
+.defeatBanner {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(192, 57, 43, 0.15));
+  border-color: #E74C3C;
+  box-shadow: 0 0 20px rgba(231, 76, 60, 0.3);
+}
+
+.resultText {
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.victoryBanner .resultText {
+  color: #2ECC71;
+  text-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+}
+
+.defeatBanner .resultText {
+  color: #E74C3C;
+  text-shadow: 0 0 15px rgba(231, 76, 60, 0.6);
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Tab Navigation */
+.tabNavigation {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid var(--region-panel-border);
+}
+
+.tab {
+  padding: 1rem 2rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: var(--region-primary);
+  background: var(--region-panel-hover);
+}
+
+.activeTab {
+  color: var(--region-primary);
+  border-bottom-color: var(--region-primary);
+  background: var(--region-panel-hover);
+}
+
+.tabContent {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.summaryItem {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background: var(--background);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 8px;
+}
+
+.summaryLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.summaryValue {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--region-accent);
+}
+
+@media (max-width: 768px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Performance Summary */
+.performanceSummary {
+  background: linear-gradient(135deg, var(--region-panel) 0%, var(--region-panel-hover) 100%);
+  border: 2px solid var(--region-primary);
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), var(--region-shadow-primary);
+}
+
+.performanceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.championIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  border: 3px solid var(--region-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.performanceSummary h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--region-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.performanceContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.performanceBadge {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--region-primary);
+  text-align: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--region-secondary) 0%, var(--region-panel) 100%);
+  border-radius: 12px;
+  border: 2px solid var(--region-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.basicStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--background);
+  border-radius: 8px;
+  border: 1px solid var(--region-panel-border);
+}
+
+.statGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.statGroup .statLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.statGroup .statValue {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--region-accent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statSubtext {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.performanceStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: var(--background);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 8px;
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--region-primary);
+}
+
+.positive {
+  color: #2ECC71 !important;
+}
+
+.negative {
+  color: #E74C3C !important;
+}
+
+/* Players Ranking */
+.playersRanking {
+  background: var(--region-panel);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.playersRanking h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  color: var(--region-primary);
+  text-align: center;
+}
+
+.rankingList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.playerCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--background);
+  border: 2px solid var(--region-panel-border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.playerCard:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.userPlayer {
+  border-color: var(--region-primary);
+  background: var(--region-panel-hover);
+  box-shadow: 0 0 16px rgba(var(--region-primary-rgb), 0.3);
+}
+
+.blueTeam {
+  border-left: 4px solid #5DADE2;
+}
+
+.redTeam {
+  border-left: 4px solid #EC7063;
+}
+
+.playerRank {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--region-accent);
+  min-width: 50px;
+  text-align: center;
+}
+
+.playerChampionIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  border: 2px solid var(--region-panel-border);
+}
+
+.playerInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.playerName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.playerSummoner {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.playerStats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 100px;
+}
+
+.playerKDA {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.playerKDARatio {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.playerScores {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.scoreItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.scoreLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.scoreValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--region-primary);
+}
+
+/* Champion Tab */
+.championSelector {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: var(--region-panel);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 8px;
+}
+
+.championSelector label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.championDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.championHeader {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--region-panel) 0%, var(--region-panel-hover) 100%);
+  border: 2px solid var(--region-primary);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.championDetailIcon {
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  border: 3px solid var(--region-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.championHeaderInfo {
+  flex: 1;
+}
+
+.championHeaderInfo h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 2rem;
+  color: var(--region-primary);
+}
+
+.championHeaderInfo .summonerName {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+}
+
+.championRank {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: var(--region-accent);
+  color: var(--background);
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.championStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.statCard {
+  background: var(--region-panel);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.statCard h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  color: var(--region-primary);
+  border-bottom: 2px solid var(--region-panel-border);
+  padding-bottom: 0.5rem;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--region-panel-border);
+}
+
+.statRow:last-child {
+  border-bottom: none;
+}
+
+.statRow span:first-child {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.statRow span:last-child {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.highlightValue {
+  color: var(--region-primary) !important;
+  font-size: 1.125rem !important;
+}
+
+.championGraph {
+  background: var(--region-panel);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.championGraph h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  color: var(--region-primary);
+}
+
+@media (max-width: 768px) {
+  .performanceStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .performanceBadge {
+    font-size: 1.25rem;
+  }
+  
+  .statValue {
+    font-size: 1.25rem;
+  }
+}
+
+/* Champion Filter Section */
+.filterSection {
+  background: var(--region-panel);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filterLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.championSelect {
+  flex: 1;
+  max-width: 300px;
+  padding: 0.75rem 1rem;
+  background: var(--background);
+  color: var(--text-primary);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.championSelect:hover {
+  border-color: var(--region-primary);
+  box-shadow: 0 0 0 2px rgba(var(--region-primary-rgb), 0.1);
+}
+
+.championSelect:focus {
+  outline: none;
+  border-color: var(--region-primary);
+  box-shadow: 0 0 0 3px rgba(var(--region-primary-rgb), 0.2);
+}
+
+.championSelect option {
+  background: var(--background);
+  color: var(--text-primary);
+  padding: 0.5rem;
+}
+
 .header {
   display: flex;
   flex-direction: column;
@@ -98,7 +678,8 @@
 }
 
 .matchInfo,
-.timelineInfo {
+.timelineInfo,
+.analysisInfo {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -106,7 +687,8 @@
 }
 
 .matchInfo h2,
-.timelineInfo h2 {
+.timelineInfo h2,
+.analysisInfo h2 {
   margin: 0 0 1rem 0;
   font-size: 1.25rem;
   color: var(--text-primary);
@@ -131,6 +713,142 @@
   margin: 0;
 }
 
+/* Analysis Section Styles */
+.analysisContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.analysisSection {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.analysisSection {
+  margin-bottom: 2rem;
+  overflow: hidden; /* Prevent chart from overflowing */
+}
+
+.tallerChart {
+  /* Make PST chart taller to see differences better */
+  min-height: 700px;
+}
+
+.analysisSection h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.chartNote {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+  font-style: italic;
+}
+
+.rawDataDetails,
+.scoresDetails {
+  margin-top: 1rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.rawDataDetails summary,
+.scoresDetails summary {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s;
+  user-select: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rawDataDetails summary:hover,
+.scoresDetails summary:hover {
+  background: var(--surface-hover);
+  color: var(--primary);
+}
+
+.rawDataDetails[open] summary,
+.scoresDetails[open] summary {
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+}
+
+.rawDataDetails[open] .jsonData {
+  margin: 1rem;
+}
+
+.scoresDetails {
+  background: var(--background);
+}
+
+.scoresDetails summary {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* EPS Scores Display */
+.epsScores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.epsRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.epsRow:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+  transform: translateX(4px);
+}
+
+.rank {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  min-width: 2.5rem;
+  text-align: center;
+  background: var(--background);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.championName {
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.epsScore {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--primary);
+  font-family: monospace;
+  min-width: 4rem;
+  text-align: right;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -143,5 +861,13 @@
   .jsonData {
     font-size: 0.75rem;
     max-height: 400px;
+  }
+
+  .analysisSection h3 {
+    font-size: 1rem;
+  }
+
+  .epsRow {
+    padding: 0.5rem;
   }
 }

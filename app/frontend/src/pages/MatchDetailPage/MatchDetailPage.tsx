@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './MatchDetailPage.module.css';
-import { Navbar, Spinner } from '@/components';
+import { Navbar, Spinner, MatchAnalysisChart } from '@/components';
 import { authActions } from '@/actions/auth';
 import { playersActions } from '@/actions/players';
 import { useSummoner } from '@/contexts';
@@ -16,6 +16,11 @@ export default function MatchDetailPage() {
   const [match, setMatch] = useState<FullGameData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedChampion, setSelectedChampion] = useState<string>('all');
+  const [userChampion, setUserChampion] = useState<string>('');
+  const [allChampions, setAllChampions] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'summary' | 'champion' | 'statistics'>('summary');
+  const [championTabSelection, setChampionTabSelection] = useState<string>('');
 
   useEffect(() => {
     loadMatch();
@@ -42,6 +47,35 @@ export default function MatchDetailPage() {
       const result = await playersActions.getMatch(matchId);
       if (result.success && result.data) {
         setMatch(result.data);
+        
+        // Extract all champion names from the chart data
+        if (result.data.analysis?.charts?.powerScoreTimeline?.data?.datasets) {
+          const championNames = result.data.analysis.charts.powerScoreTimeline.data.datasets
+            .map((dataset: any) => {
+              const label = dataset.label || '';
+              // Extract champion name (before role if present, otherwise full name)
+              const name = label.includes(' (') ? label.split(' (')[0] : label;
+              return name.trim();
+            })
+            .filter((name: string) => name); // Remove empty names
+          
+          setAllChampions(championNames);
+        }
+        
+        // Find user's champion in the match
+        if (summoner?.puuid && result.data.match_data?.info?.participants) {
+          const userParticipant = result.data.match_data.info.participants.find(
+            (p: any) => p.puuid === summoner.puuid
+          );
+          if (userParticipant) {
+            // Use the actual champion name for matching with analysis data
+            const championName = userParticipant.championName;
+            setUserChampion(championName);
+            setChampionTabSelection(championName); // Default champion tab to user's champion
+            console.log('User champion set to:', championName);
+            // Don't set default - let user choose
+          }
+        }
       } else {
         setError(result.error || 'Failed to load match');
       }
@@ -51,6 +85,133 @@ export default function MatchDetailPage() {
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Highlight selected champion while keeping others visible but dimmed
+  const filterChartData = (chartConfig: any, chartType: 'line' | 'bar' | 'eps') => {
+    if (!chartConfig || selectedChampion === 'all') return chartConfig;
+    
+    console.log(`[${chartType}] Original chart config:`, chartConfig);
+    console.log(`[${chartType}] Original labels:`, chartConfig?.data?.labels);
+    if (chartType === 'eps' && chartConfig?.data?.labels) {
+      console.log(`[${chartType}] Label details:`, chartConfig.data.labels.map((l: any, i: number) => 
+        `[${i}]: "${l}" (length: ${l?.length || 0}, type: ${typeof l})`
+      ));
+    }
+    
+    // Deep clone to avoid mutating original data
+    const filtered = JSON.parse(JSON.stringify(chartConfig));
+    
+    console.log('After clone labels:', filtered?.data?.labels);
+    
+    // Helper to check if a label matches the selected champion
+    const matchesChampion = (label: string) => {
+      if (!label) return false;
+      // Extract champion name (handle both with and without role parentheses)
+      const labelName = label.includes(' (') ? label.split(' (')[0].trim() : label.trim();
+      const selectedName = selectedChampion.includes(' (') ? selectedChampion.split(' (')[0].trim() : selectedChampion.trim();
+      
+      console.log(`Comparing: labelName="${labelName}" vs selectedName="${selectedName}"`);
+      
+      return labelName === selectedName;
+    };
+    
+    if (chartType === 'eps') {
+      // For EPS breakdown, highlight selected champion's bar
+      if (filtered.data && filtered.data.labels && filtered.data.datasets) {
+        // IMPORTANT: Keep all labels - they're the player names on Y-axis
+        console.log('EPS Labels (raw):', filtered.data.labels);
+        console.log('EPS Labels (expanded):', filtered.data.labels.map((l: any, i: number) => `[${i}]: "${l}"`));
+        
+        const championIndex = filtered.data.labels.findIndex((label: string) => matchesChampion(label));
+        console.log('Selected champion index:', championIndex, 'for', selectedChampion);
+        
+        if (championIndex !== -1) {
+          // Dim all bars except the selected one, but keep ALL labels
+          filtered.data.datasets = filtered.data.datasets.map((dataset: any) => {
+            const newData = dataset.data.map((value: any, idx: number) => {
+              return idx === championIndex ? value : value * 0.3; // Dim others to 30%
+            });
+            
+            return {
+              ...dataset,
+              data: newData,
+            };
+          });
+        }
+        
+        // Ensure labels are preserved
+        console.log('Final EPS labels:', filtered.data.labels);
+      }
+    } else if (chartType === 'bar') {
+      // For gold efficiency bar chart, highlight selected champion
+      if (filtered.data && filtered.data.labels && filtered.data.datasets) {
+        const championIndex = filtered.data.labels.findIndex((label: string) => matchesChampion(label));
+        
+        if (championIndex !== -1) {
+          filtered.data.datasets = filtered.data.datasets.map((dataset: any) => {
+            // Adjust opacity for background colors
+            const newBackgroundColors = Array.isArray(dataset.backgroundColor)
+              ? dataset.backgroundColor.map((color: string, idx: number) => {
+                  if (idx === championIndex) return color; // Full opacity for selected
+                  // Add transparency to others
+                  if (color && typeof color === 'string') {
+                    if (color.startsWith('rgb(')) {
+                      return color.replace('rgb(', 'rgba(').replace(')', ', 0.3)');
+                    }
+                    return color + '4D'; // Add alpha for hex colors
+                  }
+                  return color;
+                })
+              : dataset.backgroundColor;
+            
+            return {
+              ...dataset,
+              backgroundColor: newBackgroundColors
+            };
+          });
+        }
+      }
+    } else {
+      // For line charts (power score timeline), highlight selected line
+      if (filtered.data && filtered.data.datasets) {
+        console.log('Line chart filtering for:', selectedChampion);
+        
+        filtered.data.datasets = filtered.data.datasets.map((dataset: any) => {
+          const label = dataset.label || '';
+          const isSelected = matchesChampion(label);
+          
+          console.log(`Dataset label: "${label}", matches: ${isSelected}`);
+          
+          // Helper to add transparency to color
+          const addTransparency = (color: string | undefined, opacity: number) => {
+            if (!color || typeof color !== 'string') return color;
+            if (color.startsWith('rgb(') && !color.startsWith('rgba(')) {
+              return color.replace('rgb(', 'rgba(').replace(')', `, ${opacity})`);
+            }
+            if (color.startsWith('rgba(')) {
+              // Already has alpha, replace it
+              return color.replace(/[\d.]+\)$/g, `${opacity})`);
+            }
+            // Hex color - add alpha
+            return color + Math.round(opacity * 255).toString(16).padStart(2, '0');
+          };
+          
+          return {
+            ...dataset,
+            borderWidth: isSelected ? 4 : 1.5, // Thicker line for selected
+            borderColor: isSelected 
+              ? dataset.borderColor 
+              : addTransparency(dataset.borderColor, 0.2), // Dim others more
+            backgroundColor: isSelected
+              ? dataset.backgroundColor
+              : addTransparency(dataset.backgroundColor, 0.2),
+          };
+        });
+      }
+    }
+    
+    return filtered;
   };
 
   return (
@@ -74,28 +235,600 @@ export default function MatchDetailPage() {
               <button onClick={() => navigate(-1)} className={styles.backButton}>
                 ← Back
               </button>
-              <h1 className={styles.title}>Match Details</h1>
+              <h1 className={styles.title}>Match Analysis</h1>
               <p className={styles.matchId}>{matchId}</p>
             </div>
 
-            <div className={styles.matchInfo}>
-              <h2>Match Information</h2>
-              <pre className={styles.jsonData}>
-                {JSON.stringify(match.match_data, null, 2)}
-              </pre>
+            {/* Match Summary */}
+            {match.match_data?.info && (
+              <div className={styles.matchSummary}>
+                <h2>Match Summary</h2>
+                {(() => {
+                  // Determine if user won
+                  const userParticipant = summoner?.puuid 
+                    ? match.match_data.info.participants?.find((p: any) => p.puuid === summoner.puuid)
+                    : null;
+                  const userWon = userParticipant?.win;
+                  const hasUserData = !!userParticipant;
+                  
+                  return (
+                    <>
+                      {hasUserData && (
+                        <div className={`${styles.winnerBanner} ${userWon ? styles.victoryBanner : styles.defeatBanner}`}>
+                          <span className={styles.resultText}>
+                            {userWon ? '🏆 VICTORY' : '💔 DEFEAT'}
+                          </span>
+                        </div>
+                      )}
+                      <div className={styles.summaryGrid}>
+                        <div className={styles.summaryItem}>
+                          <span className={styles.summaryLabel}>Game Mode</span>
+                          <span className={styles.summaryValue}>
+                            {match.match_data.info.gameMode || 'Unknown'}
+                          </span>
+                        </div>
+                        <div className={styles.summaryItem}>
+                          <span className={styles.summaryLabel}>Duration</span>
+                          <span className={styles.summaryValue}>
+                            {Math.floor((match.match_data.info.gameDuration || 0) / 60)}m {(match.match_data.info.gameDuration || 0) % 60}s
+                          </span>
+                        </div>
+                        <div className={styles.summaryItem}>
+                          <span className={styles.summaryLabel}>Queue Type</span>
+                          <span className={styles.summaryValue}>
+                            {match.match_data.info.queueId === 420 ? 'Ranked Solo/Duo' :
+                             match.match_data.info.queueId === 440 ? 'Ranked Flex' :
+                             match.match_data.info.queueId === 450 ? 'ARAM' :
+                             match.match_data.info.queueId === 400 ? 'Normal Draft' :
+                             `Queue ${match.match_data.info.queueId}`}
+                          </span>
+                        </div>
+                        <div className={styles.summaryItem}>
+                          <span className={styles.summaryLabel}>Game Version</span>
+                          <span className={styles.summaryValue}>
+                            {match.match_data.info.gameVersion?.split('.').slice(0, 2).join('.') || 'Unknown'}
+                          </span>
+                        </div>
+                        {match.match_data.info.participants && (
+                          <>
+                            <div className={styles.summaryItem}>
+                              <span className={styles.summaryLabel}>Blue Team Kills</span>
+                              <span className={styles.summaryValue}>
+                                {match.match_data.info.participants
+                                  .filter((p: any) => p.teamId === 100)
+                                  .reduce((sum: number, p: any) => sum + (p.kills || 0), 0)}
+                              </span>
+                            </div>
+                            <div className={styles.summaryItem}>
+                              <span className={styles.summaryLabel}>Red Team Kills</span>
+                              <span className={styles.summaryValue}>
+                                {match.match_data.info.participants
+                                  .filter((p: any) => p.teamId === 200)
+                                  .reduce((sum: number, p: any) => sum + (p.kills || 0), 0)}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* Tab Navigation */}
+            <div className={styles.tabNavigation}>
+              <button 
+                className={`${styles.tab} ${activeTab === 'summary' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('summary')}
+              >
+                Summary
+              </button>
+              <button 
+                className={`${styles.tab} ${activeTab === 'statistics' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('statistics')}
+              >
+                Statistics
+              </button>
+              <button 
+                className={`${styles.tab} ${activeTab === 'champion' ? styles.activeTab : ''}`}
+                onClick={() => setActiveTab('champion')}
+              >
+                Champion
+              </button>
             </div>
 
-            {match.timeline_data ? (
-              <div className={styles.timelineInfo}>
-                <h2>Timeline Data</h2>
-                <pre className={styles.jsonData}>
-                  {JSON.stringify(match.timeline_data, null, 2)}
-                </pre>
-              </div>
+            {match.analysis ? (
+              <>
+                {/* Summary Tab */}
+                {activeTab === 'summary' && (
+                  <div className={styles.tabContent}>
+                    {/* User Performance Summary */}
+                    {userChampion && match.analysis.rawStats?.epsScores && (
+                      <div className={styles.performanceSummary}>
+                        <div className={styles.performanceHeader}>
+                          <img 
+                            src={`https://ddragon.leagueoflegends.com/cdn/15.22.1/img/champion/${userChampion}.png`}
+                            alt={userChampion}
+                            className={styles.championIcon}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                            }}
+                          />
+                          <h3>Your Performance as {userChampion}</h3>
+                        </div>
+                        {(() => {
+                          const userEPS = match.analysis.rawStats.epsScores[userChampion];
+                          
+                          if (!userEPS) {
+                            return <p className={styles.noData}>Performance data not available for {userChampion}</p>;
+                          }
+                          
+                          // Find user's participant data
+                          const userParticipant = match.match_data?.info?.participants?.find(
+                            (p: any) => p.puuid === summoner?.puuid
+                          );
+                          
+                          const allScores = Object.values(match.analysis.rawStats.epsScores) as number[];
+                          const rank = allScores.filter((score: number) => score > userEPS).length + 1;
+                          const avgScore = allScores.reduce((a: number, b: number) => a + b, 0) / allScores.length;
+                          const percentile = ((10 - rank + 1) / 10 * 100).toFixed(0);
+                          
+                          // Get CPS (final cumulative power score)
+                          const cpsData = match.analysis.charts?.powerScoreTimeline?.data?.datasets?.find(
+                            (ds: any) => ds.label?.includes(userChampion)
+                          );
+                          const finalCPS = cpsData?.data?.[cpsData.data.length - 1] || 0;
+                          
+                          let performance = '';
+                          if (rank === 1) performance = '🏆 MVP Performance!';
+                          else if (rank <= 3) performance = '⭐ Excellent Performance';
+                          else if (rank <= 5) performance = '✓ Solid Performance';
+                          else if (rank <= 7) performance = '→ Average Performance';
+                          else performance = '↓ Room for Improvement';
+                          
+                          return (
+                            <div className={styles.performanceContent}>
+                              <div className={styles.performanceBadge}>{performance}</div>
+                              
+                              {/* Basic Stats */}
+                              {userParticipant && (
+                                <div className={styles.basicStats}>
+                                  <div className={styles.statGroup}>
+                                    <span className={styles.statLabel}>KDA</span>
+                                    <span className={styles.statValue}>
+                                      {userParticipant.kills}/{userParticipant.deaths}/{userParticipant.assists}
+                                      <span className={styles.statSubtext}>
+                                        ({((userParticipant.kills + userParticipant.assists) / Math.max(1, userParticipant.deaths)).toFixed(2)} ratio)
+                                      </span>
+                                    </span>
+                                  </div>
+                                  <div className={styles.statGroup}>
+                                    <span className={styles.statLabel}>CS</span>
+                                    <span className={styles.statValue}>
+                                      {userParticipant.totalMinionsKilled + userParticipant.neutralMinionsKilled}
+                                      <span className={styles.statSubtext}>
+                                        ({((userParticipant.totalMinionsKilled + userParticipant.neutralMinionsKilled) / (match.match_data.info.gameDuration / 60)).toFixed(1)} per min)
+                                      </span>
+                                    </span>
+                                  </div>
+                                  <div className={styles.statGroup}>
+                                    <span className={styles.statLabel}>Gold</span>
+                                    <span className={styles.statValue}>
+                                      {(userParticipant.goldEarned / 1000).toFixed(1)}k
+                                      <span className={styles.statSubtext}>
+                                        ({(userParticipant.goldEarned / (match.match_data.info.gameDuration / 60)).toFixed(0)} per min)
+                                      </span>
+                                    </span>
+                                  </div>
+                                  <div className={styles.statGroup}>
+                                    <span className={styles.statLabel}>Damage</span>
+                                    <span className={styles.statValue}>
+                                      {(userParticipant.totalDamageDealtToChampions / 1000).toFixed(1)}k
+                                      <span className={styles.statSubtext}>
+                                        ({(userParticipant.totalDamageDealtToChampions / (match.match_data.info.gameDuration / 60)).toFixed(0)} per min)
+                                      </span>
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Performance Metrics */}
+                              <div className={styles.performanceStats}>
+                                <div className={styles.statItem}>
+                                  <span className={styles.statLabel}>Match Rank</span>
+                                  <span className={styles.statValue}>#{rank} of 10</span>
+                                </div>
+                                <div className={styles.statItem}>
+                                  <span className={styles.statLabel}>EPS Score</span>
+                                  <span className={styles.statValue}>{userEPS?.toFixed(1) || 'N/A'}</span>
+                                </div>
+                                <div className={styles.statItem}>
+                                  <span className={styles.statLabel}>Final CPS</span>
+                                  <span className={styles.statValue}>{finalCPS?.toFixed(1) || 'N/A'}</span>
+                                </div>
+                                <div className={styles.statItem}>
+                                  <span className={styles.statLabel}>vs Average</span>
+                                  <span className={`${styles.statValue} ${userEPS > avgScore ? styles.positive : styles.negative}`}>
+                                    {userEPS > avgScore ? '+' : ''}{((userEPS - avgScore) / avgScore * 100).toFixed(1)}%
+                                  </span>
+                                </div>
+                                {userParticipant && (
+                                  <div className={styles.statItem}>
+                                    <span className={styles.statLabel}>Vision Score</span>
+                                    <span className={styles.statValue}>{userParticipant.visionScore}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
+
+                    {/* All Players Ranking */}
+                    {match.analysis.rawStats?.epsScores && match.match_data?.info?.participants && (
+                      <div className={styles.playersRanking}>
+                        <h3>All Players Performance</h3>
+                        <div className={styles.rankingList}>
+                          {(() => {
+                            const epsScores = match.analysis.rawStats.epsScores;
+                            const participants = match.match_data.info.participants;
+                            
+                            // Create array of player data with scores
+                            const playerData = participants.map((p: any) => {
+                              const championName = p.championName;
+                              const epsScore = epsScores[championName] || 0;
+                              
+                              // Get final CPS
+                              const cpsData = match.analysis.charts?.powerScoreTimeline?.data?.datasets?.find(
+                                (ds: any) => ds.label?.includes(championName)
+                              );
+                              const finalCPS = cpsData?.data?.[cpsData.data.length - 1] || 0;
+                              
+                              return {
+                                championName,
+                                summonerName: p.summonerName || p.riotIdGameName || 'Unknown',
+                                teamId: p.teamId,
+                                kills: p.kills,
+                                deaths: p.deaths,
+                                assists: p.assists,
+                                epsScore,
+                                finalCPS,
+                                isUser: p.puuid === summoner?.puuid
+                              };
+                            }).sort((a, b) => b.epsScore - a.epsScore);
+                            
+                            return playerData.map((player, index) => (
+                              <div 
+                                key={player.championName} 
+                                className={`${styles.playerCard} ${player.isUser ? styles.userPlayer : ''} ${player.teamId === 100 ? styles.blueTeam : styles.redTeam}`}
+                              >
+                                <div className={styles.playerRank}>#{index + 1}</div>
+                                <img 
+                                  src={`https://ddragon.leagueoflegends.com/cdn/15.22.1/img/champion/${player.championName}.png`}
+                                  alt={player.championName}
+                                  className={styles.playerChampionIcon}
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                  }}
+                                />
+                                <div className={styles.playerInfo}>
+                                  <div className={styles.playerName}>{player.championName}</div>
+                                  <div className={styles.playerSummoner}>{player.summonerName}</div>
+                                </div>
+                                <div className={styles.playerStats}>
+                                  <div className={styles.playerKDA}>
+                                    {player.kills}/{player.deaths}/{player.assists}
+                                  </div>
+                                  <div className={styles.playerKDARatio}>
+                                    {((player.kills + player.assists) / Math.max(1, player.deaths)).toFixed(2)} KDA
+                                  </div>
+                                </div>
+                                <div className={styles.playerScores}>
+                                  <div className={styles.scoreItem}>
+                                    <span className={styles.scoreLabel}>EPS</span>
+                                    <span className={styles.scoreValue}>{player.epsScore.toFixed(1)}</span>
+                                  </div>
+                                  <div className={styles.scoreItem}>
+                                    <span className={styles.scoreLabel}>CPS</span>
+                                    <span className={styles.scoreValue}>{player.finalCPS.toFixed(1)}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Champion Tab */}
+                {activeTab === 'champion' && championTabSelection && (
+                  <div className={styles.tabContent}>
+                    {/* Champion Selector */}
+                    <div className={styles.championSelector}>
+                      <label htmlFor="championTabSelect">Select Champion:</label>
+                      <select
+                        id="championTabSelect"
+                        value={championTabSelection}
+                        onChange={(e) => setChampionTabSelection(e.target.value)}
+                        className={styles.championSelect}
+                      >
+                        {allChampions.map((championName) => (
+                          <option key={championName} value={championName}>
+                            {championName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Champion Performance Details */}
+                    {(() => {
+                      const participant = match.match_data?.info?.participants?.find(
+                        (p: any) => p.championName === championTabSelection
+                      );
+                      
+                      if (!participant) {
+                        return <p className={styles.noData}>Champion data not available</p>;
+                      }
+
+                      const epsScore = match.analysis.rawStats?.epsScores?.[championTabSelection] || 0;
+                      const allScores = Object.values(match.analysis.rawStats?.epsScores || {}) as number[];
+                      const rank = allScores.filter((score: number) => score > epsScore).length + 1;
+                      const avgScore = allScores.reduce((a: number, b: number) => a + b, 0) / allScores.length;
+                      
+                      // Get final CPS
+                      const cpsData = match.analysis.charts?.powerScoreTimeline?.data?.datasets?.find(
+                        (ds: any) => ds.label?.includes(championTabSelection)
+                      );
+                      const finalCPS = cpsData?.data?.[cpsData.data.length - 1] || 0;
+
+                      return (
+                        <div className={styles.championDetails}>
+                          {/* Champion Header */}
+                          <div className={styles.championHeader}>
+                            <img 
+                              src={`https://ddragon.leagueoflegends.com/cdn/15.22.1/img/champion/${championTabSelection}.png`}
+                              alt={championTabSelection}
+                              className={styles.championDetailIcon}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                            <div className={styles.championHeaderInfo}>
+                              <h2>{championTabSelection}</h2>
+                              <p className={styles.summonerName}>{participant.summonerName || participant.riotIdGameName || 'Unknown'}</p>
+                              <div className={styles.championRank}>
+                                Rank #{rank} of 10
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Stats Grid */}
+                          <div className={styles.championStatsGrid}>
+                            <div className={styles.statCard}>
+                              <h4>Combat</h4>
+                              <div className={styles.statRow}>
+                                <span>KDA:</span>
+                                <span>{participant.kills}/{participant.deaths}/{participant.assists}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>KDA Ratio:</span>
+                                <span>{((participant.kills + participant.assists) / Math.max(1, participant.deaths)).toFixed(2)}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>Damage Dealt:</span>
+                                <span>{(participant.totalDamageDealtToChampions / 1000).toFixed(1)}k</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>Damage Taken:</span>
+                                <span>{(participant.totalDamageTaken / 1000).toFixed(1)}k</span>
+                              </div>
+                            </div>
+
+                            <div className={styles.statCard}>
+                              <h4>Economy</h4>
+                              <div className={styles.statRow}>
+                                <span>Gold Earned:</span>
+                                <span>{(participant.goldEarned / 1000).toFixed(1)}k</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>CS:</span>
+                                <span>{participant.totalMinionsKilled + participant.neutralMinionsKilled}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>CS/min:</span>
+                                <span>{((participant.totalMinionsKilled + participant.neutralMinionsKilled) / (match.match_data.info.gameDuration / 60)).toFixed(1)}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>Gold/min:</span>
+                                <span>{(participant.goldEarned / (match.match_data.info.gameDuration / 60)).toFixed(0)}</span>
+                              </div>
+                            </div>
+
+                            <div className={styles.statCard}>
+                              <h4>Performance Scores</h4>
+                              <div className={styles.statRow}>
+                                <span>EPS Score:</span>
+                                <span className={styles.highlightValue}>{epsScore.toFixed(1)}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>Final CPS:</span>
+                                <span className={styles.highlightValue}>{finalCPS.toFixed(1)}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>vs Average:</span>
+                                <span className={epsScore > avgScore ? styles.positive : styles.negative}>
+                                  {epsScore > avgScore ? '+' : ''}{((epsScore - avgScore) / avgScore * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className={styles.statCard}>
+                              <h4>Vision & Objectives</h4>
+                              <div className={styles.statRow}>
+                                <span>Vision Score:</span>
+                                <span>{participant.visionScore}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>Wards Placed:</span>
+                                <span>{participant.wardsPlaced}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>Wards Killed:</span>
+                                <span>{participant.wardsKilled}</span>
+                              </div>
+                              <div className={styles.statRow}>
+                                <span>Control Wards:</span>
+                                <span>{participant.visionWardsBoughtInGame}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Champion PRT Graph */}
+                          <div className={styles.championGraph}>
+                            <h3>Power Ranking Timeline</h3>
+                            <p className={styles.chartNote}>
+                              Performance ranking (0-100 percentile) over time for {championTabSelection}
+                            </p>
+                            <MatchAnalysisChart 
+                              key={`champion-prt-${championTabSelection}`}
+                              chartConfig={(() => {
+                                // Filter chart to show only the selected champion
+                                const chartConfig = match.analysis.charts?.powerRankingTimeline;
+                                if (!chartConfig) return chartConfig;
+                                
+                                const filtered = JSON.parse(JSON.stringify(chartConfig));
+                                
+                                if (filtered.data && filtered.data.datasets) {
+                                  filtered.data.datasets = filtered.data.datasets.map((dataset: any) => {
+                                    const label = dataset.label || '';
+                                    const labelName = label.includes(' (') ? label.split(' (')[0].trim() : label.trim();
+                                    const isSelected = labelName === championTabSelection;
+                                    
+                                    const addTransparency = (color: string | undefined, opacity: number) => {
+                                      if (!color || typeof color !== 'string') return color;
+                                      if (color.startsWith('rgb(') && !color.startsWith('rgba(')) {
+                                        return color.replace('rgb(', 'rgba(').replace(')', `, ${opacity})`);
+                                      }
+                                      if (color.startsWith('rgba(')) {
+                                        return color.replace(/[\d.]+\)$/g, `${opacity})`);
+                                      }
+                                      return color + Math.round(opacity * 255).toString(16).padStart(2, '0');
+                                    };
+                                    
+                                    return {
+                                      ...dataset,
+                                      borderWidth: isSelected ? 4 : 1.5,
+                                      borderColor: isSelected 
+                                        ? dataset.borderColor 
+                                        : addTransparency(dataset.borderColor, 0.2),
+                                      backgroundColor: isSelected
+                                        ? dataset.backgroundColor
+                                        : addTransparency(dataset.backgroundColor, 0.2),
+                                    };
+                                  });
+                                }
+                                
+                                return filtered;
+                              })()}
+                              title={`${championTabSelection} Power Ranking Over Time`}
+                              skipThemeColors={true}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* Statistics Tab */}
+                {activeTab === 'statistics' && (
+                  <div className={styles.tabContent}>
+                    <div className={styles.analysisContent}>
+                      <div className={styles.analysisSection}>
+                        <h3>EPS Breakdown</h3>
+                        <p className={styles.chartNote}>
+                          End-of-Game Performance Score (Combat 40% + Economic 30% + Objective 30%)
+                        </p>
+                        <MatchAnalysisChart 
+                          chartConfig={match.analysis.charts?.epsBreakdown}
+                          title="Player Performance Breakdown"
+                        />
+                      </div>
+
+                      <div className={styles.analysisSection}>
+                        <h3>Gold Efficiency</h3>
+                        <p className={styles.chartNote}>
+                          Power per 1000 gold spent (100% = match average)
+                        </p>
+                        <MatchAnalysisChart 
+                          chartConfig={match.analysis.charts?.goldEfficiency}
+                          title="Gold Efficiency Comparison"
+                        />
+                      </div>
+
+                      {/* Champion Filter */}
+                      <div className={styles.filterSection}>
+                        <label htmlFor="championFilter" className={styles.filterLabel}>
+                          Filter by Champion:
+                        </label>
+                        <select
+                          id="championFilter"
+                          value={selectedChampion}
+                          onChange={(e) => setSelectedChampion(e.target.value)}
+                          className={styles.championSelect}
+                        >
+                          <option value="all">All Champions</option>
+                          {allChampions.map((championName) => (
+                            <option key={championName} value={championName}>
+                              {championName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className={styles.analysisSection}>
+                        <h3>Power Ranking Timeline</h3>
+                        <p className={styles.chartNote}>
+                          Relative performance ranking (0-100 percentile) at each moment in the game
+                        </p>
+                        <MatchAnalysisChart 
+                          key={`ranking-${selectedChampion}`}
+                          chartConfig={filterChartData(match.analysis.charts?.powerRankingTimeline, 'line')}
+                          title="Power Ranking Over Time"
+                          skipThemeColors={selectedChampion !== 'all'}
+                        />
+                      </div>
+
+                      <div className={styles.analysisSection}>
+                        <h3>Cumulative Power Score Timeline</h3>
+                        <p className={styles.chartNote}>
+                          Total accumulated combat power over time (Economic 45% + Offensive 35% + Defensive 20%)
+                        </p>
+                        <MatchAnalysisChart 
+                          key={`power-${selectedChampion}`}
+                          chartConfig={filterChartData(match.analysis.charts?.powerScoreTimeline, 'line')}
+                          title="Cumulative Power Score Over Time"
+                          skipThemeColors={selectedChampion !== 'all'}
+                          height={700}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
-              <div className={styles.timelineInfo}>
-                <h2>Timeline Data</h2>
-                <p className={styles.noData}>Timeline data not available for this match.</p>
+              <div className={styles.analysisInfo}>
+                <h2>Match Analysis</h2>
+                <p className={styles.noData}>
+                  Analysis not available for this match. Analysis is generated when both match and timeline data are present.
+                </p>
               </div>
             )}
           </div>
