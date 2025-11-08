@@ -325,6 +325,50 @@ class PlayerRepositoryRiot(PlayerRepository):
         logger.info(f"Built {len(games)}/{len(match_ids)} game summaries")
         return games
     
+    async def fetch_and_build_games(self, match_ids: List[str], puuid: str, region: str) -> List[RecentGameSummary]:
+        """
+        Fetch matches (from DB or API) and build game summaries.
+        This method checks DB first, fetches missing matches from API, saves them, and builds summaries.
+        
+        Args:
+            match_ids: List of match IDs to fetch
+            puuid: Player UUID
+            region: Region code
+            
+        Returns:
+            List of RecentGameSummary objects
+        """
+        if not match_ids:
+            return []
+        
+        logger.info(f"Fetching and building {len(match_ids)} games for {puuid}")
+        
+        # Step 1: Check which matches are in DB
+        db_matches = await self.check_matches_in_db(match_ids)
+        
+        # Step 2: Identify missing matches
+        missing_ids = [mid for mid, data in db_matches.items() if data is None]
+        
+        if missing_ids:
+            logger.info(f"Fetching {len(missing_ids)} missing matches from API")
+            # Step 3: Fetch missing matches from API
+            api_matches = await self.fetch_matches_from_api(missing_ids, region)
+            
+            # Step 4: Save fetched matches to DB
+            if api_matches:
+                await self.save_matches_batch(api_matches, puuid)
+                
+                # Add API matches to db_matches dict
+                for match_id, (match_data, _) in api_matches.items():
+                    db_matches[match_id] = match_data
+        
+        # Step 5: Build game summaries from all matches (maintaining order)
+        all_matches = {mid: data for mid, data in db_matches.items() if data is not None}
+        games = await self.build_game_summaries(match_ids, all_matches, puuid)
+        
+        logger.info(f"Successfully built {len(games)} game summaries")
+        return games
+    
     async def update_recent_games_cache(self, puuid: str, games: List[RecentGameSummary]) -> None:
         """Update the recent_games cache in summoners table"""
         if not self.db or not games:

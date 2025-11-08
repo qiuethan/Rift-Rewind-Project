@@ -230,6 +230,54 @@
   box-shadow: var(--region-shadow-primary);
 }
 
+.authButtons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.loginButton {
+  padding: 0.5rem 1.25rem;
+  background: transparent;
+  border: 2px solid var(--region-primary);
+  color: var(--region-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: var(--transition);
+  letter-spacing: 0.02em;
+  font-family: inherit;
+  text-transform: uppercase;
+}
+
+.loginButton:hover {
+  background: var(--region-panel-hover);
+  box-shadow: var(--region-shadow-primary);
+}
+
+.registerButton {
+  padding: 0.5rem 1.25rem;
+  background: var(--region-primary);
+  border: 2px solid var(--region-primary);
+  color: var(--region-bg);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: var(--transition);
+  letter-spacing: 0.02em;
+  font-family: inherit;
+  text-transform: uppercase;
+  box-shadow: var(--region-shadow-primary);
+}
+
+.registerButton:hover {
+  background: var(--region-accent);
+  border-color: var(--region-accent);
+  box-shadow: var(--region-shadow-secondary);
+}
+
 @media (max-width: 768px) {
   .nav {
     display: none;

@@ -1,26 +1,47 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './LandingPage.module.css';
-import { Button } from '@/components';
+import { Button, Navbar } from '@/components';
 import { ROUTES } from '@/config';
+import { authActions } from '@/actions/auth';
+import { useSummoner } from '@/contexts';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { summoner } = useSummoner();
+  const [user, setUser] = useState<any>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const authenticated = authActions.isAuthenticated();
+    setIsAuthenticated(authenticated);
+    
+    if (authenticated) {
+      const userData = authActions.getCurrentUser();
+      setUser(userData);
+    }
+  }, []);
 
   return (
     <div className={styles.container}>
-      <nav className={styles.nav}>
-        <div className={styles.navContent}>
-          <h2 className={styles.logo}>Rift Rewind</h2>
-          <div className={styles.navButtons}>
-            <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)}>
-              Login
-            </Button>
-            <Button onClick={() => navigate(ROUTES.REGISTER)}>
-              Get Started
-            </Button>
+      {isAuthenticated ? (
+        <Navbar user={user} summoner={summoner} />
+      ) : (
+        <nav className={styles.nav}>
+          <div className={styles.navContent}>
+            <h2 className={styles.logo}>Rift Rewind</h2>
+            <div className={styles.navButtons}>
+              <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)}>
+                Login
+              </Button>
+              <Button onClick={() => navigate(ROUTES.REGISTER)}>
+                Get Started
+              </Button>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
+      )}
 
       <main className={styles.main}>
         <section className={styles.hero}>
@@ -33,14 +54,23 @@ export default function LandingPage() {
             Analyze your gameplay, discover your perfect champions, and climb the ranks
             with personalized recommendations powered by advanced AI.
           </p>
-          <div className={styles.cta}>
-            <Button onClick={() => navigate(ROUTES.REGISTER)} fullWidth={false}>
-              Start Analyzing
-            </Button>
-            <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)} fullWidth={false}>
-              Sign In
-            </Button>
-          </div>
+          {!isAuthenticated && (
+            <div className={styles.cta}>
+              <Button onClick={() => navigate(ROUTES.REGISTER)} fullWidth={false}>
+                Start Analyzing
+              </Button>
+              <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)} fullWidth={false}>
+                Sign In
+              </Button>
+            </div>
+          )}
+          {isAuthenticated && (
+            <div className={styles.cta}>
+              <Button onClick={() => navigate(ROUTES.DASHBOARD)} fullWidth={false}>
+                Go to Dashboard
+              </Button>
+            </div>
+          )}
         </section>
 
         <section className={styles.features}>
@@ -81,15 +111,17 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className={styles.cta2}>
-          <h2 className={styles.cta2Title}>Ready to level up your game?</h2>
-          <p className={styles.cta2Text}>
-            Join thousands of players improving their League of Legends skills with Rift Rewind.
-          </p>
-          <Button onClick={() => navigate(ROUTES.REGISTER)}>
-            Create Free Account
-          </Button>
-        </section>
+        {!isAuthenticated && (
+          <section className={styles.cta2}>
+            <h2 className={styles.cta2Title}>Ready to level up your game?</h2>
+            <p className={styles.cta2Text}>
+              Join thousands of players improving their League of Legends skills with Rift Rewind.
+            </p>
+            <Button onClick={() => navigate(ROUTES.REGISTER)}>
+              Create Free Account
+            </Button>
+          </section>
+        )}
       </main>
     </div>
   );
