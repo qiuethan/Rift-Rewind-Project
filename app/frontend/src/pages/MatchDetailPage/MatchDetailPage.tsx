@@ -21,6 +21,7 @@ export default function MatchDetailPage() {
   const [allChampions, setAllChampions] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'summary' | 'champion' | 'statistics'>('summary');
   const [championTabSelection, setChampionTabSelection] = useState<string>('');
+  const [showInfoModal, setShowInfoModal] = useState(false);
 
   useEffect(() => {
     loadMatch();
@@ -232,11 +233,18 @@ export default function MatchDetailPage() {
         ) : match ? (
           <div className={styles.matchContent}>
             <div className={styles.header}>
-              <button onClick={() => navigate(-1)} className={styles.backButton}>
-                ← Back
-              </button>
-              <h1 className={styles.title}>Match Analysis</h1>
-              <p className={styles.matchId}>{matchId}</p>
+              <div className={styles.headerTop}>
+                <button onClick={() => navigate(-1)} className={styles.backButton}>
+                  ← Back
+                </button>
+                <button onClick={() => setShowInfoModal(true)} className={styles.infoButton} title="Learn about metrics">
+                  ℹ️ Metrics Info
+                </button>
+              </div>
+              <div className={styles.headerCenter}>
+                <h1 className={styles.title}>Match Analysis</h1>
+                <p className={styles.matchId}>{matchId}</p>
+              </div>
             </div>
 
             {/* Match Summary */}
@@ -610,9 +618,11 @@ export default function MatchDetailPage() {
                           </div>
 
                           {/* Stats Grid */}
-                          <div className={styles.championStatsGrid}>
-                            <div className={styles.statCard}>
-                              <h4>Combat</h4>
+                          <div className={styles.statsContainer}>
+                            <h3 className={styles.statsHeader}>Basic Stats</h3>
+                            <div className={styles.championStatsGrid}>
+                              <div className={styles.statCard}>
+                                <h4>Combat</h4>
                               <div className={styles.statRow}>
                                 <span>KDA:</span>
                                 <span>{participant.kills}/{participant.deaths}/{participant.assists}</span>
@@ -652,94 +662,197 @@ export default function MatchDetailPage() {
                             </div>
 
                             <div className={styles.statCard}>
-                              <h4>Performance Scores</h4>
-                              <div className={styles.statRow}>
-                                <span>EPS Score:</span>
-                                <span className={styles.highlightValue}>{epsScore.toFixed(1)}</span>
-                              </div>
-                              <div className={styles.statRow}>
-                                <span>Final CPS:</span>
-                                <span className={styles.highlightValue}>{finalCPS.toFixed(1)}</span>
-                              </div>
-                              <div className={styles.statRow}>
-                                <span>vs Average:</span>
-                                <span className={epsScore > avgScore ? styles.positive : styles.negative}>
-                                  {epsScore > avgScore ? '+' : ''}{((epsScore - avgScore) / avgScore * 100).toFixed(1)}%
-                                </span>
+                                <h4>Vision & Objectives</h4>
+                                <div className={styles.statRow}>
+                                  <span>Vision Score:</span>
+                                  <span>{participant.visionScore}</span>
+                                </div>
+                                <div className={styles.statRow}>
+                                  <span>Wards Placed:</span>
+                                  <span>{participant.wardsPlaced}</span>
+                                </div>
+                                <div className={styles.statRow}>
+                                  <span>Wards Killed:</span>
+                                  <span>{participant.wardsKilled}</span>
+                                </div>
+                                <div className={styles.statRow}>
+                                  <span>Control Wards:</span>
+                                  <span>{participant.visionWardsBoughtInGame}</span>
+                                </div>
                               </div>
                             </div>
 
-                            <div className={styles.statCard}>
-                              <h4>Vision & Objectives</h4>
-                              <div className={styles.statRow}>
-                                <span>Vision Score:</span>
-                                <span>{participant.visionScore}</span>
+                            <h3 className={styles.statsHeader}>Performance Metrics</h3>
+                            <div className={styles.championStatsGrid}>
+                              <div className={styles.statCard}>
+                                <h4>EPS Score</h4>
+                                <div className={styles.statRow}>
+                                  <span>Score:</span>
+                                  <span className={styles.highlightValue}>{epsScore.toFixed(1)}</span>
+                                </div>
+                                <div className={styles.statRow}>
+                                  <span>Match Rank:</span>
+                                  <span>#{rank} of 10</span>
+                                </div>
+                                <div className={styles.statRow}>
+                                  <span>vs Average:</span>
+                                  <span className={epsScore > avgScore ? styles.positive : styles.negative}>
+                                    {epsScore > avgScore ? '+' : ''}{((epsScore - avgScore) / avgScore * 100).toFixed(1)}%
+                                  </span>
+                                </div>
                               </div>
-                              <div className={styles.statRow}>
-                                <span>Wards Placed:</span>
-                                <span>{participant.wardsPlaced}</span>
+
+                              <div className={styles.statCard}>
+                                <h4>Cumulative Power Score</h4>
+                                <div className={styles.statRow}>
+                                  <span>Final CPS:</span>
+                                  <span className={styles.highlightValue}>{finalCPS.toFixed(1)}</span>
+                                </div>
+                                <div className={styles.statRowIndented}>
+                                  <span>Economic (45%):</span>
+                                  <span>{(finalCPS * 0.45).toFixed(1)}</span>
+                                </div>
+                                <div className={styles.statRowIndented}>
+                                  <span>Offensive (35%):</span>
+                                  <span>{(finalCPS * 0.35).toFixed(1)}</span>
+                                </div>
+                                <div className={styles.statRowIndented}>
+                                  <span>Defensive (20%):</span>
+                                  <span>{(finalCPS * 0.20).toFixed(1)}</span>
+                                </div>
                               </div>
-                              <div className={styles.statRow}>
-                                <span>Wards Killed:</span>
-                                <span>{participant.wardsKilled}</span>
-                              </div>
-                              <div className={styles.statRow}>
-                                <span>Control Wards:</span>
-                                <span>{participant.visionWardsBoughtInGame}</span>
+
+                              <div className={styles.statCard}>
+                                <h4>Gold Efficiency</h4>
+                                <div className={styles.statRow}>
+                                  <span>Gold Earned:</span>
+                                  <span>{(participant.goldEarned / 1000).toFixed(1)}k</span>
+                                </div>
+                                <div className={styles.statRow}>
+                                  <span>Gold/min:</span>
+                                  <span>{(participant.goldEarned / (match.match_data.info.gameDuration / 60)).toFixed(0)}</span>
+                                </div>
+                                <div className={styles.statRow}>
+                                  <span>Efficiency:</span>
+                                  <span>{(() => {
+                                    const goldEffData = match.analysis.charts?.goldEfficiency?.data?.datasets?.[0];
+                                    const labels = match.analysis.charts?.goldEfficiency?.data?.labels;
+                                    const champIndex = labels?.findIndex((l: string) => l.includes(championTabSelection));
+                                    const efficiency = champIndex !== -1 ? goldEffData?.data?.[champIndex] : null;
+                                    return efficiency ? `${efficiency.toFixed(1)}%` : 'N/A';
+                                  })()}</span>
+                                </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* Champion PRT Graph */}
-                          <div className={styles.championGraph}>
-                            <h3>Power Ranking Timeline</h3>
-                            <p className={styles.chartNote}>
-                              Performance ranking (0-100 percentile) over time for {championTabSelection}
-                            </p>
-                            <MatchAnalysisChart 
-                              key={`champion-prt-${championTabSelection}`}
-                              chartConfig={(() => {
-                                // Filter chart to show only the selected champion
-                                const chartConfig = match.analysis.charts?.powerRankingTimeline;
-                                if (!chartConfig) return chartConfig;
-                                
-                                const filtered = JSON.parse(JSON.stringify(chartConfig));
-                                
-                                if (filtered.data && filtered.data.datasets) {
-                                  filtered.data.datasets = filtered.data.datasets.map((dataset: any) => {
-                                    const label = dataset.label || '';
-                                    const labelName = label.includes(' (') ? label.split(' (')[0].trim() : label.trim();
-                                    const isSelected = labelName === championTabSelection;
-                                    
-                                    const addTransparency = (color: string | undefined, opacity: number) => {
-                                      if (!color || typeof color !== 'string') return color;
-                                      if (color.startsWith('rgb(') && !color.startsWith('rgba(')) {
-                                        return color.replace('rgb(', 'rgba(').replace(')', `, ${opacity})`);
-                                      }
-                                      if (color.startsWith('rgba(')) {
-                                        return color.replace(/[\d.]+\)$/g, `${opacity})`);
-                                      }
-                                      return color + Math.round(opacity * 255).toString(16).padStart(2, '0');
-                                    };
-                                    
-                                    return {
-                                      ...dataset,
-                                      borderWidth: isSelected ? 4 : 1.5,
-                                      borderColor: isSelected 
-                                        ? dataset.borderColor 
-                                        : addTransparency(dataset.borderColor, 0.2),
-                                      backgroundColor: isSelected
-                                        ? dataset.backgroundColor
-                                        : addTransparency(dataset.backgroundColor, 0.2),
-                                    };
-                                  });
-                                }
-                                
-                                return filtered;
-                              })()}
-                              title={`${championTabSelection} Power Ranking Over Time`}
-                              skipThemeColors={true}
-                            />
+                          {/* Champion Graphs - Side by Side */}
+                          <div className={styles.championGraphsContainer}>
+                            {/* Champion PRT Graph */}
+                            <div className={styles.championGraph}>
+                              <h3>Power Ranking Timeline</h3>
+                              <p className={styles.chartNote}>
+                                Performance ranking (0-100 percentile) over time
+                              </p>
+                              <MatchAnalysisChart 
+                                key={`champion-prt-${championTabSelection}`}
+                                chartConfig={(() => {
+                                  // Filter chart to show only the selected champion
+                                  const chartConfig = match.analysis.charts?.powerRankingTimeline;
+                                  if (!chartConfig) return chartConfig;
+                                  
+                                  const filtered = JSON.parse(JSON.stringify(chartConfig));
+                                  
+                                  if (filtered.data && filtered.data.datasets) {
+                                    filtered.data.datasets = filtered.data.datasets.map((dataset: any) => {
+                                      const label = dataset.label || '';
+                                      const labelName = label.includes(' (') ? label.split(' (')[0].trim() : label.trim();
+                                      const isSelected = labelName === championTabSelection;
+                                      
+                                      const addTransparency = (color: string | undefined, opacity: number) => {
+                                        if (!color || typeof color !== 'string') return color;
+                                        if (color.startsWith('rgb(') && !color.startsWith('rgba(')) {
+                                          return color.replace('rgb(', 'rgba(').replace(')', `, ${opacity})`);
+                                        }
+                                        if (color.startsWith('rgba(')) {
+                                          return color.replace(/[\d.]+\)$/g, `${opacity})`);
+                                        }
+                                        return color + Math.round(opacity * 255).toString(16).padStart(2, '0');
+                                      };
+                                      
+                                      return {
+                                        ...dataset,
+                                        borderWidth: isSelected ? 4 : 1.5,
+                                        borderColor: isSelected 
+                                          ? dataset.borderColor 
+                                          : addTransparency(dataset.borderColor, 0.2),
+                                        backgroundColor: isSelected
+                                          ? dataset.backgroundColor
+                                          : addTransparency(dataset.backgroundColor, 0.2),
+                                      };
+                                    });
+                                  }
+                                  
+                                  return filtered;
+                                })()}
+                                title={`${championTabSelection} Power Ranking`}
+                                skipThemeColors={true}
+                                height={400}
+                              />
+                            </div>
+
+                            {/* Champion CPS Graph */}
+                            <div className={styles.championGraph}>
+                              <h3>Cumulative Power Score</h3>
+                              <p className={styles.chartNote}>
+                                Total accumulated combat power over time
+                              </p>
+                              <MatchAnalysisChart 
+                                key={`champion-cps-${championTabSelection}`}
+                                chartConfig={(() => {
+                                  // Filter chart to show only the selected champion
+                                  const chartConfig = match.analysis.charts?.powerScoreTimeline;
+                                  if (!chartConfig) return chartConfig;
+                                  
+                                  const filtered = JSON.parse(JSON.stringify(chartConfig));
+                                  
+                                  if (filtered.data && filtered.data.datasets) {
+                                    filtered.data.datasets = filtered.data.datasets.map((dataset: any) => {
+                                      const label = dataset.label || '';
+                                      const labelName = label.includes(' (') ? label.split(' (')[0].trim() : label.trim();
+                                      const isSelected = labelName === championTabSelection;
+                                      
+                                      const addTransparency = (color: string | undefined, opacity: number) => {
+                                        if (!color || typeof color !== 'string') return color;
+                                        if (color.startsWith('rgb(') && !color.startsWith('rgba(')) {
+                                          return color.replace('rgb(', 'rgba(').replace(')', `, ${opacity})`);
+                                        }
+                                        if (color.startsWith('rgba(')) {
+                                          return color.replace(/[\d.]+\)$/g, `${opacity})`);
+                                        }
+                                        return color + Math.round(opacity * 255).toString(16).padStart(2, '0');
+                                      };
+                                      
+                                      return {
+                                        ...dataset,
+                                        borderWidth: isSelected ? 4 : 1.5,
+                                        borderColor: isSelected 
+                                          ? dataset.borderColor 
+                                          : addTransparency(dataset.borderColor, 0.2),
+                                        backgroundColor: isSelected
+                                          ? dataset.backgroundColor
+                                          : addTransparency(dataset.backgroundColor, 0.2),
+                                      };
+                                    });
+                                  }
+                                  
+                                  return filtered;
+                                })()}
+                                title={`${championTabSelection} Cumulative Power`}
+                                skipThemeColors={true}
+                                height={400}
+                              />
+                            </div>
                           </div>
                         </div>
                       );
@@ -829,6 +942,78 @@ export default function MatchDetailPage() {
                 <p className={styles.noData}>
                   Analysis not available for this match. Analysis is generated when both match and timeline data are present.
                 </p>
+              </div>
+            )}
+
+            {/* Info Modal */}
+            {showInfoModal && (
+              <div className={styles.modalOverlay} onClick={() => setShowInfoModal(false)}>
+                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                  <div className={styles.modalHeader}>
+                    <h2>Metrics Explained</h2>
+                    <button onClick={() => setShowInfoModal(false)} className={styles.modalClose}>×</button>
+                  </div>
+                  <div className={styles.modalBody}>
+                    <section className={styles.metricSection}>
+                      <h3>Basic Metrics</h3>
+                      <div className={styles.metricItem}>
+                        <strong>KDA (Kills/Deaths/Assists):</strong> Standard League of Legends combat statistics.
+                      </div>
+                      <div className={styles.metricItem}>
+                        <strong>CS (Creep Score):</strong> Total minions and neutral monsters killed.
+                      </div>
+                      <div className={styles.metricItem}>
+                        <strong>Gold Earned:</strong> Total gold accumulated during the match.
+                      </div>
+                      <div className={styles.metricItem}>
+                        <strong>Vision Score:</strong> Riot's metric for vision control contribution.
+                      </div>
+                    </section>
+
+                    <section className={styles.metricSection}>
+                      <h3>Performance Metrics</h3>
+                      
+                      <div className={styles.metricItem}>
+                        <strong>EPS (End-Game Performance Score):</strong>
+                        <p>A comprehensive score calculated at the end of the match based on:</p>
+                        <ul>
+                          <li><strong>Combat (40%):</strong> KDA, damage dealt, damage taken</li>
+                          <li><strong>Economic (30%):</strong> Gold earned, CS, gold efficiency</li>
+                          <li><strong>Objective (30%):</strong> Turret damage, objective participation</li>
+                        </ul>
+                        <p>Higher EPS indicates better overall performance in the match.</p>
+                      </div>
+
+                      <div className={styles.metricItem}>
+                        <strong>CPS (Cumulative Power Score):</strong>
+                        <p>Tracks accumulated combat power throughout the game based on:</p>
+                        <ul>
+                          <li><strong>Economic (45%):</strong> Gold and experience advantages</li>
+                          <li><strong>Offensive (35%):</strong> Damage output and kills</li>
+                          <li><strong>Defensive (20%):</strong> Survivability and damage mitigation</li>
+                        </ul>
+                        <p>Shows how a player's power grows over time during the match.</p>
+                      </div>
+
+                      <div className={styles.metricItem}>
+                        <strong>PRT (Power Ranking Timeline):</strong>
+                        <p>Percentile ranking (0-100) showing relative performance compared to all players at each moment in the game. A value of 100 means the player was performing better than everyone else at that time.</p>
+                      </div>
+
+                      <div className={styles.metricItem}>
+                        <strong>Gold Efficiency:</strong>
+                        <p>Measures power gained per 1000 gold spent, normalized to match average (100%). Values above 100% indicate efficient gold usage.</p>
+                      </div>
+                    </section>
+
+                    <section className={styles.metricSection}>
+                      <h3>Match Rank</h3>
+                      <div className={styles.metricItem}>
+                        <p>Your overall placement (#1-10) among all players in the match based on EPS score.</p>
+                      </div>
+                    </section>
+                  </div>
+                </div>
               </div>
             )}
           </div>
