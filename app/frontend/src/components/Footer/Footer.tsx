@@ -1,5 +1,4 @@
 import styles from './Footer.module.css';
-import RegionSelector from '../RegionSelector';
 
 export default function Footer() {
   return (
@@ -9,10 +8,6 @@ export default function Footer() {
           <span className={styles.copyright}>
             © 2025 Rift Rewind. All rights reserved.
           </span>
-        </div>
-        
-        <div className={styles.center}>
-          <RegionSelector />
         </div>
         
         <div className={styles.right}>
