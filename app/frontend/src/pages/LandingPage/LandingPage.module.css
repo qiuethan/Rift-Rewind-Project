@@ -201,6 +201,10 @@
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  min-height: 300px; /* NEW: Makes all cards taller */
 }
 
 .feature::before {
@@ -227,6 +231,17 @@
   filter: drop-shadow(var(--region-shadow-primary));
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.emote {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: block;
 }
 
 .featureTitle {
@@ -238,6 +253,10 @@
   text-transform: uppercase;
   position: relative;
   z-index: 1;
+  min-height: 40px; /* NEW: Reserves space for two lines of text */
+  display: flex; /* NEW: Helps vertically center the title text */
+  align-items: center; /* NEW: in the reserved space */
+  justify-content: center; /* NEW: */
 }
 
 .featureText {
