@@ -89,10 +89,13 @@ class MatchRepositoryRiot(MatchRepository):
             
             summoners = []
             existing_timeline = None
+            is_new_match = False
             if existing.data and len(existing.data) > 0:
                 # Match exists, get current summoners list and timeline
                 summoners = existing.data[0].get('summoners', [])
                 existing_timeline = existing.data[0].get('timeline_data')
+            else:
+                is_new_match = True
             
             # Add this summoner if provided and not already in list
             if puuid and puuid not in summoners:
@@ -133,6 +136,10 @@ class MatchRepositoryRiot(MatchRepository):
             }
             
             await self.client.table(DatabaseTable.MATCHES).upsert(match_record).execute()
+            
+            # Update champion progress for tracked summoners (only for new matches with analysis)
+            if is_new_match and analysis and puuid:
+                await self._update_champion_progress_for_match(match_id, match_data, analysis, puuid)
             
             timeline_status = "with timeline" if final_timeline else "without timeline"
             if existing_timeline and not timeline_data:
@@ -415,6 +422,101 @@ class MatchRepositoryRiot(MatchRepository):
         except Exception as e:
             logger.error(f"Error syncing match history for {puuid}: {e}")
             return 0
+    
+    async def _update_champion_progress_for_match(
+        self, 
+        match_id: str, 
+        match_data: Dict[str, Any], 
+        analysis: Dict[str, Any], 
+        puuid: str
+    ) -> None:
+        """
+        Update champion progress after processing a match.
+        This is called internally when a new match is saved with analysis.
+        """
+        try:
+            from infrastructure.champion_progress_repository import ChampionProgressRepositorySupabase
+            from models.champion_progress import UpdateChampionProgressRequest
+            
+            # Find the participant for this PUUID
+            participants = match_data.get('info', {}).get('participants', [])
+            participant = next((p for p in participants if p.get('puuid') == puuid), None)
+            
+            if not participant:
+                logger.warning(f"Could not find participant with PUUID {puuid} in match {match_id}")
+                return
+            
+            # Extract champion info
+            champion_id = participant.get('championId')
+            champion_name = participant.get('championName')
+            
+            if not champion_id or not champion_name:
+                logger.warning(f"Missing champion info for PUUID {puuid} in match {match_id}")
+                return
+            
+            # Get EPS score from analysis
+            eps_scores = analysis.get('rawStats', {}).get('epsScores', {})
+            eps_score = eps_scores.get(champion_name, 0.0)
+            
+            # Get final CPS from power score timeline
+            cps_score = 0.0
+            power_timeline = analysis.get('charts', {}).get('powerScoreTimeline', {})
+            if power_timeline:
+                datasets = power_timeline.get('data', {}).get('datasets', [])
+                for dataset in datasets:
+                    label = dataset.get('label', '')
+                    if champion_name in label:
+                        data_points = dataset.get('data', [])
+                        if data_points:
+                            cps_score = data_points[-1]  # Final CPS value
+                        break
+            
+            # Calculate KDA
+            kills = participant.get('kills', 0)
+            deaths = participant.get('deaths', 0)
+            assists = participant.get('assists', 0)
+            kda = round((kills + assists) / max(deaths, 1), 2)
+            
+            # Get user_id from user_summoners table
+            user_result = await self.client.table(DatabaseTable.USER_SUMMONERS).select('user_id').eq('puuid', puuid).limit(1).execute()
+            
+            if not user_result.data or len(user_result.data) == 0:
+                logger.debug(f"No user_id found for PUUID {puuid} - skipping champion progress update")
+                return
+            
+            user_id = user_result.data[0].get('user_id')
+            
+            # Create update request
+            update_request = UpdateChampionProgressRequest(
+                match_id=match_id,
+                champion_id=champion_id,
+                champion_name=champion_name,
+                eps_score=eps_score,
+                cps_score=cps_score,
+                kda=kda,
+                win=participant.get('win', False),
+                kills=kills,
+                deaths=deaths,
+                assists=assists,
+                cs=participant.get('totalMinionsKilled', 0) + participant.get('neutralMinionsKilled', 0),
+                gold=participant.get('goldEarned', 0),
+                damage=participant.get('totalDamageDealtToChampions', 0),
+                vision_score=participant.get('visionScore', 0),
+                game_date=match_data.get('info', {}).get('gameCreation', 0) // 1000  # Convert to seconds
+            )
+            
+            # Update champion progress
+            progress_repo = ChampionProgressRepositorySupabase(self.client)
+            result = await progress_repo.update_champion_progress(user_id, puuid, update_request)
+            
+            if result:
+                logger.info(f"✅ Updated champion progress for {champion_name} (user: {user_id}, match: {match_id})")
+            else:
+                logger.warning(f"Failed to update champion progress for {champion_name} (match: {match_id})")
+                
+        except Exception as e:
+            logger.error(f"Error updating champion progress for match {match_id}: {e}")
+            # Don't raise - this is a non-critical operation
     
     async def is_match_history_synced(self, puuid: str, region: str, riot_api: RiotAPIRepository) -> bool:
         """Check if player's match history is already synced by checking first match"""

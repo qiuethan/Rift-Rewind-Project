@@ -13,6 +13,7 @@ from domain.match_domain import MatchDomain
 from domain.champion_domain import ChampionDomain
 from domain.analytics_domain import AnalyticsDomain
 from domain.riot_api_domain import RiotAPIDomain
+from domain.champion_progress_domain import ChampionProgressDomain
 
 # Repositories (Interfaces)
 from repositories.auth_repository import AuthRepository
@@ -21,6 +22,7 @@ from repositories.match_repository import MatchRepository
 from repositories.champion_repository import ChampionRepository
 from repositories.analytics_repository import AnalyticsRepository
 from repositories.riot_api_repository import RiotAPIRepository
+from repositories.champion_progress_repository import ChampionProgressRepository
 
 # Infrastructure (Implementations)
 from infrastructure.auth_repository import AuthRepositorySupabase
@@ -29,6 +31,7 @@ from infrastructure.match_repository import MatchRepositoryRiot
 from infrastructure.champion_repository import ChampionRepositorySupabase
 from infrastructure.analytics_repository import AnalyticsRepositorySupabase
 from infrastructure.riot_api_repository import RiotAPIRepositoryImpl
+from infrastructure.champion_progress_repository import ChampionProgressRepositorySupabase
 
 # Services
 from services.auth_service import AuthService
@@ -37,6 +40,7 @@ from services.match_service import MatchService
 from services.champion_service import ChampionService
 from services.analytics_service import AnalyticsService
 from services.llm_service import BedrockService
+from services.champion_progress_service import ChampionProgressService
 
 
 # ============================================================================
@@ -73,6 +77,11 @@ def get_riot_api_domain() -> RiotAPIDomain:
     return RiotAPIDomain()
 
 
+def get_champion_progress_domain() -> ChampionProgressDomain:
+    """Factory for ChampionProgressDomain"""
+    return ChampionProgressDomain()
+
+
 # ============================================================================
 # REPOSITORY FACTORIES (Infrastructure Implementations)
 # ============================================================================
@@ -106,6 +115,11 @@ def get_champion_repository() -> ChampionRepository:
 def get_analytics_repository() -> AnalyticsRepository:
     """Factory for AnalyticsRepository"""
     return AnalyticsRepositorySupabase(supabase_service, settings.OPENROUTER_API_KEY)
+
+
+def get_champion_progress_repository() -> ChampionProgressRepository:
+    """Factory for ChampionProgressRepository"""
+    return ChampionProgressRepositorySupabase(supabase_service)
 
 
 # ============================================================================
@@ -163,4 +177,13 @@ def get_bedrock_service() -> BedrockService:
         aws_secret_key=settings.AWS_SECRET_ACCESS_KEY,
         region=settings.AWS_REGION,
         model_id=settings.AWS_BEDROCK_MODEL
+    )
+
+
+def get_champion_progress_service() -> ChampionProgressService:
+    """Factory for ChampionProgressService"""
+    return ChampionProgressService(
+        champion_progress_repository=get_champion_progress_repository(),
+        player_repository=get_player_repository(),
+        champion_progress_domain=get_champion_progress_domain()
     )

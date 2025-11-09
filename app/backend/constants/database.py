@@ -20,6 +20,7 @@ class DatabaseTable(str, Enum):
     # Champion tables
     CHAMPIONS = "champions"
     CHAMPION_STATS = "champion_stats"
+    CHAMPION_PROGRESS = "champion_progress"
     
     # Analytics tables
     PLAYER_ANALYTICS = "player_analytics"

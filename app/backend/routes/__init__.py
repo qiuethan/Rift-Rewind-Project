@@ -5,6 +5,7 @@ from routes.matches import router as matches_router
 from routes.champions import router as champions_router
 from routes.analytics import router as analytics_router
 from routes.health import router as health_router
+from routes.champion_progress import router as champion_progress_router
 
 __all__ = [
     'auth_router',
@@ -13,4 +14,5 @@ __all__ = [
     'champions_router',
     'analytics_router',
     'health_router',
+    'champion_progress_router',
 ]
