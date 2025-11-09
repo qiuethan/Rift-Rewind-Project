@@ -15,6 +15,6 @@ MAX_BACKGROUND_SYNC_MATCHES = 100  # Maximum matches to sync in background
 DEFAULT_CACHED_GAMES_COUNT = 100  # Number of games to cache in summoners.recent_games
 
 # Retry settings for database operations
-DB_RETRY_MAX_ATTEMPTS = 3  # Maximum retry attempts for DB operations
+DB_RETRY_MAX_ATTEMPTS = 5  # Maximum retry attempts for DB operations
 DB_RETRY_INITIAL_DELAY = 1.0  # Initial retry delay in seconds (exponential backoff)
 DB_OPERATION_DELAY = 0.1  # Delay between sequential DB operations (seconds)
