@@ -39,7 +39,7 @@ from services.player_service import PlayerService
 from services.match_service import MatchService
 from services.champion_service import ChampionService
 from services.analytics_service import AnalyticsService
-from services.llm_service import BedrockService
+from services.llm_service import LLMService
 from services.champion_progress_service import ChampionProgressService
 
 
@@ -170,14 +170,49 @@ def get_analytics_service() -> AnalyticsService:
     )
 
 
-def get_bedrock_service() -> BedrockService:
-    """Factory for BedrockService with injected config"""
-    return BedrockService(
-        aws_access_key=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_key=settings.AWS_SECRET_ACCESS_KEY,
-        region=settings.AWS_REGION,
-        model_id=settings.AWS_BEDROCK_MODEL
+def get_llm_repository():
+    """Factory for LLM Repository (Bedrock implementation)"""
+    from infrastructure.bedrock_repository import BedrockRepository
+    return BedrockRepository()
+
+
+def get_llm_prompt_builder():
+    """Factory for LLM Prompt Builder"""
+    from infrastructure.llm_prompt_builder import LLMPromptBuilder
+    return LLMPromptBuilder()
+
+
+# Alias for backward compatibility
+def get_bedrock_repository():
+    """Deprecated: Use get_llm_repository instead"""
+    return get_llm_repository()
+
+
+def get_database():
+    """Factory for Database client (returns Supabase client wrapper)"""
+    from infrastructure.database.supabase_client import SupabaseClient
+    return SupabaseClient(supabase_service)
+
+
+def get_context_repository():
+    """Factory for ContextRepository"""
+    from infrastructure.context_repository import ContextRepositorySupabase
+    return ContextRepositorySupabase(supabase_service)
+
+
+def get_llm_service() -> LLMService:
+    """Factory for LLMService with injected dependencies"""
+    return LLMService(
+        llm_repository=get_llm_repository(),
+        context_repository=get_context_repository(),
+        prompt_builder=get_llm_prompt_builder()
     )
+
+
+# Alias for backward compatibility
+def get_bedrock_service() -> LLMService:
+    """Deprecated: Use get_llm_service instead"""
+    return get_llm_service()
 
 
 def get_champion_progress_service() -> ChampionProgressService:

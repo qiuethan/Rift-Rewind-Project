@@ -84,10 +84,10 @@ async def test_bedrock():
         
         return False
 
-async def test_multiple_prompts():
-    """Test multiple prompts to verify consistency"""
+async def test_prompt_routing():
+    """Test prompt routing with different complexity levels"""
     print("\n" + "=" * 60)
-    print("Testing Multiple Prompts")
+    print("Testing Prompt Routing")
     print("=" * 60)
     
     bedrock = BedrockRepository()
@@ -96,17 +96,75 @@ async def test_multiple_prompts():
         print("❌ Bedrock not available")
         return
     
-    prompts = [
-        "What is League of Legends in one sentence?",
-        "Name 3 popular League of Legends champions.",
-        "What does KDA stand for in gaming?"
+    test_cases = [
+        {
+            "prompt": "Hello!",
+            "expected": "simple",
+            "description": "Simple greeting"
+        },
+        {
+            "prompt": "What is KDA?",
+            "expected": "simple",
+            "description": "Basic question"
+        },
+        {
+            "prompt": "Analyze this match: I played Yasuo mid and went 10/3/5. We won but I felt like I could have roamed more. What should I improve?",
+            "expected": "moderate",
+            "description": "Match analysis"
+        },
+        {
+            "prompt": "Given the current meta, predict the optimal team composition for countering a poke-heavy comp with Xerath, Caitlyn, and Karma. Consider draft phase, win conditions, and macro strategy.",
+            "expected": "complex",
+            "description": "Strategic analysis"
+        }
     ]
     
-    for i, prompt in enumerate(prompts, 1):
-        print(f"\n{i}. Prompt: {prompt}")
+    for i, test in enumerate(test_cases, 1):
+        print(f"\n{i}. {test['description']}")
+        print(f"   Prompt: {test['prompt'][:80]}{'...' if len(test['prompt']) > 80 else ''}")
+        print(f"   Expected complexity: {test['expected']}")
+        
         try:
-            response = await bedrock.generate_text(prompt)
-            print(f"   Response: {response[:100]}{'...' if len(response) > 100 else ''}")
+            result = await bedrock.generate_text_with_routing(test['prompt'])
+            
+            print(f"   ✅ Classified as: {result['complexity']}")
+            print(f"   📦 Model used: {result['model_used'].split('.')[-1]}")
+            print(f"   📝 Response: {result['text'][:150]}{'...' if len(result['text']) > 150 else ''}")
+            
+            if result['complexity'] == test['expected']:
+                print(f"   ✅ Routing correct!")
+            else:
+                print(f"   ⚠️  Expected {test['expected']}, got {result['complexity']}")
+                
+        except Exception as e:
+            print(f"   ❌ Error: {e}")
+
+async def test_use_case_routing():
+    """Test predefined use case routing"""
+    print("\n" + "=" * 60)
+    print("Testing Use Case Routing")
+    print("=" * 60)
+    
+    bedrock = BedrockRepository()
+    
+    if not bedrock.is_available():
+        print("❌ Bedrock not available")
+        return
+    
+    use_cases = [
+        ("greeting", "Hi there!"),
+        ("match_summary", "Summarize my last game"),
+        ("team_comp_analysis", "Analyze our team comp")
+    ]
+    
+    for use_case, prompt in use_cases:
+        print(f"\n📋 Use case: {use_case}")
+        print(f"   Prompt: {prompt}")
+        
+        try:
+            result = await bedrock.generate_text_with_routing(prompt, use_case=use_case)
+            print(f"   ✅ Routed to: {result['model_used'].split('.')[-1]}")
+            print(f"   📝 Response: {result['text'][:100]}{'...' if len(result['text']) > 100 else ''}")
         except Exception as e:
             print(f"   ❌ Error: {e}")
 
@@ -118,17 +176,26 @@ def main():
     success = asyncio.run(test_bedrock())
     
     if success:
-        # Run additional tests
-        response = input("\n\nRun additional tests? (y/n): ")
+        # Run routing tests
+        print("\n\n" + "=" * 60)
+        response = input("Test prompt routing? (y/n): ")
         if response.lower() == 'y':
-            asyncio.run(test_multiple_prompts())
+            asyncio.run(test_prompt_routing())
+        
+        print("\n\n" + "=" * 60)
+        response = input("Test use case routing? (y/n): ")
+        if response.lower() == 'y':
+            asyncio.run(test_use_case_routing())
     
     print("\n" + "=" * 60)
     print("Test Complete")
     print("=" * 60)
     
     if success:
-        print("✅ All tests passed! Bedrock is ready to use.")
+        print("✅ All tests passed! Bedrock prompt router is ready to use.")
+        print("\n💡 The router automatically selects:")
+        print("   - Haiku 4.5 (fast & cheap) for simple queries")
+        print("   - Sonnet 4.5 for moderate and complex tasks")
     else:
         print("❌ Tests failed. Check the errors above and refer to BEDROCK_SETUP.md")
 

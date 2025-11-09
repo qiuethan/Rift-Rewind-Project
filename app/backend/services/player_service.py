@@ -8,6 +8,7 @@ from domain.player_domain import PlayerDomain
 from domain.exceptions import DomainException
 from models.players import SummonerRequest, SummonerResponse, PlayerStatsResponse
 from models.match import RecentGameSummary, FullGameData
+from constants.repository import MAX_BACKGROUND_SYNC_MATCHES
 from fastapi import HTTPException, status
 from typing import List
 from datetime import datetime, timezone
@@ -291,7 +292,7 @@ class PlayerService:
         Runs asynchronously without blocking the response.
         """
         try:
-            max_total_matches = 100  # Cap at 100 matches total
+            max_total_matches = MAX_BACKGROUND_SYNC_MATCHES
             logger.info(f"Background sync: Starting to fetch up to {max_total_matches} total matches for {puuid}")
             
             total_saved = 0

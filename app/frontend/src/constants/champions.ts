@@ -160,6 +160,7 @@ export const CHAMPION_ID_TO_KEY: { [key: number]: string } = {
   711: 'Vex',
   777: 'Yone',
   799: 'Ambessa',
+  800: 'Mel',
   804: 'Yunara',
   875: 'Sett',
   876: 'Lillia',
@@ -180,6 +181,26 @@ export const CHAMPION_ID_TO_KEY: { [key: number]: string } = {
  */
 export const getChampionKey = (championId: number): string => {
   return CHAMPION_ID_TO_KEY[championId] || 'Aatrox';
+};
+
+/**
+ * Get champion key from champion name (case-insensitive)
+ * @param championName - The champion name from Riot API
+ * @returns Champion key for Data Dragon URLs
+ */
+export const getChampionKeyByName = (championName: string): string => {
+  // Normalize the name (remove spaces, lowercase)
+  const normalizedName = championName.replace(/\s+/g, '').toLowerCase();
+  
+  // Search through all champion keys
+  for (const key of Object.values(CHAMPION_ID_TO_KEY)) {
+    if (key.toLowerCase() === normalizedName) {
+      return key;
+    }
+  }
+  
+  // Fallback to the name itself (capitalize first letter)
+  return championName.charAt(0).toUpperCase() + championName.slice(1);
 };
 
 /**

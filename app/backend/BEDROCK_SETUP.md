@@ -12,13 +12,28 @@ This guide will help you set up AWS Bedrock (Claude 3.5 Sonnet) for the Rift Rew
 
 1. **Log in to AWS Console**: https://console.aws.amazon.com/
 2. **Navigate to Bedrock**: Search for "Bedrock" in the services search bar
-3. **Request Model Access**:
+3. **Submit Anthropic Use Case Form** (REQUIRED - One-time only):
    - Go to "Model access" in the left sidebar
    - Click "Manage model access" or "Request model access"
-   - Find **Claude 3.5 Sonnet v2** (`anthropic.claude-3-5-sonnet-20241022-v2:0`)
-   - Check the box next to it
-   - Click "Request model access" at the bottom
-   - Wait for approval (usually instant for Claude models)
+   - Find any **Anthropic Claude** model
+   - Click "Request model access" or "Edit" if already requested
+   - You'll see a form asking about your use case
+   - Fill out the form with:
+     - **Use case**: "AI-powered gaming analytics and match analysis for League of Legends"
+     - **Company/Organization**: Your name or company
+     - **Industry**: Gaming/Entertainment
+     - **Intended use**: "Analyzing game matches, providing player insights, and generating strategic recommendations"
+   - Submit the form
+   - **Wait 15-30 minutes** for approval (usually automatic)
+
+4. **Request Model Access**:
+   - After the form is approved, go back to "Model access"
+   - Find and enable these models:
+     - **Claude Haiku 4.5** (`anthropic.claude-haiku-4-5-20251001-v1:0`)
+     - **Claude Sonnet 4.5** (`anthropic.claude-sonnet-4-5-20250929-v1:0`)
+   - Check the boxes next to them
+   - Click "Save changes" or "Request model access"
+   - Wait for approval (usually instant after use case form is approved)
 
 ## Step 2: Create IAM User for Bedrock
 
@@ -52,7 +67,7 @@ Add the following to your `.env` file in the backend directory:
 AWS_ACCESS_KEY_ID=your_access_key_id_here
 AWS_SECRET_ACCESS_KEY=your_secret_access_key_here
 AWS_REGION=us-east-1
-AWS_BEDROCK_MODEL=anthropic.claude-3-5-sonnet-20241022-v2:0
+AWS_BEDROCK_MODEL=us.anthropic.claude-3-5-sonnet-20241022-v2:0
 ```
 
 **Security Notes**:
@@ -113,11 +128,13 @@ if bedrock.is_available():
 
 ## Current Configuration
 
-- **Model**: Claude 3.5 Sonnet v2 (`anthropic.claude-3-5-sonnet-20241022-v2:0`)
+- **Model**: Claude 3.5 Sonnet v2 (Inference Profile: `us.anthropic.claude-3-5-sonnet-20241022-v2:0`)
 - **Region**: us-east-1 (default)
 - **Max Tokens**: 500 (configurable in `bedrock_repository.py`)
 - **Temperature**: 0.7 (configurable)
 - **Top P**: 0.9 (configurable)
+
+**Note**: AWS Bedrock requires using inference profiles (prefixed with region, e.g., `us.`) instead of direct model IDs for on-demand throughput.
 
 ## Troubleshooting
 
@@ -137,8 +154,21 @@ if bedrock.is_available():
 - Wait a few minutes if you just requested model access
 
 ### Error: "ValidationException: The provided model identifier is invalid"
-- Verify the model ID in your `.env` matches exactly: `anthropic.claude-3-5-sonnet-20241022-v2:0`
+- Verify the model ID in your `.env` matches exactly: `us.anthropic.claude-3-5-sonnet-20241022-v2:0`
 - Check that you've requested access to this specific model version
+
+### Error: "Invocation of model ID ... with on-demand throughput isn't supported"
+- You need to use an inference profile instead of the direct model ID
+- Update your `.env` to use: `AWS_BEDROCK_MODEL=us.anthropic.claude-3-5-sonnet-20241022-v2:0`
+- Note the `us.` prefix for the US region inference profile
+
+### Error: "Model use case details have not been submitted for this account"
+- **You must submit the Anthropic use case form** (one-time requirement)
+- Go to AWS Bedrock Console → Model access
+- Click on any Anthropic model and fill out the use case form
+- Suggested use case: "AI-powered gaming analytics and match analysis for League of Legends"
+- Wait 15-30 minutes after submission
+- The form is required even if you already have model access enabled
 
 ## Cost Considerations
 

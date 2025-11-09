@@ -54,7 +54,11 @@ class SupabaseTableQuery(TableQuery):
     
     async def execute(self) -> QueryResponse:
         """Execute query asynchronously to prevent blocking"""
-        result = await asyncio.to_thread(self._query.execute)
+        # Supabase execute is synchronous - run it in a thread to avoid blocking
+        def _execute():
+            return self._query.execute()
+        
+        result = await asyncio.to_thread(_execute)
         return QueryResponse(data=result.data if hasattr(result, 'data') else [])
 
 

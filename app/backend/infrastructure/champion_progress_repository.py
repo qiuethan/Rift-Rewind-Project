@@ -291,7 +291,7 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
         Returns:
             float: Percentage change per game (positive = improving, negative = declining)
         """
-        if len(recent_scores) < 5:
+        if len(recent_scores) < 3:
             return 0.0
         
         n = len(recent_scores)
@@ -333,7 +333,7 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
         Returns:
             float: Average percentage change per game
         """
-        if len(eps_scores) < 5 or len(cps_scores) < 5:
+        if len(eps_scores) < 3 or len(cps_scores) < 3:
             return 0.0
         
         # Calculate trend for both metrics

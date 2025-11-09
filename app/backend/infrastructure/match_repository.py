@@ -458,17 +458,20 @@ class MatchRepositoryRiot(MatchRepository):
             eps_scores = analysis.get('rawStats', {}).get('epsScores', {})
             eps_score = eps_scores.get(champion_name, 0.0)
             
-            # Get final CPS from power score timeline
+            # Get final CPS from power score timeline and normalize by game length
             cps_score = 0.0
             power_timeline = analysis.get('charts', {}).get('powerScoreTimeline', {})
-            if power_timeline:
+            game_duration_minutes = match_data.get('info', {}).get('gameDuration', 0) / 60  # Convert seconds to minutes
+            
+            if power_timeline and game_duration_minutes > 0:
                 datasets = power_timeline.get('data', {}).get('datasets', [])
                 for dataset in datasets:
                     label = dataset.get('label', '')
                     if champion_name in label:
                         data_points = dataset.get('data', [])
                         if data_points:
-                            cps_score = data_points[-1]  # Final CPS value
+                            final_cps = data_points[-1]  # Final cumulative power score
+                            cps_score = final_cps / game_duration_minutes  # Normalize by game length
                         break
             
             # Calculate KDA

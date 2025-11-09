@@ -1,81 +1,208 @@
 """
-AWS Bedrock LLM Service
+LLM Service - Orchestrates AI interactions with user context
 Handles interactions with AWS Bedrock for AI-powered analytics
+Clean Architecture - Layer 4 (Service/Use Case)
 """
-import json
-import boto3
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
+from repositories.llm_repository import LLMRepository
+from repositories.context_repository import ContextRepository
+from infrastructure.llm_prompt_builder import LLMPromptBuilder
 from utils.logger import logger
+from utils.champion_mapping import extract_champion_from_text, get_champion_id
 
 
-class BedrockService:
-    """Service for interacting with AWS Bedrock LLMs"""
+class LLMService:
+    """Service for AI-powered analytics with user context"""
     
-    def __init__(self, aws_access_key: str, aws_secret_key: str, region: str, model_id: str):
+    def __init__(
+        self, 
+        llm_repository: LLMRepository, 
+        context_repository: ContextRepository,
+        prompt_builder: LLMPromptBuilder
+    ):
         """
-        Initialize Bedrock client with injected credentials
+        Initialize LLM service with dependencies
         
         Args:
-            aws_access_key: AWS access key ID
-            aws_secret_key: AWS secret access key
-            region: AWS region
-            model_id: Bedrock model ID to use
+            llm_repository: LLM repository for AI calls
+            context_repository: Context repository for retrieving user data
+            prompt_builder: Infrastructure for building prompts
         """
-        self.model_id = model_id
-        self.client = None
-        self._initialize_client(aws_access_key, aws_secret_key, region)
+        self.llm = llm_repository
+        self.context = context_repository
+        self.prompt_builder = prompt_builder
     
-    def _initialize_client(self, aws_access_key: str, aws_secret_key: str, region: str):
-        """Initialize boto3 Bedrock client with credentials"""
-        if not aws_access_key or not aws_secret_key:
-            logger.warning("AWS credentials not configured")
-            return
-        
-        try:
-            self.client = boto3.client(
-                service_name='bedrock-runtime',
-                region_name=region,
-                aws_access_key_id=aws_access_key,
-                aws_secret_access_key=aws_secret_key
-            )
-            logger.info(f"AWS Bedrock client initialized (region: {region})")
-        except Exception as e:
-            logger.error(f"Failed to initialize AWS Bedrock client: {e}")
-            self.client = None
+    async def get_summoner_context(self, puuid: str) -> Optional[Dict[str, Any]]:
+        """Delegate to context repository"""
+        return await self.context.get_summoner_context(puuid)
     
-    async def generate_match_analysis(
+    async def get_champion_progress_context(self, puuid: str, champion_id: int) -> Optional[Dict[str, Any]]:
+        """Delegate to context repository"""
+        return await self.context.get_champion_progress_context(puuid, champion_id)
+    
+    async def get_match_context(self, puuid: str, match_id: str) -> Optional[Dict[str, Any]]:
+        """Delegate to context repository"""
+        return await self.context.get_match_context(puuid, match_id)
+    
+    # Alias for backward compatibility
+    async def get_user_context(self, puuid: str) -> Optional[Dict[str, Any]]:
+        """Alias for get_summoner_context"""
+        return await self.get_summoner_context(puuid)
+    
+    async def generate_with_smart_routing(
         self,
-        match_data: Dict[str, Any],
-        player_puuid: str
-    ) -> Optional[str]:
+        puuid: str,
+        prompt: str,
+        match_id: Optional[str] = None,
+        use_case: Optional[str] = None,
+        summoner_context_override: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        Generate AI-powered match analysis using AWS Bedrock
+        Generate AI response with smart context routing
+        Automatically determines what contexts are needed and fetches them
         
         Args:
-            match_data: Complete match data from Riot API
-            player_puuid: PUUID of the player to analyze
+            puuid: Player UUID
+            prompt: User's prompt/question
+            match_id: Optional match ID if discussing a specific match
+            use_case: Optional predefined use case for routing
             
         Returns:
-            AI-generated analysis text or None if failed
+            Dict with 'text', 'model_used', 'complexity', 'contexts_used'
         """
-        if not self.client:
-            return "AI analysis unavailable: AWS Bedrock not configured"
+        # Step 1: Determine what contexts are needed
+        routing = await self.llm.classify_context_needs(prompt)
+        logger.info(f"Smart routing: {routing}")
         
-        try:
-            # Extract relevant player data
-            player_stats = self._extract_player_stats(match_data, player_puuid)
-            
-            # Build prompt
-            prompt = self._build_analysis_prompt(player_stats)
-            
-            # Call Bedrock
-            response = await self._invoke_bedrock(prompt)
-            
-            return response
+        contexts_array = routing['contexts']
         
-        except Exception as e:
-            logger.error(f"Error generating match analysis: {e}")
-            return f"Error generating analysis: {str(e)}"
+        # Step 2: Parse contexts array and fetch needed data
+        contexts = {}
+        
+        for ctx in contexts_array:
+            # String context (e.g., "summoner")
+            if isinstance(ctx, str):
+                if ctx == "summoner":
+                    # Use override if provided, otherwise query database
+                    if summoner_context_override:
+                        contexts['summoner'] = summoner_context_override
+                        logger.info(f"Using summoner context override: {summoner_context_override}")
+                    else:
+                        summoner_ctx = await self.get_summoner_context(puuid)
+                        if summoner_ctx:
+                            contexts['summoner'] = summoner_ctx
+            
+            # Object context (e.g., {"champion_progress": "Yasuo"})
+            elif isinstance(ctx, dict):
+                if "champion_progress" in ctx:
+                    champion_name = ctx["champion_progress"]
+                    if champion_name:
+                        champion_id = get_champion_id(champion_name)
+                        if champion_id:
+                            progress_ctx = await self.get_champion_progress_context(puuid, champion_id)
+                            if progress_ctx:
+                                contexts['champion_progress'] = progress_ctx
+                                logger.info(f"Fetched champion progress for {champion_name} (ID: {champion_id})")
+                        else:
+                            logger.warning(f"Champion '{champion_name}' not found in mapping")
+                
+                elif "match" in ctx:
+                    # Check if match_id was provided
+                    if match_id:
+                        match_ctx = await self.get_match_context(puuid, match_id)
+                        if match_ctx:
+                            contexts['match'] = match_ctx
+                    else:
+                        logger.warning("Match context needed but no match_id provided")
+        
+        # Step 3: Build enriched prompt with all contexts
+        context_prefix = self.prompt_builder.build_context_prefix(contexts)
+        enriched_prompt = context_prefix + prompt
+        
+        # Step 4: Generate response with routing
+        result = await self.llm.generate_text_with_routing(enriched_prompt, use_case=use_case)
+        
+        # Add context metadata
+        result['contexts_used'] = list(contexts.keys())
+        result['contexts_data'] = contexts
+        
+        return result
+    
+    
+    async def generate_with_context(
+        self,
+        puuid: str,
+        prompt: str,
+        use_case: Optional[str] = None,
+        additional_context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate AI response with user context included
+        
+        Args:
+            puuid: Player UUID
+            prompt: User's prompt/question
+            use_case: Optional predefined use case for routing
+            additional_context: Optional additional context to include
+            
+        Returns:
+            Dict with 'text', 'model_used', 'complexity', and 'user_context'
+        """
+        # Get user context
+        user_context = await self.get_user_context(puuid)
+        
+        if not user_context:
+            logger.warning(f"Proceeding without user context for {puuid}")
+            user_context = {'game_name': 'Unknown', 'region': 'Unknown'}
+        
+        # Build enriched prompt with context
+        context_prefix = f"[Player: {user_context['game_name']} | Region: {user_context['region']}]\n\n"
+        
+        if additional_context:
+            for key, value in additional_context.items():
+                context_prefix += f"[{key}: {value}]\n"
+            context_prefix += "\n"
+        
+        enriched_prompt = context_prefix + prompt
+        
+        logger.info(f"Generating response for {user_context['game_name']} with use_case: {use_case}")
+        
+        # Generate response with routing
+        result = await self.llm.generate_text_with_routing(enriched_prompt, use_case=use_case)
+        
+        # Add user context to result
+        result['user_context'] = user_context
+        
+        return result
+    
+    async def analyze_match(
+        self,
+        puuid: str,
+        match_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Generate AI-powered match analysis with user context
+        
+        Args:
+            puuid: Player UUID
+            match_data: Complete match data from Riot API
+            
+        Returns:
+            Analysis result with text and metadata
+        """
+        # Extract player stats
+        player_stats = self._extract_player_stats(match_data, puuid)
+        
+        # Build analysis prompt
+        prompt = self._build_analysis_prompt(player_stats)
+        
+        # Generate with context
+        return await self.generate_with_context(
+            puuid=puuid,
+            prompt=prompt,
+            use_case="match_summary",
+            additional_context={'champion': player_stats.get('champion')}
+        )
     
     def _extract_player_stats(
         self,
@@ -107,117 +234,9 @@ class BedrockService:
             'damage': player_data.get('totalDamageDealtToChampions', 0),
             'vision_score': player_data.get('visionScore', 0),
             'game_duration': info.get('gameDuration', 0) // 60,  # Convert to minutes
-            'win': player_data.get('win', False),
-            'items': [
-                player_data.get(f'item{i}', 0)
-                for i in range(7)
-                if player_data.get(f'item{i}', 0) != 0
-            ]
+            'win': player_data.get('win', False)
         }
     
     def _build_analysis_prompt(self, stats: Dict[str, Any]) -> str:
-        """Build prompt for AI analysis"""
-        kda = f"{stats.get('kills', 0)}/{stats.get('deaths', 0)}/{stats.get('assists', 0)}"
-        result = "Victory" if stats.get('win') else "Defeat"
-        
-        prompt = f"""Analyze this League of Legends match performance:
-
-Champion: {stats.get('champion', 'Unknown')}
-Role: {stats.get('role', 'Unknown')}
-Result: {result}
-KDA: {kda}
-CS: {stats.get('cs', 0)}
-Gold: {stats.get('gold', 0):,}
-Damage: {stats.get('damage', 0):,}
-Vision Score: {stats.get('vision_score', 0)}
-Game Duration: {stats.get('game_duration', 0)} minutes
-
-Provide a concise 3-4 sentence analysis covering:
-1. Overall performance assessment
-2. Key strengths in this match
-3. One specific area for improvement
-
-Keep it constructive and actionable."""
-
-        return prompt
-    
-    async def _invoke_bedrock(self, prompt: str) -> str:
-        """
-        Invoke AWS Bedrock with the given prompt
-        
-        Args:
-            prompt: The prompt to send to the model
-            
-        Returns:
-            Generated text response
-        """
-        try:
-            # Prepare request body for Claude
-            body = json.dumps({
-                "anthropic_version": "bedrock-2023-05-31",
-                "max_tokens": 500,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                "temperature": 0.7,
-                "top_p": 0.9
-            })
-            
-            # Invoke model
-            response = self.client.invoke_model(
-                modelId=self.model_id,
-                body=body,
-                contentType='application/json',
-                accept='application/json'
-            )
-            
-            # Parse response
-            response_body = json.loads(response['body'].read())
-            
-            # Extract text from Claude response
-            if 'content' in response_body and len(response_body['content']) > 0:
-                return response_body['content'][0]['text']
-            
-            return "No response generated"
-        
-        except Exception as e:
-            logger.error(f"Bedrock invocation error: {e}")
-            raise
-    
-    async def generate_champion_recommendation(
-        self,
-        player_stats: Dict[str, Any],
-        recent_matches: list
-    ) -> Optional[str]:
-        """
-        Generate champion recommendations based on player history
-        
-        Args:
-            player_stats: Player's overall statistics
-            recent_matches: List of recent match data
-            
-        Returns:
-            AI-generated recommendations or None if failed
-        """
-        if not self.client:
-            return "AI recommendations unavailable: AWS Bedrock not configured"
-        
-        try:
-            prompt = f"""Based on this League of Legends player's recent performance, suggest 3 champions they should try:
-
-Recent matches played: {len(recent_matches)}
-Most played roles: {', '.join(player_stats.get('top_roles', ['Unknown'])[:3])}
-Average KDA: {player_stats.get('avg_kda', 0):.2f}
-Win rate: {player_stats.get('win_rate', 0):.1f}%
-
-Provide 3 champion recommendations with brief reasoning for each."""
-
-            response = await self._invoke_bedrock(prompt)
-            return response
-        
-        except Exception as e:
-            logger.error(f"Error generating recommendations: {e}")
-            return f"Error generating recommendations: {str(e)}"
+        """Build prompt for AI analysis - delegates to prompt builder"""
+        return self.prompt_builder.build_analysis_prompt(stats)
