@@ -155,7 +155,7 @@ class LLMService:
             prefix += f"[CHAMPION STATS: {cp['champion_name']}]\n"
             prefix += f"Total Games: {cp['total_games']} | Win Rate: {cp['win_rate']:.1f}%\n"
             prefix += f"EPS Score: {cp['avg_eps_score']:.1f}/100 (trend: {cp['eps_trend']:+.1f} per game)\n"
-            prefix += f"CPS Score: {cp['avg_cps_score']:.1f}/100 (trend: {cp['cps_trend']:+.1f} per game)\n"
+            prefix += f"CPS Score: {cp['avg_cps_score']:.1f}/1 (normally distributed) (trend: {cp['cps_trend']:+.1f} per game)\n"
             
             # Add interpretation hints
             if cp['eps_trend'] > 2:
@@ -200,7 +200,7 @@ class LLMService:
                 prefix += f"CPS (Champion Performance Score): Measures CHAMPION EFFECTIVENESS\n"
                 prefix += f"  • How well the champion performed relative to its potential\n"
                 prefix += f"  • Considers itemization, build efficiency, champion-specific metrics\n"
-                prefix += f"  • Score range: 0-100 (higher is better)\n\n"
+                prefix += f"  • Score range: 0-1 (higher is better, normally distributed)\n\n"
                 
                 # EPS Scores and Breakdown
                 if 'rawStats' in analysis and 'epsScores' in analysis['rawStats']:
