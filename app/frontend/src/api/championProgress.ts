@@ -32,9 +32,9 @@ export interface ChampionProgressTrend {
   avg_eps_score: number;
   avg_cps_score: number;
   avg_kda: number;
-  recent_trend: 'improving' | 'declining' | 'stable';
-  eps_trend?: 'improving' | 'declining' | 'stable';  // Champion mastery trend
-  cps_trend?: 'improving' | 'declining' | 'stable';  // Scaling ability trend
+  recent_trend: number;  // Combined trend percentage (deprecated)
+  eps_trend: number;  // EPS trend percentage per game
+  cps_trend: number;  // CPS trend percentage per game
   last_played: number;
   mastery_level?: number;
   mastery_points?: number;

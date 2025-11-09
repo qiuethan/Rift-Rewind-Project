@@ -83,6 +83,8 @@ function applyThemeToDOM(theme: RegionTheme) {
   root.style.setProperty('--region-danger', theme.palette.danger);
   root.style.setProperty('--region-success', theme.palette.success);
   root.style.setProperty('--region-warning', theme.palette.warning);
+  root.style.setProperty('--region-button-text', theme.palette.buttonText);
+  root.style.setProperty('--region-button-text-alt', theme.palette.buttonTextAlt);
 
   // Apply shadows
   root.style.setProperty('--region-shadow-primary', theme.shadows.primary);

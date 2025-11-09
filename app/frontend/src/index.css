@@ -30,6 +30,8 @@
   --region-danger: #FF4D4D;
   --region-success: #55F2CE;
   --region-warning: #F5C96A;
+  --region-button-text: #0D1117;
+  --region-button-text-alt: #0D1117;
   --region-shadow-primary: 0 0 25px rgba(245, 201, 106, 0.25);
   --region-shadow-secondary: 0 0 40px rgba(85, 242, 206, 0.3);
   --region-shadow-glow: inset 0 0 20px rgba(245, 201, 106, 0.1);

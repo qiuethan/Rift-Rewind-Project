@@ -217,10 +217,10 @@ export default function ChampionDetailPage() {
                   <div className={styles.trendsContainer}>
                     <div className={styles.trendSection}>
                       <h4 className={styles.trendTitle}>Champion Mastery (EPS)</h4>
-                      <div className={styles.trendBadge} data-trend={championProgress.trend.eps_trend || 'stable'}>
-                        {(championProgress.trend.eps_trend || 'stable') === 'improving' && '📈 Improving'}
-                        {(championProgress.trend.eps_trend || 'stable') === 'declining' && '📉 Declining'}
-                        {(championProgress.trend.eps_trend || 'stable') === 'stable' && '➡️ Stable'}
+                      <div className={styles.trendBadge} data-trend={championProgress.trend.eps_trend > 1 ? 'improving' : championProgress.trend.eps_trend < -1 ? 'declining' : 'stable'}>
+                        {championProgress.trend.eps_trend > 1 && `📈 +${championProgress.trend.eps_trend.toFixed(1)}% per game`}
+                        {championProgress.trend.eps_trend < -1 && `📉 ${championProgress.trend.eps_trend.toFixed(1)}% per game`}
+                        {championProgress.trend.eps_trend >= -1 && championProgress.trend.eps_trend <= 1 && `➡️ ${championProgress.trend.eps_trend.toFixed(1)}% per game`}
                       </div>
                       <p className={styles.trendDescription}>
                         Overall performance: combat, economy, objectives
@@ -235,10 +235,10 @@ export default function ChampionDetailPage() {
 
                     <div className={styles.trendSection}>
                       <h4 className={styles.trendTitle}>Scaling Ability (CPS)</h4>
-                      <div className={styles.trendBadge} data-trend={championProgress.trend.cps_trend || 'stable'}>
-                        {(championProgress.trend.cps_trend || 'stable') === 'improving' && '📈 Improving'}
-                        {(championProgress.trend.cps_trend || 'stable') === 'declining' && '📉 Declining'}
-                        {(championProgress.trend.cps_trend || 'stable') === 'stable' && '➡️ Stable'}
+                      <div className={styles.trendBadge} data-trend={championProgress.trend.cps_trend > 1 ? 'improving' : championProgress.trend.cps_trend < -1 ? 'declining' : 'stable'}>
+                        {championProgress.trend.cps_trend > 1 && `📈 +${championProgress.trend.cps_trend.toFixed(1)}% per game`}
+                        {championProgress.trend.cps_trend < -1 && `📉 ${championProgress.trend.cps_trend.toFixed(1)}% per game`}
+                        {championProgress.trend.cps_trend >= -1 && championProgress.trend.cps_trend <= 1 && `➡️ ${championProgress.trend.cps_trend.toFixed(1)}% per game`}
                       </div>
                       <p className={styles.trendDescription}>
                         Power growth: gold/exp advantages, damage output

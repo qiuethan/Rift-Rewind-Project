@@ -43,7 +43,7 @@
 
 .primary {
   background: linear-gradient(135deg, var(--region-primary) 0%, var(--region-accent) 100%);
-  color: var(--region-secondary);
+  color: var(--region-button-text);
   border: 2px solid var(--region-primary);
   box-shadow: var(--region-shadow-primary);
   opacity: 1;
@@ -81,14 +81,14 @@
 
 .danger {
   background: var(--region-danger);
-  color: var(--region-text);
+  color: var(--region-button-text);
   border: 2px solid var(--region-danger);
   box-shadow: 0 0 20px rgba(255, 77, 77, 0.3);
   opacity: 1;
 }
 
 .danger:hover:not(:disabled) {
-  background: transparent;
+  background: var(--region-secondary);
   border-color: var(--region-danger);
   color: var(--region-danger);
   box-shadow: 0 0 30px rgba(255, 77, 77, 0.5);

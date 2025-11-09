@@ -37,9 +37,9 @@ class ChampionProgressTrend(BaseModel):
     avg_eps_score: float
     avg_cps_score: float
     avg_kda: float
-    recent_trend: str = Field(..., description="improving, declining, stable")  # Kept for backward compatibility
-    eps_trend: str = Field("stable", description="EPS trend: champion mastery (improving, declining, stable)")
-    cps_trend: str = Field("stable", description="CPS trend: scaling ability (improving, declining, stable)")
+    recent_trend: float = Field(0.0, description="Combined trend percentage (deprecated, use eps_trend/cps_trend)")
+    eps_trend: float = Field(0.0, description="EPS trend percentage per game (positive = improving, negative = declining)")
+    cps_trend: float = Field(0.0, description="CPS trend percentage per game (positive = improving, negative = declining)")
     last_played: int = Field(..., description="Unix timestamp of last game")
     mastery_level: Optional[int] = None
     mastery_points: Optional[int] = None
@@ -96,9 +96,9 @@ class ChampionProgressRecord(BaseModel):
     avg_eps_score: float = 0.0
     avg_cps_score: float = 0.0
     avg_kda: float = 0.0
-    recent_trend: str = "stable"  # Kept for backward compatibility
-    eps_trend: str = "stable"  # Champion mastery trend
-    cps_trend: str = "stable"  # Scaling ability trend
+    recent_trend: float = 0.0  # Combined trend percentage (deprecated)
+    eps_trend: float = 0.0  # EPS trend percentage per game
+    cps_trend: float = 0.0  # CPS trend percentage per game
     last_played: int = Field(..., description="Unix timestamp")
     recent_matches: List[Dict[str, Any]] = Field(default_factory=list)
     performance_history: List[Dict[str, Any]] = Field(default_factory=list)

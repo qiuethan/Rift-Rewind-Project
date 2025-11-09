@@ -289,12 +289,25 @@ class PlayerRepositoryRiot(PlayerRepository):
             
             for attempt in range(DB_RETRY_MAX_ATTEMPTS):
                 try:
-                    await self.match_repository.save_match(match_id, match_data, puuid, timeline_data)
-                    saved_count += 1
-                    logger.debug(f"Saved match {match_id}")
-                    # Small delay to prevent connection pool exhaustion
-                    await asyncio.sleep(DB_OPERATION_DELAY)
-                    break  # Success, exit retry loop
+                    success = await self.match_repository.save_match(match_id, match_data, puuid, timeline_data)
+                    if success:
+                        # Verify the match was actually saved
+                        verify = await self.match_repository.match_exists(match_id)
+                        if verify:
+                            saved_count += 1
+                            logger.info(f"✅ Successfully saved and verified match {match_id} in database")
+                        else:
+                            logger.error(f"❌ Match {match_id} saved but verification failed - not found in DB")
+                        # Small delay to prevent connection pool exhaustion
+                        await asyncio.sleep(DB_OPERATION_DELAY)
+                        break  # Success, exit retry loop
+                    else:
+                        logger.error(f"❌ save_match returned False for {match_id} (attempt {attempt + 1}/{DB_RETRY_MAX_ATTEMPTS})")
+                        if attempt < DB_RETRY_MAX_ATTEMPTS - 1:
+                            await asyncio.sleep(retry_delay)
+                            retry_delay *= 2
+                        else:
+                            break
                 except Exception as e:
                     error_msg = str(e)
                     is_connection_error = any(err in error_msg.lower() for err in ['ssl', 'eof', 'connection', 'disconnected', 'server'])
@@ -304,7 +317,9 @@ class PlayerRepositoryRiot(PlayerRepository):
                         await asyncio.sleep(retry_delay)
                         retry_delay *= 2  # Exponential backoff
                     else:
-                        logger.error(f"Error saving {match_id} after {attempt + 1} attempts: {e}")
+                        logger.error(f"❌ Exception saving {match_id} after {attempt + 1} attempts: {e}")
+                        import traceback
+                        logger.error(f"Traceback: {traceback.format_exc()}")
                         break
         
         logger.info(f"Saved {saved_count}/{len(matches)} matches")
@@ -356,11 +371,14 @@ class PlayerRepositoryRiot(PlayerRepository):
             
             # Step 4: Save fetched matches to DB
             if api_matches:
-                await self.save_matches_batch(api_matches, puuid)
+                saved_count = await self.save_matches_batch(api_matches, puuid)
+                logger.info(f"Saved {saved_count}/{len(api_matches)} matches to database")
                 
                 # Add API matches to db_matches dict
                 for match_id, (match_data, _) in api_matches.items():
                     db_matches[match_id] = match_data
+            else:
+                logger.warning(f"No matches fetched from API for {len(missing_ids)} missing IDs")
         
         # Step 5: Build game summaries from all matches (maintaining order)
         all_matches = {mid: data for mid, data in db_matches.items() if data is not None}

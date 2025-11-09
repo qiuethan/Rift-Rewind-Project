@@ -265,7 +265,9 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
                     avg_eps_score=update_request.eps_score,
                     avg_cps_score=update_request.cps_score,
                     avg_kda=update_request.kda,
-                    recent_trend="stable",
+                    recent_trend=0.0,
+                    eps_trend=0.0,
+                    cps_trend=0.0,
                     last_played=update_request.game_date,
                     recent_matches=[new_match],
                     performance_history=[{
@@ -281,67 +283,66 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
             logger.error(f"Error updating champion progress: {e}")
             return None
     
-    def _calculate_trend(self, recent_scores: List[float]) -> str:
-        """Helper to calculate trend from recent scores"""
-        if len(recent_scores) < 5:
-            return "stable"
-        
-        # Compare first half vs second half
-        mid = len(recent_scores) // 2
-        first_half_avg = sum(recent_scores[mid:]) / (len(recent_scores) - mid)
-        second_half_avg = sum(recent_scores[:mid]) / mid
-        
-        if first_half_avg == 0:
-            return "stable"
-        
-        diff_percentage = ((second_half_avg - first_half_avg) / first_half_avg) * 100
-        
-        if diff_percentage > 5:
-            return "improving"
-        elif diff_percentage < -5:
-            return "declining"
-        else:
-            return "stable"
-    
-    def _calculate_combined_trend(self, eps_scores: List[float], cps_scores: List[float]) -> str:
+    def _calculate_trend(self, recent_scores: List[float]) -> float:
         """
-        Calculate trend based on both EPS and CPS scores
-        EPS measures efficiency (CS, gold, vision, damage)
-        CPS measures combat performance (kills, deaths, assists, KDA)
+        Calculate trend using linear regression slope.
+        More recent games are weighted more heavily.
+        
+        Returns:
+            float: Percentage change per game (positive = improving, negative = declining)
+        """
+        if len(recent_scores) < 5:
+            return 0.0
+        
+        n = len(recent_scores)
+        
+        # Reverse so index 0 = oldest, index n-1 = newest
+        scores = list(reversed(recent_scores))
+        
+        # Apply exponential weighting (more recent = higher weight)
+        weights = [1.5 ** i for i in range(n)]
+        total_weight = sum(weights)
+        
+        # Weighted linear regression
+        # x = game index (0 to n-1), y = score
+        weighted_x_sum = sum(i * weights[i] for i in range(n))
+        weighted_y_sum = sum(scores[i] * weights[i] for i in range(n))
+        weighted_x_mean = weighted_x_sum / total_weight
+        weighted_y_mean = weighted_y_sum / total_weight
+        
+        # Calculate slope
+        numerator = sum(weights[i] * (i - weighted_x_mean) * (scores[i] - weighted_y_mean) for i in range(n))
+        denominator = sum(weights[i] * (i - weighted_x_mean) ** 2 for i in range(n))
+        
+        if denominator == 0 or weighted_y_mean == 0:
+            return 0.0
+        
+        slope = numerator / denominator
+        
+        # Convert slope to percentage change per game relative to mean
+        slope_percentage = (slope / weighted_y_mean) * 100
+        
+        # Round to 2 decimal places
+        return round(slope_percentage, 2)
+    
+    def _calculate_combined_trend(self, eps_scores: List[float], cps_scores: List[float]) -> float:
+        """
+        Calculate combined trend based on both EPS and CPS scores.
+        Returns average of both trend percentages.
+        
+        Returns:
+            float: Average percentage change per game
         """
         if len(eps_scores) < 5 or len(cps_scores) < 5:
-            return "stable"
+            return 0.0
         
         # Calculate trend for both metrics
         eps_trend = self._calculate_trend(eps_scores)
         cps_trend = self._calculate_trend(cps_scores)
         
-        # If both are improving or declining, return that
-        if eps_trend == cps_trend:
-            return eps_trend
-        
-        # If one is improving and one is declining, check which has stronger signal
-        mid = len(eps_scores) // 2
-        
-        # EPS trend strength
-        eps_first_half = sum(eps_scores[mid:]) / (len(eps_scores) - mid)
-        eps_second_half = sum(eps_scores[:mid]) / mid
-        eps_diff = ((eps_second_half - eps_first_half) / eps_first_half * 100) if eps_first_half > 0 else 0
-        
-        # CPS trend strength
-        cps_first_half = sum(cps_scores[mid:]) / (len(cps_scores) - mid)
-        cps_second_half = sum(cps_scores[:mid]) / mid
-        cps_diff = ((cps_second_half - cps_first_half) / cps_first_half * 100) if cps_first_half > 0 else 0
-        
-        # Average the two trends
-        avg_diff = (eps_diff + cps_diff) / 2
-        
-        if avg_diff > 5:
-            return "improving"
-        elif avg_diff < -5:
-            return "declining"
-        else:
-            return "stable"
+        # Return average of both trends
+        combined = (eps_trend + cps_trend) / 2
+        return round(combined, 2)
     
     async def get_champion_progress_record(
         self,

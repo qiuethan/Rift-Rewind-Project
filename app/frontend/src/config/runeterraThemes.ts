@@ -22,6 +22,8 @@ export interface RegionTheme {
     danger: string;
     success: string;
     warning: string;
+    buttonText: string; // High contrast text for primary buttons
+    buttonTextAlt: string; // High contrast text for secondary/accent buttons
   };
   shadows: {
     primary: string;
@@ -60,6 +62,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#FF4D4D',
       success: '#55F2CE',
       warning: '#F5C96A',
+      buttonText: '#0D1117',
+      buttonTextAlt: '#0D1117',
     },
     shadows: {
       primary: '0 0 25px rgba(245, 201, 106, 0.25)',
@@ -93,6 +97,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#FF6B9D',
       success: '#6BF7A7',
       warning: '#FFB347',
+      buttonText: '#0A0C14',
+      buttonTextAlt: '#0A0C14',
     },
     shadows: {
       primary: '0 0 25px rgba(233, 167, 255, 0.3)',
@@ -126,6 +132,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#FF5757',
       success: '#A7E7FF',
       warning: '#FFD966',
+      buttonText: '#0E1621',
+      buttonTextAlt: '#0E1621',
     },
     shadows: {
       primary: '0 0 25px rgba(199, 217, 255, 0.3)',
@@ -159,6 +167,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#FF3333',
       success: '#B19D68',
       warning: '#FF8C42',
+      buttonText: '#140406',
+      buttonTextAlt: '#140406',
     },
     shadows: {
       primary: '0 0 25px rgba(248, 72, 72, 0.35)',
@@ -192,6 +202,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#FF6B9D',
       success: '#5CD6FF',
       warning: '#FFB84D',
+      buttonText: '#071017',
+      buttonTextAlt: '#071017',
     },
     shadows: {
       primary: '0 0 25px rgba(92, 214, 255, 0.3)',
@@ -225,6 +237,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#00F0A8',
       success: '#35FFDA',
       warning: '#7DFFB3',
+      buttonText: '#020607',
+      buttonTextAlt: '#020607',
     },
     shadows: {
       primary: '0 0 25px rgba(53, 255, 218, 0.35)',
@@ -258,6 +272,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#E74C3C',
       success: '#F4D03F',
       warning: '#E67E22',
+      buttonText: '#1A0F05',
+      buttonTextAlt: '#1A0F05',
     },
     shadows: {
       primary: '0 0 25px rgba(244, 208, 63, 0.3)',
@@ -291,6 +307,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#F87171',
       success: '#FCD34D',
       warning: '#FBBF24',
+      buttonText: '#0A0514',
+      buttonTextAlt: '#0A0514',
     },
     shadows: {
       primary: '0 0 25px rgba(167, 139, 250, 0.3)',
@@ -324,6 +342,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#DC2626',
       success: '#22D3EE',
       warning: '#F59E0B',
+      buttonText: '#0C1821',
+      buttonTextAlt: '#0C1821',
     },
     shadows: {
       primary: '0 0 25px rgba(249, 115, 22, 0.3)',
@@ -357,6 +377,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#EF4444',
       success: '#10B981',
       warning: '#FBBF24',
+      buttonText: '#052E16',
+      buttonTextAlt: '#052E16',
     },
     shadows: {
       primary: '0 0 25px rgba(16, 185, 129, 0.3)',
@@ -390,6 +412,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#FF4D6D',
       success: '#FFD93D',
       warning: '#FF9A56',
+      buttonText: '#1A0A28',
+      buttonTextAlt: '#1A0A28',
     },
     shadows: {
       primary: '0 0 25px rgba(255, 107, 157, 0.35)',
@@ -423,6 +447,8 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
       danger: '#DC2626',
       success: '#A855F7',
       warning: '#C084FC',
+      buttonText: '#0A0118',
+      buttonTextAlt: '#0A0118',
     },
     shadows: {
       primary: '0 0 30px rgba(168, 85, 247, 0.4)',
