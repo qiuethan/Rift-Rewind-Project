@@ -128,7 +128,7 @@ body::after {
   pointer-events: none;
   z-index: 1;
   mix-blend-mode: screen;
-  filter: blur(1px);
+  filter: blur(4px) brightness(0.6);
 }
 
 @keyframes scanlines {
