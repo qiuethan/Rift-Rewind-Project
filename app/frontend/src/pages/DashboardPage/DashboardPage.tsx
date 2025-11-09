@@ -1,7 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DashboardPage.module.css';
-import { Button, Modal, Input, Navbar, Spinner, RegionBanner } from '@/components';
+import { Button, Modal, Input, Navbar, Spinner, RegionBanner, SyncStatusModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { playersActions } from '@/actions/players';
 import { ROUTES } from '@/config';
@@ -38,6 +38,7 @@ export default function DashboardPage() {
   const [gameName, setGameName] = useState('');
   const [tagLine, setTagLine] = useState('');
   const [region, setRegion] = useState('americas');
+  const [showSyncModal, setShowSyncModal] = useState(false);
 
 
   useEffect(() => {
@@ -173,6 +174,13 @@ export default function DashboardPage() {
 
     if (result.success) {
       setSuccess('League of Legends account linked successfully!');
+      setIsModalOpen(false);
+      
+      // Show sync modal for 5 minutes
+      setShowSyncModal(true);
+      setTimeout(() => {
+        setShowSyncModal(false);
+      }, 5 * 60 * 1000); // 5 minutes
       
       // Refresh summoner in context
       await refreshSummoner();
@@ -180,7 +188,6 @@ export default function DashboardPage() {
       // Clear cache and refetch recent games after updating account
       localStorage.removeItem(RECENT_GAMES_CACHE_KEY);
       fetchRecentGames();
-      
       setTimeout(() => {
         setIsModalOpen(false);
         setSuccess(null);
@@ -283,6 +290,11 @@ export default function DashboardPage() {
           </Button>
         </form>
       </Modal>
+      
+      <SyncStatusModal 
+        isVisible={showSyncModal} 
+        onDismiss={() => setShowSyncModal(false)} 
+      />
         </div>
       )}
     </>

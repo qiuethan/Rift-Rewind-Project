@@ -201,26 +201,28 @@
 
 .error {
   padding: 0.875rem 1rem;
-  background: var(--region-panel);
-  border: 2px solid var(--region-danger);
+  background: rgba(255, 87, 87, 0.15);
+  border: 2px solid #FF5757;
   border-radius: 6px;
-  color: var(--region-danger);
+  color: #FFB3B3;
   font-size: 0.875rem;
-  box-shadow: 0 0 20px rgba(255, 77, 77, 0.2);
-  font-weight: 500;
+  box-shadow: 0 0 20px rgba(255, 87, 87, 0.3);
+  font-weight: 600;
   letter-spacing: -0.011em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .success {
   padding: 0.875rem 1rem;
-  background: var(--region-panel);
-  border: 2px solid var(--region-success);
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid #10B981;
   border-radius: 6px;
-  color: var(--region-success);
+  color: #6EE7B7;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.01em;
-  box-shadow: 0 0 20px rgba(161, 255, 183, 0.2);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .footer {

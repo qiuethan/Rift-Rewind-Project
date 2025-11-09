@@ -8,4 +8,5 @@ export { default as RegionBanner } from './RegionBanner';
 export { default as RegionSelector } from './RegionSelector';
 export { default as Footer } from './Footer';
 export { default as ScrollToTop } from './ScrollToTop';
+export { default as SyncStatusModal } from './SyncStatusModal';
 export { MatchAnalysisChart } from './MatchAnalysisChart';
