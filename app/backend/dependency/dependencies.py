@@ -170,10 +170,22 @@ def get_analytics_service() -> AnalyticsService:
     )
 
 
-def get_bedrock_repository():
-    """Factory for BedrockRepository"""
+def get_llm_repository():
+    """Factory for LLM Repository (Bedrock implementation)"""
     from infrastructure.bedrock_repository import BedrockRepository
     return BedrockRepository()
+
+
+def get_llm_prompt_builder():
+    """Factory for LLM Prompt Builder"""
+    from infrastructure.llm_prompt_builder import LLMPromptBuilder
+    return LLMPromptBuilder()
+
+
+# Alias for backward compatibility
+def get_bedrock_repository():
+    """Deprecated: Use get_llm_repository instead"""
+    return get_llm_repository()
 
 
 def get_database():
@@ -191,8 +203,9 @@ def get_context_repository():
 def get_llm_service() -> LLMService:
     """Factory for LLMService with injected dependencies"""
     return LLMService(
-        bedrock_repository=get_bedrock_repository(),
-        context_repository=get_context_repository()
+        llm_repository=get_llm_repository(),
+        context_repository=get_context_repository(),
+        prompt_builder=get_llm_prompt_builder()
     )
 
 
