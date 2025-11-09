@@ -111,7 +111,7 @@ export default function RecentGames({ recentGames, loading, showCard = true }: R
 
   const getItemIconUrl = (itemId: number) => {
     if (itemId === 0) return null;
-    return `https://ddragon.leagueoflegends.com/cdn/15.21.1/img/item/${itemId}.png`;
+    return `https://ddragon.leagueoflegends.com/cdn/15.22.1/img/item/${itemId}.png`;
   };
 
   const gamesContent = (

@@ -33,8 +33,8 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
   };
 
   const profileIconUrl = summoner?.profile_icon_id
-    ? `https://ddragon.leagueoflegends.com/cdn/15.21.1/img/profileicon/${summoner.profile_icon_id}.png`
-    : 'https://ddragon.leagueoflegends.com/cdn/15.21.1/img/profileicon/29.png'; // Default icon
+    ? `https://ddragon.leagueoflegends.com/cdn/15.22.1/img/profileicon/${summoner.profile_icon_id}.png`
+    : 'https://ddragon.leagueoflegends.com/cdn/15.22.1/img/profileicon/29.png'; // Default icon
 
   return (
     <nav className={styles.navbar}>

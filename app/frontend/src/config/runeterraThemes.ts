@@ -405,6 +405,39 @@ export const RUNETERRA_THEMES: Record<string, RegionTheme> = {
     tagline: 'Where whimsy and wonder collide!',
     particles: '/particles/bandlecity-sparkles.webm',
   },
+
+  void: {
+    id: 'void',
+    name: 'The Void',
+    palette: {
+      primary: '#A855F7',
+      secondary: '#0A0118',
+      accent: '#C084FC',
+      text: '#F3E8FF',
+      textSecondary: '#D8B4FE',
+      textDim: '#A78BFA',
+      bgGradient: 'radial-gradient(ellipse at center, #1A0B2E 0%, #0A0118 60%, #000000 100%)',
+      panel: 'rgba(168, 85, 247, 0.08)',
+      panelBorder: 'rgba(168, 85, 247, 0.35)',
+      panelHover: 'rgba(168, 85, 247, 0.12)',
+      danger: '#DC2626',
+      success: '#A855F7',
+      warning: '#C084FC',
+    },
+    shadows: {
+      primary: '0 0 30px rgba(168, 85, 247, 0.4)',
+      secondary: '0 0 50px rgba(192, 132, 252, 0.3)',
+      glow: 'inset 0 0 25px rgba(168, 85, 247, 0.15)',
+    },
+    images: {
+      hero: '/img/regions/void-hero.jpg',
+      background: '/img/regions/void-bg.jpg',
+      pattern: '/img/regions/void-pattern.svg',
+      decorative: '/img/regions/void-eye.svg',
+    },
+    tagline: 'Hunger without end.',
+    particles: '/particles/void-tendrils.webm',
+  },
 };
 
 /**

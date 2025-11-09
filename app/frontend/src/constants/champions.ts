@@ -1,5 +1,5 @@
 /**
- * Champion ID to Key mapping (Updated for Patch 15.21.1)
+ * Champion ID to Key mapping (Updated for Patch 15.22.1)
  * Used to fetch champion images from Data Dragon
  */
 export const CHAMPION_ID_TO_KEY: { [key: number]: string } = {
@@ -195,9 +195,9 @@ export const getChampionSplashUrl = (championKey: string, skinNum: number = 0): 
 /**
  * Get champion square icon URL
  * @param championKey - The champion key
- * @param version - Data Dragon version (default 15.21.1)
+ * @param version - Data Dragon version (default 15.22.1)
  * @returns URL to champion square icon
  */
-export const getChampionIconUrl = (championKey: string, version: string = '15.21.1'): string => {
+export const getChampionIconUrl = (championKey: string, version: string = '15.22.1'): string => {
   return `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${championKey}.png`;
 };

@@ -2,7 +2,7 @@
  * Riot API and Data Dragon constants
  */
 
-export const DATA_DRAGON_VERSION = '15.21.1';
+export const DATA_DRAGON_VERSION = '15.22.1';
 
 export const DATA_DRAGON_BASE_URL = 'https://ddragon.leagueoflegends.com/cdn';
 
