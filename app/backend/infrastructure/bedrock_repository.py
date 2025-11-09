@@ -7,6 +7,7 @@ import boto3
 from typing import Optional
 from repositories.llm_repository import LLMRepository
 from config.settings import settings
+from utils.logger import logger
 
 
 class BedrockRepository(LLMRepository):
