@@ -23,4 +23,5 @@ export const ROUTES = {
   ANALYTICS: '/analytics',
   CHAMPIONS: '/champions',
   PROFILE: '/profile',
+  TEST_CHAT: '/test-chat',
 } as const;

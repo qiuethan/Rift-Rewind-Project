@@ -13,8 +13,8 @@ class ChampionMatchScore(BaseModel):
     champion_id: int
     champion_name: str
     game_date: int = Field(..., description="Unix timestamp of game")
-    eps_score: float = Field(..., description="End-game Performance Score")
-    cps_score: float = Field(..., description="Final Cumulative Power Score")
+    eps_score: float = Field(..., description="End-Game Performance Score - player skill performance")
+    cps_score: float = Field(..., description="Cumulative Power Score - champion power/strength in-game")
     kda: float = Field(..., description="KDA ratio")
     win: bool
     kills: int
@@ -128,7 +128,7 @@ class ChampionProgressRecord(BaseModel):
         Calculate trend based on recent performance
         Returns: 'improving', 'declining', or 'stable'
         """
-        if previous_avg_eps is None or len(self.performance_history) < 5:
+        if previous_avg_eps is None or len(self.performance_history) < 3:
             return "stable"
         
         # Compare current average to previous

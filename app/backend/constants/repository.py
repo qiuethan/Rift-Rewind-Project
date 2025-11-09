@@ -9,10 +9,10 @@ MAX_CONCURRENT_DB_WRITES = 1  # Max concurrent DB write operations (sequential f
 
 # Match syncing limits
 DEFAULT_INITIAL_MATCH_COUNT = 10  # Number of matches to fetch on account link
-MAX_BACKGROUND_SYNC_MATCHES = 50  # Maximum matches to sync in background
+MAX_BACKGROUND_SYNC_MATCHES = 75  # Maximum matches to sync in background
 
 # Cache settings
-DEFAULT_CACHED_GAMES_COUNT = 50  # Number of games to cache in summoners.recent_games
+DEFAULT_CACHED_GAMES_COUNT = 75  # Number of games to cache in summoners.recent_games
 
 # Retry settings for database operations
 DB_RETRY_MAX_ATTEMPTS = 5  # Maximum retry attempts for DB operations
