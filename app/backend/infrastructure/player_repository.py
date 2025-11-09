@@ -16,6 +16,7 @@ from constants.repository import (
 )
 from typing import Optional, List, Dict, Any
 from utils.logger import logger
+from utils.match_sync_logger import get_match_sync_logger
 from datetime import datetime
 import asyncio
 
@@ -281,11 +282,14 @@ class PlayerRepositoryRiot(PlayerRepository):
         Returns count of successfully saved matches.
         """
         saved_count = 0
+        failed_count = 0
+        sync_logger = get_match_sync_logger()
         logger.info(f"Saving {len(matches)} matches to DB (sequential with retry)")
         
         for match_id, (match_data, timeline_data) in matches.items():
             # Retry logic for connection errors
             retry_delay = DB_RETRY_INITIAL_DELAY
+            sync_logger.log_save_attempt(match_id, puuid, timeline_data is not None, "batch_save")
             
             for attempt in range(DB_RETRY_MAX_ATTEMPTS):
                 try:
@@ -296,8 +300,11 @@ class PlayerRepositoryRiot(PlayerRepository):
                         if verify:
                             saved_count += 1
                             logger.info(f"✅ Successfully saved and verified match {match_id} in database")
+                            sync_logger.log_save_success(match_id, puuid, verified=True)
                         else:
+                            failed_count += 1
                             logger.error(f"❌ Match {match_id} saved but verification failed - not found in DB")
+                            sync_logger.log_verification_failure(match_id, puuid)
                         # Small delay to prevent connection pool exhaustion
                         await asyncio.sleep(DB_OPERATION_DELAY)
                         break  # Success, exit retry loop
@@ -307,6 +314,8 @@ class PlayerRepositoryRiot(PlayerRepository):
                             await asyncio.sleep(retry_delay)
                             retry_delay *= 2
                         else:
+                            failed_count += 1
+                            sync_logger.log_save_failure(match_id, puuid, "save_match_returned_false")
                             break
                 except Exception as e:
                     error_msg = str(e)
@@ -317,12 +326,15 @@ class PlayerRepositoryRiot(PlayerRepository):
                         await asyncio.sleep(retry_delay)
                         retry_delay *= 2  # Exponential backoff
                     else:
+                        failed_count += 1
                         logger.error(f"❌ Exception saving {match_id} after {attempt + 1} attempts: {e}")
                         import traceback
                         logger.error(f"Traceback: {traceback.format_exc()}")
+                        sync_logger.log_save_failure(match_id, puuid, "exception", str(e))
                         break
         
         logger.info(f"Saved {saved_count}/{len(matches)} matches")
+        sync_logger.log_batch_summary(len(matches), saved_count, failed_count, puuid)
         return saved_count
     
     async def build_game_summaries(self, match_ids: List[str], matches: Dict[str, dict], puuid: str) -> List[RecentGameSummary]:

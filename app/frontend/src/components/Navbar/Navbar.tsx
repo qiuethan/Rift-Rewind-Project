@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
+import RegionSelector from '../RegionSelector';
 
 interface NavbarProps {
   user?: any;
@@ -67,6 +68,9 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
         )}
 
         <div className={styles.rightSection}>
+          <div className={styles.regionSelector}>
+            <RegionSelector />
+          </div>
           {showAuthButtons ? (
             <div className={styles.authButtons}>
               <button 
@@ -99,7 +103,7 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
               </button>
 
               {isDropdownOpen && (
-                <div className={styles.dropdown}>
+              <div className={styles.dropdown}>
                   <div className={styles.dropdownHeader}>
                     <img 
                       src={profileIconUrl}
