@@ -75,7 +75,17 @@ export default function LandingPage() {
 
         <section className={styles.features}>
           <div className={styles.feature}>
-            <div className={styles.featureIcon}>📊</div>
+            <div className={styles.featureIcon}>
+              <img 
+                src="/img/emotes/bard.png" 
+                alt="Bard" 
+                className={styles.emote}
+                onError={(e) => {
+                  console.error('Failed to load bard.png');
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
             <h3 className={styles.featureTitle}>Match Analysis</h3>
             <p className={styles.featureText}>
               Deep dive into your match history with AI-powered performance insights
@@ -84,8 +94,18 @@ export default function LandingPage() {
           </div>
 
           <div className={styles.feature}>
-            <div className={styles.featureIcon}>🏆</div>
-            <h3 className={styles.featureTitle}>Champion Recommendations</h3>
+            <div className={styles.featureIcon}>
+              <img 
+                src="/img/emotes/heimerdinger.png" 
+                alt="Heimerdinger" 
+                className={styles.emote}
+                onError={(e) => {
+                  console.error('Failed to load heimerdinger.png');
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+            <h2 className={styles.featureTitle}> New Champions</h2>
             <p className={styles.featureText}>
               Discover champions that match your playstyle and maximize your win rate
               based on your unique strengths.
@@ -93,7 +113,17 @@ export default function LandingPage() {
           </div>
 
           <div className={styles.feature}>
-            <div className={styles.featureIcon}>📈</div>
+            <div className={styles.featureIcon}>
+              <img 
+                src="/img/emotes/leesin.png" 
+                alt="Lee Sin" 
+                className={styles.emote}
+                onError={(e) => {
+                  console.error('Failed to load leesin.png');
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
             <h3 className={styles.featureTitle}>Skill Progression</h3>
             <p className={styles.featureText}>
               Track your improvement over time with detailed analytics and personalized
@@ -102,7 +132,17 @@ export default function LandingPage() {
           </div>
 
           <div className={styles.feature}>
-            <div className={styles.featureIcon}>🤖</div>
+            <div className={styles.featureIcon}>
+              <img 
+                src="/img/emotes/blitzcrank.png" 
+                alt="Blitzcrank" 
+                className={styles.emote}
+                onError={(e) => {
+                  console.error('Failed to load blitzcrank.png');
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
             <h3 className={styles.featureTitle}>AI Insights</h3>
             <p className={styles.featureText}>
               Get intelligent feedback on your gameplay patterns, decision-making,
