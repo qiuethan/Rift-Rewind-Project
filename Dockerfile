@@ -1,7 +1,7 @@
 # Use Python 3.11 slim image
 FROM python:3.11-slim
 
-# Set working directory to monorepo root
+# Set working directory to project root
 WORKDIR /app
 
 # Install system dependencies
@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the entire monorepo (to access shared resources)
+# Copy the entire monorepo (backend needs access to data/graph_data)
 COPY . .
 
 # Install Python dependencies from backend requirements

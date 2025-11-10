@@ -6,7 +6,6 @@ primary_region = "iad"
 
 [build]
   dockerfile = "Dockerfile"
-  # Build context is the monorepo root, but Dockerfile is in backend
   ignorefile = ".dockerignore"
 
 [env]
