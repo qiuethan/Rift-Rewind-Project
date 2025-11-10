@@ -211,7 +211,8 @@
 /* Ability Grid */
 .abilityGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, minmax(min-content, 1fr));
   gap: 2rem;
 }
 
@@ -223,6 +224,8 @@
   text-align: center;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid var(--primary);
+  /* Position headers above their respective columns */
+  grid-column: span 1;
 }
 
 .abilityComparison {

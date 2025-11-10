@@ -254,7 +254,7 @@ export default function RecommendPage() {
                             </div>
                           );
                         })()}
-                        <span className={styles.abilityName}><span className={styles.championNameInAbility}>{currentRecommendation.champion_name}</span>'s {ability.ability_name} ({ability.ability_type})</span>
+                        <span className={styles.abilityName}><span className={styles.championNameInAbility}>{currentRecommendation.champion_name}'s</span> {ability.ability_name} ({ability.ability_type})</span>
                       </div>
                       <div className={styles.similaritySection}>
                         <div className={styles.similarityScore}>
@@ -287,7 +287,7 @@ export default function RecommendPage() {
                           );
                         })()}
                         <span className={styles.abilityName}>
-                          <span className={styles.championNameInAbility}>{ability.similar_champion}</span>'s {ability.similar_ability_name} ({ability.similar_ability_type})
+                          <span className={styles.championNameInAbility}>{ability.similar_champion}'s</span> {ability.similar_ability_name} ({ability.similar_ability_type})
                         </span>
                       </div>
                     </div>
@@ -328,7 +328,7 @@ export default function RecommendPage() {
                             </div>
                           );
                         })()}
-                        <span className={styles.abilityName}><span className={styles.championNameInAbility}>{currentRecommendation.champion_name}</span>'s {ability.ability_name} ({ability.ability_type})</span>
+                        <span className={styles.abilityName}><span className={styles.championNameInAbility}>{currentRecommendation.champion_name}'s</span> {ability.ability_name} ({ability.ability_type})</span>
                       </div>
                       <div className={styles.similaritySection}>
                         <div className={styles.similarityScore}>
@@ -361,7 +361,7 @@ export default function RecommendPage() {
                           );
                         })()}
                         <span className={styles.abilityName}>
-                          <span className={styles.championNameInAbility}>{ability.similar_champion}</span>'s {ability.similar_ability_name} ({ability.similar_ability_type})
+                          <span className={styles.championNameInAbility}>{ability.similar_champion}'s</span> {ability.similar_ability_name} ({ability.similar_ability_type})
                         </span>
                       </div>
                     </div>
