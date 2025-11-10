@@ -12,7 +12,7 @@ class BedrockModels:
     CLAUDE_HAIKU_4 = CLAUDE_HAIKU_4_5  # Alias
     
     # Claude Sonnet 4 - Best for all other tasks (main responses)
-    CLAUDE_SONNET_4 = "anthropic.claude-sonnet-4-20250514-v1:0"
+    CLAUDE_SONNET_4 = "us.anthropic.claude-sonnet-4-20250514-v1:0"
     CLAUDE_SONNET_4_5 = CLAUDE_SONNET_4  # Alias for backward compatibility
 
 

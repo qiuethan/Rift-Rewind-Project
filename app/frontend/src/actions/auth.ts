@@ -1,6 +1,7 @@
 import { RegisterRequest, LoginRequest, AuthResponse } from '@/api/auth';
 import { supabase } from '@/lib/supabase';
 import { STORAGE_KEYS } from '@/config';
+import { clearAllAnalysisCache } from '@/utils/analysisCache';
 
 export const authActions = {
   /**
@@ -96,6 +97,8 @@ export const authActions = {
       await supabase.auth.signOut();
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+      // Clear all cached analyses
+      clearAllAnalysisCache();
       return { success: true, data: null };
     } catch (error) {
       return {

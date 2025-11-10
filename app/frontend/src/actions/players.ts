@@ -1,4 +1,5 @@
 import { playersApi, SummonerRequest } from '@/api/players';
+import { clearAllAnalysisCache } from '@/utils/analysisCache';
 
 export const playersActions = {
   /**
@@ -7,6 +8,8 @@ export const playersActions = {
   linkSummoner: async (data: SummonerRequest) => {
     try {
       const summoner = await playersApi.linkSummoner(data);
+      // Clear cached analyses when linking new summoner
+      clearAllAnalysisCache();
       return { success: true, data: summoner };
     } catch (error) {
       return {
@@ -22,6 +25,8 @@ export const playersActions = {
   linkAccount: async (data: SummonerRequest) => {
     try {
       const summoner = await playersApi.linkSummoner(data);
+      // Clear cached analyses when linking new account
+      clearAllAnalysisCache();
       return { success: true, data: summoner };
     } catch (error) {
       return {

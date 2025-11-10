@@ -15,3 +15,6 @@ export { default as PrimaryCTAGroup } from './PrimaryCTAGroup';
 export { default as SummonerLinkModal } from './SummonerLinkModal';
 export { default as TermsModal } from './TermsModal';
 export { MatchAnalysisChart } from './MatchAnalysisChart';
+export { GenerateAnalysisButton } from './GenerateAnalysisButton';
+export { AnalysisModal } from './AnalysisModal';
+export { HeimerdingerModal } from './HeimerdingerModal';

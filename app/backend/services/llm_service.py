@@ -200,34 +200,95 @@ class LLMService:
         
         return result
     
-    async def analyze_match(
+    async def analyze_champion(
         self,
         puuid: str,
-        match_data: Dict[str, Any]
+        champion_id: int
     ) -> Dict[str, Any]:
         """
-        Generate AI-powered match analysis with user context
+        Generate AI-powered champion analysis
+        Directly fetches champion progress context without routing
         
         Args:
             puuid: Player UUID
-            match_data: Complete match data from Riot API
+            champion_id: Champion ID to analyze
             
         Returns:
             Analysis result with text and metadata
         """
-        # Extract player stats
-        player_stats = self._extract_player_stats(match_data, puuid)
+        logger.info(f"Analyzing champion {champion_id} for PUUID {puuid}")
         
-        # Build analysis prompt
-        prompt = self._build_analysis_prompt(player_stats)
+        # Fetch contexts directly (no routing)
+        contexts = {}
         
-        # Generate with context
-        return await self.generate_with_context(
-            puuid=puuid,
-            prompt=prompt,
-            use_case="match_summary",
-            additional_context={'champion': player_stats.get('champion')}
-        )
+        # Get summoner context
+        summoner_ctx = await self.get_summoner_context(puuid)
+        if summoner_ctx:
+            contexts['summoner'] = summoner_ctx
+        
+        # Get detailed champion data
+        champion_ctx = await self.context.get_champion_detailed(puuid, champion_id)
+        if champion_ctx:
+            contexts['champion_detailed'] = champion_ctx
+            logger.info(f"Fetched detailed champion data")
+        
+        # Build enriched prompt with contexts
+        context_prefix = self.prompt_builder.build_context_prefix(contexts)
+        prompt = context_prefix + f"Analyze my performance and progress with this champion. Provide insights on my trends, strengths, weaknesses, and suggestions for improvement."
+        
+        # Generate response
+        result = await self.llm.generate_text_with_routing(prompt, use_case="champion_analysis")
+        
+        # Add context metadata
+        result['contexts_used'] = list(contexts.keys())
+        result['champion_id'] = champion_id
+        
+        return result
+    
+    async def analyze_match(
+        self,
+        puuid: str,
+        match_id: str
+    ) -> Dict[str, Any]:
+        """
+        Generate AI-powered match analysis
+        Directly fetches match context without routing
+        
+        Args:
+            puuid: Player UUID
+            match_id: Match ID to analyze
+            
+        Returns:
+            Analysis result with text and metadata
+        """
+        logger.info(f"Analyzing match {match_id} for PUUID {puuid}")
+        
+        # Fetch contexts directly (no routing)
+        contexts = {}
+        
+        # Get summoner context
+        summoner_ctx = await self.get_summoner_context(puuid)
+        if summoner_ctx:
+            contexts['summoner'] = summoner_ctx
+        
+        # Get match context
+        match_ctx = await self.get_match_context(puuid, match_id)
+        if match_ctx:
+            contexts['match'] = match_ctx
+            logger.info(f"Fetched match data")
+        
+        # Build enriched prompt with contexts
+        context_prefix = self.prompt_builder.build_context_prefix(contexts)
+        prompt = context_prefix + f"Analyze my performance in this match. Provide insights on what I did well, what I could improve, and key moments that affected the outcome."
+        
+        # Generate response
+        result = await self.llm.generate_text_with_routing(prompt, use_case="match_summary")
+        
+        # Add context metadata
+        result['contexts_used'] = list(contexts.keys())
+        result['match_id'] = match_id
+        
+        return result
     
     def _extract_player_stats(
         self,

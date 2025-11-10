@@ -40,78 +40,49 @@ class ChatResponse(BaseModel):
 # ROUTES
 # ============================================================================
 
-@router.post("/chat", response_model=ChatResponse)
-async def chat(
-    request: ChatRequest,
+@router.post("/analyze-champion")
+async def analyze_champion(
+    champion_id: int,
     current_user: str = Depends(get_current_user),
     player_service: PlayerService = Depends(get_player_service),
     llm_service: LLMService = Depends(get_llm_service)
 ):
     """
-    AI-powered chat endpoint with smart context routing
+    Generate AI-powered analysis for a specific champion
     
-    The frontend should send:
-    - **prompt**: User's question (required)
-    - **match_id**: Optional, if user is on a match detail page
-    - **champion_id**: Optional, if user is on a champion detail page
-    - **page_context**: Optional, for analytics/tracking
-    
-    The backend will:
-    1. Get the user's PUUID from their auth token
-    2. Use smart routing to determine what data to fetch
-    3. Automatically fetch summoner, champion progress, or match data as needed
-    4. Return AI-generated response with appropriate context
+    Fetches champion progress context and generates insights about:
+    - Performance trends
+    - Win rate analysis
+    - Improvement suggestions
+    - Mastery progress
     """
-    logger.info(f"POST /api/llm/chat - User: {current_user}, Page: {request.page_context}")
-    logger.debug(f"Request: {request.dict()}")
+    logger.info(f"POST /api/llm/analyze-champion - User: {current_user}, Champion ID: {champion_id}")
     
     try:
-        # Get user's summoner to get PUUID
+        # Get user's summoner
         summoner = await player_service.get_summoner(current_user)
         puuid = summoner.puuid
         
-        logger.info(f"User ID: {current_user}")
-        logger.info(f"Summoner: {summoner.game_name}#{summoner.tag_line} ({summoner.region})")
-        logger.info(f"Generating response for PUUID: {puuid}")
+        logger.info(f"Analyzing champion {champion_id} for {summoner.game_name}")
         
-        # WORKAROUND: Inject summoner context directly since we already have it
-        # This avoids the database query issue
-        summoner_context = {
-            'game_name': summoner.game_name,
-            'region': summoner.region
+        # Generate analysis with champion context
+        result = await llm_service.analyze_champion(puuid, champion_id)
+        
+        return {
+            "summary": result.get('summary', ''),
+            "full_analysis": result.get('full_analysis', ''),
+            "model_used": result['model_used'],
+            "champion_id": champion_id,
+            "contexts_used": result.get('contexts_used', [])
         }
-        
-        # Call smart routing service
-        result = await llm_service.generate_with_smart_routing(
-            puuid=puuid,
-            prompt=request.prompt,
-            match_id=request.match_id,
-            summoner_context_override=summoner_context  # Pass it directly
-        )
-        
-        # Build response
-        response = ChatResponse(
-            text=result['text'],
-            model_used=result['model_used'],
-            complexity=result['complexity'],
-            contexts_used=result['contexts_used'],
-            metadata={
-                'page_context': request.page_context,
-                'champion_id': request.champion_id,
-                'match_id': request.match_id
-            }
-        )
-        
-        logger.info(f"Response generated - Model: {response.model_used}, Contexts: {response.contexts_used}")
-        return response
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error in chat endpoint: {e}", exc_info=True)
+        logger.error(f"Error analyzing champion: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to generate response: {str(e)}"
+            detail=f"Failed to analyze champion: {str(e)}"
         )
 
 
@@ -125,8 +96,11 @@ async def analyze_match(
     """
     Generate AI-powered analysis for a specific match
     
-    This is a convenience endpoint that automatically generates
-    a comprehensive match analysis without requiring a prompt.
+    Fetches match context and generates insights about:
+    - Performance breakdown
+    - Key moments and decisions
+    - Areas for improvement
+    - Comparison to averages
     """
     logger.info(f"POST /api/llm/analyze-match - User: {current_user}, Match: {match_id}")
     
@@ -135,17 +109,17 @@ async def analyze_match(
         summoner = await player_service.get_summoner(current_user)
         puuid = summoner.puuid
         
-        # Get match data
-        match_data = await player_service.get_match_by_id(current_user, match_id)
+        logger.info(f"Analyzing match {match_id} for {summoner.game_name}")
         
-        # Generate analysis
-        result = await llm_service.analyze_match(puuid, match_data.dict())
+        # Generate analysis with match context
+        result = await llm_service.analyze_match(puuid, match_id)
         
         return {
-            "text": result['text'],
+            "summary": result.get('summary', ''),
+            "full_analysis": result.get('full_analysis', ''),
             "model_used": result['model_used'],
-            "complexity": result['complexity'],
-            "match_id": match_id
+            "match_id": match_id,
+            "contexts_used": result.get('contexts_used', [])
         }
         
     except HTTPException:
