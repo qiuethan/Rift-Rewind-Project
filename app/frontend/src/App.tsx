@@ -9,6 +9,7 @@ import ChampionsPage from '@/pages/ChampionsPage';
 import ChampionDetailPage from '@/pages/ChampionDetailPage';
 import MatchDetailPage from '@/pages/MatchDetailPage';
 import TestChatPage from '@/pages/TestChatPage';
+import RecommendPage from '@/pages/RecommendPage';
 import { Footer, ScrollToTop } from '@/components';
 import { ROUTES, STORAGE_KEYS } from '@/config';
 import { authActions } from '@/actions/auth';
@@ -118,6 +119,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ChampionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.RECOMMEND}
+            element={
+              <ProtectedRoute>
+                <RecommendPage />
               </ProtectedRoute>
             }
           />

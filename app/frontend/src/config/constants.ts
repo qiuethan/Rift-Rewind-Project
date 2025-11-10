@@ -22,6 +22,7 @@ export const ROUTES = {
   MATCH: '/match/:matchId',
   ANALYTICS: '/analytics',
   CHAMPIONS: '/champions',
+  RECOMMEND: '/recommend',
   PROFILE: '/profile',
   TEST_CHAT: '/test-chat',
 } as const;
