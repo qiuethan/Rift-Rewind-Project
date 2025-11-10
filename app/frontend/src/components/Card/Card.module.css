@@ -8,7 +8,7 @@
   transition: var(--transition-slow);
   position: relative;
   overflow: hidden;
-  opacity: 0.98;
+  opacity: 1;
 }
 
 .card::before {
@@ -19,7 +19,7 @@
   right: 0;
   bottom: 0;
   background: var(--region-pattern);
-  opacity: 0.08;
+  opacity: 0.12;
   pointer-events: none;
 }
 
