@@ -1,0 +1,176 @@
+.audioControls {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--region-secondary);
+  background-image: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, var(--region-secondary) 100%);
+  border: 2px solid var(--region-panel-border);
+  border-radius: 50px;
+  box-shadow: var(--region-shadow-primary), 0 8px 32px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.audioControls:hover {
+  border-color: var(--region-primary);
+  box-shadow: var(--region-shadow-secondary), 0 12px 48px rgba(0, 0, 0, 0.8);
+}
+
+.audioControls::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, var(--region-primary), var(--region-accent));
+  border-radius: 50px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.audioControls:hover::before {
+  opacity: 0.2;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.toggleButton:hover {
+  transform: scale(1.1);
+}
+
+.toggleButton:active {
+  transform: scale(0.95);
+}
+
+.icon {
+  width: 36px;
+  height: 36px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.volumeContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  width: 0;
+}
+
+.expanded .volumeContainer {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+  width: 180px;
+}
+
+.volumeSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 6px;
+  background: var(--region-panel);
+  border-radius: 3px;
+  outline: none;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+
+.volumeSlider:hover {
+  background: var(--region-panel-hover);
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--region-primary);
+  border: 2px solid var(--region-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: var(--region-accent);
+  box-shadow: var(--region-shadow-primary), 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--region-primary);
+  border: 2px solid var(--region-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.volumeSlider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: var(--region-accent);
+  box-shadow: var(--region-shadow-primary), 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.volumeLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--region-text);
+  min-width: 40px;
+  text-align: right;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .audioControls {
+    bottom: 1rem;
+    left: 1rem;
+    padding: 0.5rem;
+  }
+
+  .icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .toggleButton {
+    width: 32px;
+    height: 32px;
+  }
+
+  .expanded .volumeContainer {
+    width: 140px;
+  }
+
+  .volumeSlider {
+    width: 90px;
+  }
+}

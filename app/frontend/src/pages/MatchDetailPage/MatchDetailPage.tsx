@@ -872,6 +872,7 @@ export default function MatchDetailPage() {
                         <MatchAnalysisChart 
                           chartConfig={match.analysis.charts?.epsBreakdown}
                           title="Player Performance Breakdown"
+                          enableLegendClick={true}
                         />
                       </div>
 
