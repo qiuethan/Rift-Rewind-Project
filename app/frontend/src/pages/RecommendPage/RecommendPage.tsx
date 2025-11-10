@@ -407,7 +407,12 @@ const RecommendationsCard = React.forwardRef<
                                   </div>
                                 );
                               })()}
-                              <span className={styles.abilityName}>{ability.similar_ability_name}</span>
+                              <div className={styles.abilityNameContainer}>
+                                <span className={styles.abilityName}>{ability.similar_ability_name}</span>
+                                <span className={styles.abilityMeta}>
+                                  {ability.similar_champion} ({ability.similar_ability_type})
+                                </span>
+                              </div>
                             </div>
                           </div>
                           <p className={styles.explanation}>{ability.explanation}</p>

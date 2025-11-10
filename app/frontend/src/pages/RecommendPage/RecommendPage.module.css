@@ -813,11 +813,24 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+.abilityNameContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+}
+
 .abilityName {
   font-weight: 500;
   color: var(--region-text);
-  flex: 1;
   font-size: 0.8125rem;
+}
+
+.abilityMeta {
+  font-size: 0.6875rem;
+  color: var(--region-text-secondary);
+  font-weight: 400;
+  opacity: 0.8;
 }
 
 .championNameInAbility {
