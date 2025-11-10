@@ -70,7 +70,7 @@ export default function TrackedChampions({ championMasteries, onTrackingChange }
   const handleChampionClick = (championId: number) => {
     if (hasPlayedChampion(championId)) {
       const championName = getChampionKey(championId);
-      navigate(`${ROUTES.CHAMPIONS}/${championName.toLowerCase()}`);
+      navigate(`/champion/${championName.toLowerCase()}`, { state: { from: 'recommend' } });
     }
   };
 

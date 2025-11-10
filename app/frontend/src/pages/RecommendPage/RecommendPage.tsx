@@ -473,10 +473,10 @@ export default function RecommendPage() {
         <div className={styles.header}>
           <button 
             className={styles.backButton}
-            onClick={() => navigate(ROUTES.HOME)}
-            aria-label="Back to main menu"
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
           >
-            ← Back to Main Menu
+            ← Back
           </button>
           <h1 className={styles.pageTitle}>Champion Recommendations</h1>
         </div>
