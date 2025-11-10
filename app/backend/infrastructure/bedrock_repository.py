@@ -96,142 +96,77 @@ class BedrockRepository(LLMRepository):
     
     async def classify_context_needs(self, prompt: str) -> Dict[str, Any]:
         """
-        Classify what context data is needed for the prompt
+        DEPRECATED: Context routing removed. Contexts are now determined by endpoint.
+        This method is kept for backward compatibility but returns empty contexts.
         
         Args:
             prompt: User's prompt
             
         Returns:
-            Dict with contexts array containing strings and objects:
-            {"contexts": ["summoner", {"champion_progress": "Yasuo"}, {"match": "match_id"}]}
+            Dict with empty contexts array
         """
-        try:
-            import json
-            context_prompt = RouterPrompts.CONTEXT_ROUTING_PROMPT.format(user_prompt=prompt)
-            
-            logger.info(f"=== ROUTER PROMPT ===\n{context_prompt}\n=== END ROUTER PROMPT ===")
-            
-            # Use Haiku for fast context classification
-            response = await self._invoke_model(
-                model_id=PromptRouterConfig.ROUTER_MODEL,
-                prompt=context_prompt,
-                max_tokens=100,
-                temperature=0.3
-            )
-            
-            logger.info(f"=== ROUTER RESPONSE ===\n{response}\n=== END ROUTER RESPONSE ===")
-            
-            # Parse JSON response (handle markdown code blocks)
-            try:
-                # Strip markdown code blocks if present
-                cleaned_response = response.strip()
-                if cleaned_response.startswith('```'):
-                    # Remove ```json or ``` at start
-                    cleaned_response = cleaned_response.split('\n', 1)[1] if '\n' in cleaned_response else cleaned_response[3:]
-                    # Remove ``` at end
-                    if cleaned_response.endswith('```'):
-                        cleaned_response = cleaned_response.rsplit('```', 1)[0]
-                    cleaned_response = cleaned_response.strip()
-                
-                logger.info(f"=== CLEANED ROUTER RESPONSE ===\n{cleaned_response}\n=== END CLEANED ===")
-                
-                result = json.loads(cleaned_response)
-                contexts = result.get('contexts', ['summoner'])
-                
-                # Ensure summoner is always first
-                if not contexts or contexts[0] != 'summoner':
-                    contexts.insert(0, 'summoner')
-                
-                routing_result = {'contexts': contexts}
-                logger.info(f"Context routing: {routing_result}")
-                return routing_result
-                
-            except json.JSONDecodeError as je:
-                logger.warning(f"Failed to parse JSON response: {response}. Error: {je}")
-                return {'contexts': ['summoner']}
-            
-        except Exception as e:
-            logger.error(f"Error classifying context needs: {e}")
-            return {'contexts': ['summoner']}
-    
-    async def classify_prompt_complexity(self, prompt: str) -> str:
-        """
-        Classify prompt complexity to determine which model to use
-        
-        Args:
-            prompt: User's prompt
-            
-        Returns:
-            Complexity level: "simple", "moderate", or "complex"
-        """
-        try:
-            classification_prompt = RouterPrompts.CLASSIFICATION_PROMPT.format(user_prompt=prompt)
-            
-            # Use Sonnet 3.5 for classification (fast and accurate)
-            response = await self._invoke_model(
-                model_id=PromptRouterConfig.ROUTER_MODEL,
-                prompt=classification_prompt,
-                max_tokens=10,
-                temperature=0.3
-            )
-            
-            complexity = response.strip().lower()
-            
-            # Validate response
-            if complexity in ["simple", "moderate", "complex"]:
-                logger.info(f"Classified prompt as: {complexity}")
-                return complexity
-            
-            logger.warning(f"Invalid classification '{complexity}', defaulting to moderate")
-            return "moderate"
-            
-        except Exception as e:
-            logger.error(f"Error classifying prompt: {e}")
-            return "moderate"  # Default to moderate on error
+        logger.warning("classify_context_needs called but routing is deprecated")
+        return {'contexts': []}
     
     async def generate_text_with_routing(self, prompt: str, use_case: Optional[str] = None) -> Dict[str, Any]:
         """
-        Generate text using automatic prompt routing
+        Generate both a 3-line summary and full analysis using Claude Sonnet 4
+        Note: 'routing' is deprecated but method name kept for backward compatibility
         
         Args:
             prompt: The prompt to send
-            use_case: Optional predefined use case (e.g., "match_summary", "greeting")
+            use_case: Optional use case label for logging
             
         Returns:
-            Dict with 'text', 'model_used', and 'complexity' keys
+            Dict with 'summary', 'full_analysis', 'model_used' keys
         """
         if not self.client:
             raise Exception("AWS Bedrock client not initialized")
         
         try:
-            # Use Claude Sonnet 4 for all responses (no complexity classification)
+            # Use Claude Sonnet 4 for all responses
             model_id = BedrockModels.CLAUDE_SONNET_4
-            max_tokens = 2048
+            max_tokens = 3072  # Increased for both summary and full analysis
             temperature = 0.7
             
-            logger.info(f"Using model: {model_id}")
+            logger.info(f"Generating summary + analysis with {model_id} (use_case: {use_case})")
+            logger.debug(f"Prompt preview: {prompt[:200]}...")
             
-            logger.info(f"=== RESPONSE MODEL PROMPT ===\n{prompt[:500]}...\n=== END RESPONSE PROMPT (truncated) ===")
+            # Enhanced prompt to request both summary and full analysis
+            enhanced_prompt = f"""{prompt}
+
+Please provide your response in the following format:
+
+## SUMMARY
+[Provide a concise 3-line summary of the key insights]
+
+## FULL ANALYSIS
+[Provide a comprehensive, detailed analysis with specific recommendations and observations]
+"""
             
             # Generate response
             text = await self._invoke_model(
                 model_id=model_id,
-                prompt=prompt,
+                prompt=enhanced_prompt,
                 max_tokens=max_tokens,
                 temperature=temperature
             )
             
-            logger.info(f"=== RESPONSE MODEL OUTPUT ===\n{text[:300]}...\n=== END RESPONSE (truncated) ===")
+            logger.debug(f"Response preview: {text[:200]}...")
+            
+            # Parse the response to extract summary and full analysis
+            summary, full_analysis = self._parse_summary_and_analysis(text)
             
             return {
-                "text": text,
+                "summary": summary,
+                "full_analysis": full_analysis,
+                "text": text,  # Keep original for backward compatibility
                 "model_used": model_id,
-                "complexity": "n/a",  # No longer classifying complexity
                 "max_tokens": max_tokens
             }
             
         except Exception as e:
-            logger.error(f"Bedrock routing error: {e}")
+            logger.error(f"Bedrock generation error: {e}")
             raise
     
     async def _invoke_model(
@@ -291,6 +226,67 @@ class BedrockRepository(LLMRepository):
         except Exception as e:
             logger.error(f"Bedrock invocation error for model {model_id}: {e}")
             raise
+    
+    def _parse_summary_and_analysis(self, text: str) -> tuple[str, str]:
+        """
+        Parse the LLM response to extract summary and full analysis sections
+        
+        Args:
+            text: Raw LLM response
+            
+        Returns:
+            Tuple of (summary, full_analysis)
+        """
+        try:
+            # Look for ## SUMMARY and ## FULL ANALYSIS markers
+            summary_marker = "## SUMMARY"
+            analysis_marker = "## FULL ANALYSIS"
+            
+            summary = ""
+            full_analysis = ""
+            
+            if summary_marker in text and analysis_marker in text:
+                # Extract summary section
+                summary_start = text.index(summary_marker) + len(summary_marker)
+                analysis_start = text.index(analysis_marker)
+                summary = text[summary_start:analysis_start].strip()
+                
+                # Extract full analysis section
+                full_analysis = text[analysis_start + len(analysis_marker):].strip()
+            else:
+                # Fallback: if markers not found, split the text
+                # First 3 lines as summary, rest as full analysis
+                lines = text.strip().split('\n')
+                summary_lines = []
+                analysis_lines = []
+                
+                # Take first few non-empty lines for summary
+                line_count = 0
+                for i, line in enumerate(lines):
+                    if line.strip():
+                        if line_count < 3:
+                            summary_lines.append(line)
+                            line_count += 1
+                        else:
+                            analysis_lines.extend(lines[i:])
+                            break
+                
+                summary = '\n'.join(summary_lines)
+                full_analysis = '\n'.join(analysis_lines) if analysis_lines else text
+            
+            # Clean up any remaining markdown headers
+            summary = summary.replace('## SUMMARY', '').replace('#', '').strip()
+            full_analysis = full_analysis.replace('## FULL ANALYSIS', '').replace('## Analysis', '').strip()
+            
+            return summary, full_analysis
+            
+        except Exception as e:
+            logger.warning(f"Failed to parse summary/analysis sections: {e}")
+            # Fallback: return first 3 lines as summary, rest as analysis
+            lines = text.strip().split('\n')
+            summary = '\n'.join(lines[:3])
+            full_analysis = '\n'.join(lines[3:]) if len(lines) > 3 else text
+            return summary, full_analysis
     
     def is_available(self) -> bool:
         """Check if Bedrock client is available"""

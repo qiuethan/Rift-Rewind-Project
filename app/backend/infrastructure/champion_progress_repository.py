@@ -168,6 +168,31 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
         try:
             logger.info(f"Updating champion progress for user {user_id}, champion {update_request.champion_id}")
             
+            # Fetch mastery data for this champion
+            mastery_level = None
+            mastery_points = None
+            try:
+                from infrastructure.player_repository import PlayerRepositoryRiot
+                from repositories.riot_api_repository import RiotAPIRepository
+                from infrastructure.riot_api_repository import RiotAPIRepositoryImpl
+                from config.riot_api import riot_api_config
+                
+                # Get region from summoners table
+                region_result = await self.db.table(DatabaseTable.SUMMONERS).select('region').eq('puuid', puuid).limit(1).execute()
+                region = region_result.data[0].get('region', 'americas') if region_result.data else 'americas'
+                
+                # Fetch mastery for this specific champion
+                riot_api = RiotAPIRepositoryImpl(riot_api_config)
+                player_repo = PlayerRepositoryRiot(self.db, riot_api)
+                mastery_data = await player_repo.get_champion_mastery_by_champion(puuid, update_request.champion_id, region)
+                
+                if mastery_data:
+                    mastery_level = mastery_data.champion_level
+                    mastery_points = mastery_data.champion_points
+                    logger.info(f"Fetched mastery for champion {update_request.champion_id}: Level {mastery_level}, {mastery_points} points")
+            except Exception as e:
+                logger.warning(f"Could not fetch mastery data (non-critical): {e}")
+            
             # Get existing record
             existing = await self.get_champion_progress_record(user_id, update_request.champion_id)
             

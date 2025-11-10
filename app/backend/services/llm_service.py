@@ -80,7 +80,7 @@ class LLMService:
         contexts = {}
         
         for ctx in contexts_array:
-            # String context (e.g., "summoner")
+            # String context (e.g., "summoner", "summoner_overview", "recent_performance")
             if isinstance(ctx, str):
                 if ctx == "summoner":
                     # Use override if provided, otherwise query database
@@ -91,6 +91,18 @@ class LLMService:
                         summoner_ctx = await self.get_summoner_context(puuid)
                         if summoner_ctx:
                             contexts['summoner'] = summoner_ctx
+                
+                elif ctx == "summoner_overview":
+                    overview_ctx = await self.context.get_summoner_overview(puuid)
+                    if overview_ctx:
+                        contexts['summoner_overview'] = overview_ctx
+                        logger.info(f"Fetched summoner overview")
+                
+                elif ctx == "recent_performance":
+                    perf_ctx = await self.context.get_recent_performance(puuid, num_games=10)
+                    if perf_ctx:
+                        contexts['recent_performance'] = perf_ctx
+                        logger.info(f"Fetched recent performance")
             
             # Object context (e.g., {"champion_progress": "Yasuo"})
             elif isinstance(ctx, dict):
@@ -106,6 +118,18 @@ class LLMService:
                         else:
                             logger.warning(f"Champion '{champion_name}' not found in mapping")
                 
+                elif "champion_detailed" in ctx:
+                    champion_name = ctx["champion_detailed"]
+                    if champion_name:
+                        champion_id = get_champion_id(champion_name)
+                        if champion_id:
+                            detailed_ctx = await self.context.get_champion_detailed(puuid, champion_id)
+                            if detailed_ctx:
+                                contexts['champion_detailed'] = detailed_ctx
+                                logger.info(f"Fetched detailed champion data for {champion_name} (ID: {champion_id})")
+                        else:
+                            logger.warning(f"Champion '{champion_name}' not found in mapping")
+                
                 elif "match" in ctx:
                     # Check if match_id was provided
                     if match_id:
@@ -114,6 +138,7 @@ class LLMService:
                             contexts['match'] = match_ctx
                     else:
                         logger.warning("Match context needed but no match_id provided")
+                
         
         # Step 3: Build enriched prompt with all contexts
         context_prefix = self.prompt_builder.build_context_prefix(contexts)
@@ -175,34 +200,95 @@ class LLMService:
         
         return result
     
-    async def analyze_match(
+    async def analyze_champion(
         self,
         puuid: str,
-        match_data: Dict[str, Any]
+        champion_id: int
     ) -> Dict[str, Any]:
         """
-        Generate AI-powered match analysis with user context
+        Generate AI-powered champion analysis
+        Directly fetches champion progress context without routing
         
         Args:
             puuid: Player UUID
-            match_data: Complete match data from Riot API
+            champion_id: Champion ID to analyze
             
         Returns:
             Analysis result with text and metadata
         """
-        # Extract player stats
-        player_stats = self._extract_player_stats(match_data, puuid)
+        logger.info(f"Analyzing champion {champion_id} for PUUID {puuid}")
         
-        # Build analysis prompt
-        prompt = self._build_analysis_prompt(player_stats)
+        # Fetch contexts directly (no routing)
+        contexts = {}
         
-        # Generate with context
-        return await self.generate_with_context(
-            puuid=puuid,
-            prompt=prompt,
-            use_case="match_summary",
-            additional_context={'champion': player_stats.get('champion')}
-        )
+        # Get summoner context
+        summoner_ctx = await self.get_summoner_context(puuid)
+        if summoner_ctx:
+            contexts['summoner'] = summoner_ctx
+        
+        # Get detailed champion data
+        champion_ctx = await self.context.get_champion_detailed(puuid, champion_id)
+        if champion_ctx:
+            contexts['champion_detailed'] = champion_ctx
+            logger.info(f"Fetched detailed champion data")
+        
+        # Build enriched prompt with contexts
+        context_prefix = self.prompt_builder.build_context_prefix(contexts)
+        prompt = context_prefix + f"Analyze my performance and progress with this champion. Provide insights on my trends, strengths, weaknesses, and suggestions for improvement."
+        
+        # Generate response
+        result = await self.llm.generate_text_with_routing(prompt, use_case="champion_analysis")
+        
+        # Add context metadata
+        result['contexts_used'] = list(contexts.keys())
+        result['champion_id'] = champion_id
+        
+        return result
+    
+    async def analyze_match(
+        self,
+        puuid: str,
+        match_id: str
+    ) -> Dict[str, Any]:
+        """
+        Generate AI-powered match analysis
+        Directly fetches match context without routing
+        
+        Args:
+            puuid: Player UUID
+            match_id: Match ID to analyze
+            
+        Returns:
+            Analysis result with text and metadata
+        """
+        logger.info(f"Analyzing match {match_id} for PUUID {puuid}")
+        
+        # Fetch contexts directly (no routing)
+        contexts = {}
+        
+        # Get summoner context
+        summoner_ctx = await self.get_summoner_context(puuid)
+        if summoner_ctx:
+            contexts['summoner'] = summoner_ctx
+        
+        # Get match context
+        match_ctx = await self.get_match_context(puuid, match_id)
+        if match_ctx:
+            contexts['match'] = match_ctx
+            logger.info(f"Fetched match data")
+        
+        # Build enriched prompt with contexts
+        context_prefix = self.prompt_builder.build_context_prefix(contexts)
+        prompt = context_prefix + f"Analyze my performance in this match. Provide insights on what I did well, what I could improve, and key moments that affected the outcome."
+        
+        # Generate response
+        result = await self.llm.generate_text_with_routing(prompt, use_case="match_summary")
+        
+        # Add context metadata
+        result['contexts_used'] = list(contexts.keys())
+        result['match_id'] = match_id
+        
+        return result
     
     def _extract_player_stats(
         self,

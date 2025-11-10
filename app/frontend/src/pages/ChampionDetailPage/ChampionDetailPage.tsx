@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styles from './ChampionDetailPage.module.css';
-import { Navbar, Button, Card, Spinner } from '@/components';
+import { Navbar, Button, Card, Spinner, GenerateAnalysisButton, HeimerdingerModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { championProgressActions } from '@/actions/championProgress';
+import { llmActions } from '@/actions/llm';
 import { ROUTES } from '@/config';
 import { useSummoner, useTheme } from '@/contexts';
 import { getChampionKey, getChampionIconUrl } from '@/constants';
 import type { ChampionProgressResponse } from '@/api/championProgress';
+import { getCachedChampionAnalysis, cacheChampionAnalysis } from '@/utils/analysisCache';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -43,6 +45,9 @@ export default function ChampionDetailPage() {
   const [championProgress, setChampionProgress] = useState<ChampionProgressResponse | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(true);
   const [progressError, setProgressError] = useState<string | null>(null);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [analysisData, setAnalysisData] = useState<{ summary: string; fullAnalysis: string } | null>(null);
+  const [cachedAnalysis, setCachedAnalysis] = useState<{ summary: string; fullAnalysis: string } | null>(null);
 
   // Find champion from summoner's mastery data
   const champion = summoner?.champion_masteries?.find((c: any) => {
@@ -143,7 +148,45 @@ export default function ChampionDetailPage() {
     };
 
     fetchChampionProgress();
+    
+    // Load cached analysis if available
+    if (championId && championId !== 0) {
+      const cached = getCachedChampionAnalysis(championId);
+      if (cached) {
+        const data = { summary: cached.summary, fullAnalysis: cached.fullAnalysis };
+        setCachedAnalysis(data);
+        setAnalysisData(data);
+      }
+    }
   }, [championId]);
+
+  const handleGenerateAnalysis = async (): Promise<{ summary: string; fullAnalysis: string } | null> => {
+    if (!championId || championId === 0) return null;
+    
+    const result = await llmActions.analyzeChampion(championId);
+    
+    if (result.success && result.data) {
+      const data = {
+        summary: result.data.summary,
+        fullAnalysis: result.data.full_analysis,
+      };
+      setAnalysisData(data);
+      setCachedAnalysis(data);
+      // Cache in localStorage
+      cacheChampionAnalysis(championId, data);
+      return data;
+    } else {
+      alert(`Failed to generate analysis: ${result.error}`);
+      return null;
+    }
+  };
+
+  const handleOpenFullAnalysis = () => {
+    setShowAnalysisModal(true);
+  };
+
+  // Check if champion has at least 2 games
+  const hasEnoughGames = championProgress && championProgress.trend.total_games >= 2;
 
   // Handle browser back button when coming from dashboard
   useEffect(() => {
@@ -529,6 +572,26 @@ export default function ChampionDetailPage() {
               </p>
             </div>
           </Card>
+        )}
+
+        {/* Generate Analysis Button - only show if 2+ games */}
+        {hasEnoughGames && (
+          <GenerateAnalysisButton 
+            onGenerate={handleGenerateAnalysis}
+            onOpenFullAnalysis={handleOpenFullAnalysis}
+            cachedAnalysis={cachedAnalysis}
+          />
+        )}
+
+        {/* Heimerdinger Analysis Modal */}
+        {analysisData && (
+          <HeimerdingerModal
+            isOpen={showAnalysisModal}
+            onClose={() => setShowAnalysisModal(false)}
+            summary={analysisData.summary}
+            fullAnalysis={analysisData.fullAnalysis}
+            title={`${championKey} Analysis`}
+          />
         )}
       </div>
     </>

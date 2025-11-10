@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './MatchDetailPage.module.css';
-import { Navbar, Spinner, MatchAnalysisChart } from '@/components';
+import { Navbar, Spinner, MatchAnalysisChart, GenerateAnalysisButton, HeimerdingerModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { playersActions } from '@/actions/players';
+import { llmActions } from '@/actions/llm';
 import { useSummoner } from '@/contexts';
 import { ROUTES } from '@/config';
 import type { FullGameData } from '@/api/players';
+import { getCachedMatchAnalysis, cacheMatchAnalysis } from '@/utils/analysisCache';
 
 export default function MatchDetailPage() {
   const { matchId } = useParams<{ matchId: string }>();
@@ -22,9 +24,21 @@ export default function MatchDetailPage() {
   const [activeTab, setActiveTab] = useState<'summary' | 'champion' | 'statistics'>('summary');
   const [championTabSelection, setChampionTabSelection] = useState<string>('');
   const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [analysisData, setAnalysisData] = useState<{ summary: string; fullAnalysis: string } | null>(null);
+  const [cachedAnalysis, setCachedAnalysis] = useState<{ summary: string; fullAnalysis: string } | null>(null);
 
   useEffect(() => {
     loadMatch();
+    // Load cached analysis if available
+    if (matchId) {
+      const cached = getCachedMatchAnalysis(matchId);
+      if (cached) {
+        const data = { summary: cached.summary, fullAnalysis: cached.fullAnalysis };
+        setCachedAnalysis(data);
+        setAnalysisData(data);
+      }
+    }
   }, [matchId]);
 
   const loadMatch = async () => {
@@ -213,6 +227,31 @@ export default function MatchDetailPage() {
     }
     
     return filtered;
+  };
+
+  const handleGenerateAnalysis = async (): Promise<{ summary: string; fullAnalysis: string } | null> => {
+    if (!matchId) return null;
+    
+    const result = await llmActions.analyzeMatch(matchId);
+    
+    if (result.success && result.data) {
+      const data = {
+        summary: result.data.summary,
+        fullAnalysis: result.data.full_analysis,
+      };
+      setAnalysisData(data);
+      setCachedAnalysis(data);
+      // Cache in localStorage
+      cacheMatchAnalysis(matchId, data);
+      return data;
+    } else {
+      alert(`Failed to generate analysis: ${result.error}`);
+      return null;
+    }
+  };
+
+  const handleOpenFullAnalysis = () => {
+    setShowAnalysisModal(true);
   };
 
   return (
@@ -1023,6 +1062,26 @@ export default function MatchDetailPage() {
             <h2>Match not found</h2>
             <button onClick={() => navigate(ROUTES.GAMES)}>Back to Games</button>
           </div>
+        )}
+
+        {/* Generate Analysis Button */}
+        {match && (
+          <GenerateAnalysisButton 
+            onGenerate={handleGenerateAnalysis}
+            onOpenFullAnalysis={handleOpenFullAnalysis}
+            cachedAnalysis={cachedAnalysis}
+          />
+        )}
+
+        {/* Heimerdinger Analysis Modal */}
+        {analysisData && (
+          <HeimerdingerModal
+            isOpen={showAnalysisModal}
+            onClose={() => setShowAnalysisModal(false)}
+            summary={analysisData.summary}
+            fullAnalysis={analysisData.fullAnalysis}
+            title="Match Analysis"
+          />
         )}
       </div>
     </>

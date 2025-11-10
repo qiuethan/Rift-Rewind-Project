@@ -11,9 +11,9 @@ class BedrockModels:
     CLAUDE_HAIKU_4_5 = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
     CLAUDE_HAIKU_4 = CLAUDE_HAIKU_4_5  # Alias
     
-    # Claude Sonnet 4.5 - Best for all other tasks (main responses)
-    CLAUDE_SONNET_4_5 = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
-    CLAUDE_SONNET_4 = CLAUDE_SONNET_4_5  # Alias
+    # Claude Sonnet 4 - Best for all other tasks (main responses)
+    CLAUDE_SONNET_4 = "us.anthropic.claude-sonnet-4-20250514-v1:0"
+    CLAUDE_SONNET_4_5 = CLAUDE_SONNET_4  # Alias for backward compatibility
 
 
 # Prompt Router Configuration
@@ -32,13 +32,13 @@ class PromptRouterConfig:
             "description": "Fast responses for simple queries (greetings, basic info, quick lookups)"
         },
         "moderate": {
-            "model": BedrockModels.CLAUDE_SONNET_4_5,
+            "model": BedrockModels.CLAUDE_SONNET_4,
             "max_tokens": 2000,
             "temperature": 0.7,
             "description": "Balanced for most tasks (match analysis, summaries, recommendations)"
         },
         "complex": {
-            "model": BedrockModels.CLAUDE_SONNET_4_5,
+            "model": BedrockModels.CLAUDE_SONNET_4,
             "max_tokens": 4000,
             "temperature": 0.8,
             "description": "Deep analysis for complex reasoning (strategy, predictions, coaching)"
@@ -46,7 +46,7 @@ class PromptRouterConfig:
     }
     
     # Default model if routing fails
-    DEFAULT_MODEL = BedrockModels.CLAUDE_SONNET_4_5
+    DEFAULT_MODEL = BedrockModels.CLAUDE_SONNET_4
     DEFAULT_MAX_TOKENS = 1500
     DEFAULT_TEMPERATURE = 0.7
     DEFAULT_TOP_P = 0.9
@@ -74,22 +74,39 @@ Your role: Analyze user questions and determine what data needs to be fetched fr
 User Request: {user_prompt}
 
 Available data contexts:
-1. "summoner" - Basic player info (game_name, region) - ALWAYS include this
-2. {{"champion_progress": "ChampionName"}} - Champion-specific stats (games played, win rate, performance trends)
-3. {{"match": "match_id"}} - Specific match data (KDA, items, timeline)
+1. "summoner" - Basic player info (game_name, region)
+2. "summoner_overview" - Full profile (level, masteries, top champions, recent games)
+3. {{"champion_progress": "ChampionName"}} - Basic champion stats (games, win rate, trends)
+4. {{"champion_detailed": "ChampionName"}} - Detailed champion data (recent matches, best/worst games, mastery)
+5. {{"match": "match_id"}} - Basic match data (KDA, stats, analysis)
+6. {{"match_detailed": "match_id"}} - Detailed match (timeline, all players, team comps)
+7. "recent_performance" - Last 10 games summary (win rate, streak, trend)
 
-Instructions:
-- Always include "summoner" as the first context
-- Add champion_progress if the user mentions a specific champion by name
-- Add match if the user wants to discuss a specific game/match
-- Extract the exact champion name from the user's question
-- Use "match_id" as placeholder for match context
+Context Selection Rules:
+- Use "summoner" for simple greetings or when no specific data needed
+- Use "summoner_overview" when asking about profile, account, top champions, or overall stats
+- Use "champion_progress" for basic champion questions (win rate, games played)
+- Use "champion_detailed" when asking about champion history, improvement, best/worst games, or mastery
+- Use "match" for basic match questions (how did I do, what was my KDA, performance in a specific game)
+  * IMPORTANT: "this game", "that game", "my last game", "my recent game" = match context needed
+- Use "match_detailed" when asking about match timeline, team comps, all players, or power curve
+- Use "recent_performance" when asking about recent form, streaks, or "lately" (NOT for specific games)
 
 Examples:
-User: "How am I doing overall?" → {{"contexts": ["summoner"]}}
+User: "Hello" → {{"contexts": ["summoner"]}}
+User: "Tell me about my account" → {{"contexts": ["summoner_overview"]}}
+User: "What are my top champions?" → {{"contexts": ["summoner_overview"]}}
 User: "How am I doing on Yasuo?" → {{"contexts": ["summoner", {{"champion_progress": "Yasuo"}}]}}
+User: "Show me my Yasuo improvement over time" → {{"contexts": ["summoner", {{"champion_detailed": "Yasuo"}}]}}
+User: "What's my best Ahri game?" → {{"contexts": ["summoner", {{"champion_detailed": "Ahri"}}]}}
 User: "Analyze my last match" → {{"contexts": ["summoner", {{"match": "match_id"}}]}}
-User: "How did I play Ahri in my last game?" → {{"contexts": ["summoner", {{"champion_progress": "Ahri"}}, {{"match": "match_id"}}]}}
+User: "How did I perform this game?" → {{"contexts": ["summoner", {{"match": "match_id"}}]}}
+User: "Tell me about that game" → {{"contexts": ["summoner", {{"match": "match_id"}}]}}
+User: "What was my KDA in my last game?" → {{"contexts": ["summoner", {{"match": "match_id"}}]}}
+User: "What was the enemy team comp in that game?" → {{"contexts": ["summoner", {{"match_detailed": "match_id"}}]}}
+User: "Show me my power curve" → {{"contexts": ["summoner", {{"match_detailed": "match_id"}}]}}
+User: "How have I been doing lately?" → {{"contexts": ["summoner", "recent_performance"]}}
+User: "Am I on a win streak?" → {{"contexts": ["summoner", "recent_performance"]}}
 
 Respond with ONLY the JSON object, no markdown, no explanation:"""
 
@@ -106,7 +123,7 @@ class RiftRewindUseCases:
         "item_lookup": "simple",
         "ability_info": "simple",
         
-        # Moderate tasks - Use Sonnet 3.5
+        # Moderate tasks - Use Sonnet 4
         "match_summary": "moderate",
         "player_analysis": "moderate",
         "champion_tips": "moderate",
@@ -115,7 +132,7 @@ class RiftRewindUseCases:
         "rune_suggestion": "moderate",
         "lane_matchup": "moderate",
         
-        # Complex tasks - Use Sonnet 4.1
+        # Complex tasks - Use Sonnet 4
         "team_comp_analysis": "complex",
         "meta_prediction": "complex",
         "strategic_planning": "complex",

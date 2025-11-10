@@ -1,0 +1,305 @@
+/* Heimerdinger/Piltover Theme Colors */
+.heimerModal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: 75vh;
+  background: linear-gradient(135deg, #0A2E3E 0%, #1A4D6D 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 3px solid #F5C96A;
+  box-shadow: 0 0 30px rgba(245, 201, 106, 0.3);
+}
+
+/* Header with Heimerdinger */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #F5C96A;
+}
+
+.heimerLogo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #F5C96A;
+  box-shadow: 0 0 20px rgba(245, 201, 106, 0.5);
+}
+
+.headerText {
+  flex: 1;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #F5C96A;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 1rem;
+  color: #55F2CE;
+  font-weight: 500;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  background: transparent;
+  border: 2px solid transparent;
+  color: #B8B5B0;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.tab:hover {
+  background: rgba(245, 201, 106, 0.1);
+  color: #F5C96A;
+  border-color: rgba(245, 201, 106, 0.3);
+}
+
+.tab.activeTab {
+  background: linear-gradient(135deg, #F5C96A, #FFD700);
+  color: #1A4D6D;
+  border-color: #FFD700;
+  box-shadow: 0 4px 12px rgba(245, 201, 106, 0.4);
+}
+
+/* Content */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 250px;
+  max-height: 45vh;
+}
+
+.summary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.summaryBox {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 3px solid #F5C96A;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  text-align: center;
+}
+
+.summaryIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.summaryText {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #1A4D6D;
+  white-space: pre-wrap;
+  margin: 0;
+  font-weight: 500;
+}
+
+.fullAnalysis {
+  padding: 1rem;
+}
+
+.analysisBox {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 3px solid #F5C96A;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.analysisText {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #1A4D6D;
+  word-wrap: break-word;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Markdown Styling */
+.mdH1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1A4D6D;
+  margin: 1.5rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 3px solid #F5C96A;
+}
+
+.mdH2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1A4D6D;
+  margin: 1.25rem 0 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid #F5C96A;
+}
+
+.mdH3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2B6B8F;
+  margin: 1rem 0 0.5rem;
+}
+
+.mdP {
+  margin: 0.75rem 0;
+  line-height: 1.8;
+  color: #1A4D6D;
+}
+
+.mdP strong {
+  font-weight: 700;
+  color: #0A2E3E;
+}
+
+.mdLi {
+  margin: 0.5rem 0;
+  margin-left: 1.5rem;
+  line-height: 1.7;
+  color: #1A4D6D;
+  list-style-type: disc;
+}
+
+.mdLi strong {
+  font-weight: 700;
+  color: #0A2E3E;
+}
+
+.summaryText .mdP,
+.summaryText .mdLi {
+  color: #2B6B8F;
+}
+
+.summaryText strong {
+  color: #1A4D6D;
+  font-weight: 700;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 2px solid #F5C96A;
+  gap: 1rem;
+}
+
+.professorQuote {
+  font-size: 0.875rem;
+  color: #55F2CE;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.closeButton {
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #F5C96A, #FFD700);
+  color: #1A4D6D;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.closeButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #FFD700, #F5C96A);
+}
+
+/* Scrollbar styling */
+.content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+}
+
+.content::-webkit-scrollbar-thumb {
+  background: #F5C96A;
+  border-radius: 5px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background: #FFD700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .heimerModal {
+    padding: 1.5rem;
+  }
+
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .heimerLogo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .content {
+    max-height: 50vh;
+  }
+
+  .summaryBox,
+  .analysisBox {
+    padding: 1.5rem;
+  }
+
+  .summaryText,
+  .analysisText {
+    font-size: 0.95rem;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .professorQuote {
+    text-align: center;
+  }
+}
