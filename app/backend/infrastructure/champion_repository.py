@@ -77,6 +77,7 @@ class ChampionRepositoryImpl(ChampionRepository):
             ].copy()
         champion_abilities['champ2_norm'] = df['champ2'].str.lower().str.replace("'", "").str.replace(" ", "").str.replace(".", "")
 
+        # Swap to champ1 for consistency
         mask_swap = champion_abilities['champ2_norm'] == normalized_champion
         for col1, col2 in [('champ1', 'champ2'),
                         ('ability1_type', 'ability2_type'),

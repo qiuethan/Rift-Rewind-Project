@@ -4,6 +4,8 @@
   right: 2rem;
   z-index: 9999;
   animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 @keyframes slideIn {
@@ -32,6 +34,7 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  transition: margin-bottom 0.25s ease;
 }
 
 .iconWrapper {
@@ -159,6 +162,39 @@
   background: var(--region-panel-hover);
   border-color: var(--region-primary);
   color: var(--region-primary);
+}
+
+.collapseButton {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.collapseButton:hover {
+  color: var(--region-primary);
+}
+
+.collapseButton:focus {
+  outline: none;
+}
+
+.collapseWrapper {
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+}
+
+.expanded {
+  max-height: 500px; /* should exceed your content height */
+  opacity: 1;
+}
+
+.collapsed {
+  max-height: 0;
+  opacity: 0;
 }
 
 /* Mobile responsive */
