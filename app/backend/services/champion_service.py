@@ -71,10 +71,10 @@ class ChampionService:
         
         puuid = user_summoner.get('puuid')
         
-        # Get player's champion pool using puuid
-        champion_pool = await self.champion_repository.get_player_champion_pool(puuid)
+        # Get player's champion pool from recent games (last 30 games with EPS/CPS scores)
+        champion_pool = await self.champion_repository.get_champion_pool_from_recent_games(puuid, game_limit=30)
         
-        logger.info(f"Champion pool for user {user_id} (puuid: {puuid}): {champion_pool}")
+        logger.info(f"Champion pool from recent games for user {user_id} (puuid: {puuid}): {champion_pool}")
 
         if not champion_pool:
             raise HTTPException(
@@ -82,7 +82,8 @@ class ChampionService:
                 detail="No champion data found. Please play some games first and sync your match history to get champion recommendations."
             )
         
-        # Get recommendations based on player's entire champion pool (using puuid)
+        # Get recommendations based on player's recent games champion pool (using puuid)
+        # Note: get_similar_champions internally calls get_champion_pool_from_recent_games
         recommendations = await self.champion_repository.get_similar_champions(
             puuid,  # Pass puuid, not champion name
             request.limit
