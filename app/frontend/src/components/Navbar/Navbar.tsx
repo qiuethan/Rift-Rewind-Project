@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
@@ -13,6 +13,7 @@ interface NavbarProps {
 
 export default function Navbar({ user, summoner, showAuthButtons = false }: NavbarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -31,9 +32,12 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
     navigate(ROUTES.LOGIN);
   };
 
-  const profileIconUrl = summoner?.profile_icon_id
+  const profileIconUrl = summoner && summoner.profile_icon_id
     ? `https://ddragon.leagueoflegends.com/cdn/15.22.1/img/profileicon/${summoner.profile_icon_id}.png`
     : 'https://ddragon.leagueoflegends.com/cdn/15.22.1/img/profileicon/29.png';
+
+  // Hide region picker on /champion/:champion routes
+  const hideRegionSelector = /^\/champion\/[^/]+$/.test(location.pathname);
 
   return (
     <nav className={styles.navbar}>
@@ -71,11 +75,13 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
           </div>
         )}
 
+        {!hideRegionSelector && (
           <div className={styles.regionSelector}>
             <RegionSelector />
           </div>
+        )}
 
-          <div className={styles.rightSection}>
+        <div className={styles.rightSection}>
           {showAuthButtons ? (
             <div className={styles.authButtons}>
               <button className={styles.loginButton} onClick={() => navigate(ROUTES.LOGIN)}>Login</button>
