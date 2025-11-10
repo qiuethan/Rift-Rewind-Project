@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from './MatchDetailPage.module.css';
-import { Navbar, Spinner, MatchAnalysisChart, GenerateAnalysisButton, HeimerdingerModal } from '@/components';
+import { Navbar, Spinner, MatchAnalysisChart, GenerateAnalysisButton, HeimerdingerModal, SummonerLinkModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { playersActions } from '@/actions/players';
 import { llmActions } from '@/actions/llm';
@@ -27,6 +27,7 @@ export default function MatchDetailPage() {
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [analysisData, setAnalysisData] = useState<{ summary: string; fullAnalysis: string } | null>(null);
   const [cachedAnalysis, setCachedAnalysis] = useState<{ summary: string; fullAnalysis: string } | null>(null);
+  const [showSummonerLinkModal, setShowSummonerLinkModal] = useState(false);
 
   useEffect(() => {
     loadMatch();
@@ -241,11 +242,11 @@ export default function MatchDetailPage() {
       };
       setAnalysisData(data);
       setCachedAnalysis(data);
-      // Cache in localStorage
+      // Cache in localStorage only on success
       cacheMatchAnalysis(matchId, data);
       return data;
     } else {
-      alert(`Failed to generate analysis: ${result.error}`);
+      // Return null - error will be shown in thought bubble
       return null;
     }
   };
@@ -256,7 +257,11 @@ export default function MatchDetailPage() {
 
   return (
     <>
-      <Navbar user={user} summoner={summoner} />
+      <Navbar user={user} summoner={summoner} onChangeSummonerAccount={() => setShowSummonerLinkModal(true)} />
+      <SummonerLinkModal
+        isOpen={showSummonerLinkModal}
+        onClose={() => setShowSummonerLinkModal(false)}
+      />
       <div className={styles.container}>
         {loading ? (
           <div className={styles.loading}>

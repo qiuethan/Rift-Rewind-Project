@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './RecommendPage.module.css';
-import { Navbar, Spinner, Card, Modal } from '@/components';
+import { Navbar, Spinner, Card, Modal, SummonerLinkModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
 import { useSummoner } from '@/contexts';
@@ -22,7 +22,9 @@ interface ChampionMastery {
 function RecommendationsCard({ summonerId, championMasteries }: { summonerId: string; championMasteries?: ChampionMastery[] }) {
   const navigate = useNavigate();
   const [recommendations, setRecommendations] = useState<ChampionRecommendationWithDetails[]>([]);
-  const [selectedChampion, setSelectedChampion] = useState<ChampionRecommendationWithDetails | null>(null);
+  const [selectedChampion, setSelectedChampion] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showSummonerLinkModal, setShowSummonerLinkModal] = useState(false);
   const [abilitySimilarities, setAbilitySimilarities] = useState<AbilitySimilarity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -328,6 +330,7 @@ export default function RecommendPage() {
   const navigate = useNavigate();
   const { summoner, loading: summonerLoading } = useSummoner();
   const [user, setUser] = useState<any>(null);
+  const [showSummonerLinkModal, setShowSummonerLinkModal] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -343,7 +346,11 @@ export default function RecommendPage() {
   if (summonerLoading) {
     return (
       <>
-        <Navbar user={user} summoner={summoner} />
+        <Navbar user={user} summoner={summoner} onChangeSummonerAccount={() => setShowSummonerLinkModal(true)} />
+        <SummonerLinkModal
+          isOpen={showSummonerLinkModal}
+          onClose={() => setShowSummonerLinkModal(false)}
+        />
         <div className={styles.container}>
           <div className={styles.loading}>
             <Spinner size="large" />
@@ -356,7 +363,11 @@ export default function RecommendPage() {
 
   return (
     <>
-      <Navbar user={user} summoner={summoner} />
+      <Navbar user={user} summoner={summoner} onChangeSummonerAccount={() => setShowSummonerLinkModal(true)} />
+      <SummonerLinkModal
+        isOpen={showSummonerLinkModal}
+        onClose={() => setShowSummonerLinkModal(false)}
+      />
       <div className={styles.container}>
         <div className={styles.header}>
           <button 

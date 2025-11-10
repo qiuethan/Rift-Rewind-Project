@@ -21,6 +21,7 @@ export default function GenerateAnalysisButton({ onGenerate, onOpenFullAnalysis,
   const [summary, setSummary] = useState<string | null>(cachedAnalysis?.summary || null);
   const [hasAnalysis, setHasAnalysis] = useState(!!cachedAnalysis);
   const [bubbleDismissed, setBubbleDismissed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Update when cached analysis changes
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function GenerateAnalysisButton({ onGenerate, onOpenFullAnalysis,
       setSummary(cachedAnalysis.summary);
       setHasAnalysis(true);
       setBubbleDismissed(false); // Show bubble when new analysis is cached
+      setError(null); // Clear any errors
     }
   }, [cachedAnalysis]);
 
@@ -42,13 +44,22 @@ export default function GenerateAnalysisButton({ onGenerate, onOpenFullAnalysis,
     
     setIsGenerating(true);
     setBubbleDismissed(false); // Show bubble when generating
+    setError(null); // Clear previous errors
     
     try {
       const result = await onGenerate();
       if (result) {
         setSummary(result.summary);
         setHasAnalysis(true);
+        setError(null);
+      } else {
+        // Generation failed but didn't throw
+        setError("Failed to generate analysis. Please try again.");
       }
+    } catch (err) {
+      // Handle unexpected errors
+      setError("An error occurred while generating analysis. Please try again.");
+      console.error('Analysis generation error:', err);
     } finally {
       setIsGenerating(false);
     }
@@ -70,6 +81,13 @@ export default function GenerateAnalysisButton({ onGenerate, onOpenFullAnalysis,
           <div className={styles.bubbleContent}>
             {isGenerating ? (
               <p className={styles.thinkingText}>The Professor is thinking...</p>
+            ) : error ? (
+              <>
+                <p className={styles.errorText}>{error}</p>
+                <button className={styles.retryButton} onClick={handleClick}>
+                  Try Again
+                </button>
+              </>
             ) : hasAnalysis && summary ? (
               <>
                 <p className={styles.summaryText}>{parseInlineMarkdown(summary)}</p>

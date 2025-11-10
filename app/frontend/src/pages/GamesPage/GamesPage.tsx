@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './GamesPage.module.css';
-import { Button, Navbar, Spinner } from '@/components';
+import { Button, Navbar, Spinner, SummonerLinkModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { playersActions } from '@/actions/players';
 import { ROUTES } from '@/config';
@@ -88,6 +88,7 @@ export default function GamesPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [showSummonerLinkModal, setShowSummonerLinkModal] = useState(false);
   const GAMES_PER_PAGE = 10;
 
   useEffect(() => {
@@ -241,7 +242,11 @@ export default function GamesPage() {
 
   return (
     <>
-      <Navbar user={user} summoner={summoner} />
+      <Navbar user={user} summoner={summoner} onChangeSummonerAccount={() => setShowSummonerLinkModal(true)} />
+      <SummonerLinkModal
+        isOpen={showSummonerLinkModal}
+        onClose={() => setShowSummonerLinkModal(false)}
+      />
       {loading ? (
         <div className={styles.container}>
           <div className={styles.loading}>

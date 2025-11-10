@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styles from './ChampionDetailPage.module.css';
-import { Navbar, Button, Card, Spinner, GenerateAnalysisButton, HeimerdingerModal } from '@/components';
+import { Navbar, Button, Card, Spinner, GenerateAnalysisButton, HeimerdingerModal, SummonerLinkModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { championProgressActions } from '@/actions/championProgress';
 import { llmActions } from '@/actions/llm';
@@ -47,6 +47,7 @@ export default function ChampionDetailPage() {
   const [progressError, setProgressError] = useState<string | null>(null);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [analysisData, setAnalysisData] = useState<{ summary: string; fullAnalysis: string } | null>(null);
+  const [showSummonerLinkModal, setShowSummonerLinkModal] = useState(false);
   const [cachedAnalysis, setCachedAnalysis] = useState<{ summary: string; fullAnalysis: string } | null>(null);
 
   // Find champion from summoner's mastery data
@@ -172,11 +173,11 @@ export default function ChampionDetailPage() {
       };
       setAnalysisData(data);
       setCachedAnalysis(data);
-      // Cache in localStorage
+      // Cache in localStorage only on success
       cacheChampionAnalysis(championId, data);
       return data;
     } else {
-      alert(`Failed to generate analysis: ${result.error}`);
+      // Return null - error will be shown in thought bubble
       return null;
     }
   };
@@ -202,7 +203,11 @@ export default function ChampionDetailPage() {
 
   return (
     <>
-      <Navbar user={user} summoner={summoner} />
+      <Navbar user={user} summoner={summoner} onChangeSummonerAccount={() => setShowSummonerLinkModal(true)} />
+      <SummonerLinkModal
+        isOpen={showSummonerLinkModal}
+        onClose={() => setShowSummonerLinkModal(false)}
+      />
       <div className={styles.container}>
         {/* Back Button */}
         <Button 

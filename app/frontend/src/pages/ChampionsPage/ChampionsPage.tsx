@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ChampionsPage.module.css';
-import { Navbar, Spinner } from '@/components';
+import { Navbar, Spinner, SummonerLinkModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
 import { useSummoner } from '@/contexts';
@@ -22,6 +22,7 @@ export default function ChampionsPage() {
   const { summoner, loading: summonerLoading } = useSummoner();
   const [user, setUser] = useState<any>(null);
   const [champions, setChampions] = useState<ChampionMastery[]>([]);
+  const [showSummonerLinkModal, setShowSummonerLinkModal] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -61,7 +62,11 @@ export default function ChampionsPage() {
   if (summonerLoading) {
     return (
       <>
-        <Navbar user={user} summoner={summoner} />
+        <Navbar user={user} summoner={summoner} onChangeSummonerAccount={() => setShowSummonerLinkModal(true)} />
+        <SummonerLinkModal
+          isOpen={showSummonerLinkModal}
+          onClose={() => setShowSummonerLinkModal(false)}
+        />
         <div className={styles.container}>
           <div className={styles.loading}>
             <Spinner size="large" />
@@ -74,7 +79,11 @@ export default function ChampionsPage() {
 
   return (
     <>
-      <Navbar user={user} summoner={summoner} />
+      <Navbar user={user} summoner={summoner} onChangeSummonerAccount={() => setShowSummonerLinkModal(true)} />
+      <SummonerLinkModal
+        isOpen={showSummonerLinkModal}
+        onClose={() => setShowSummonerLinkModal(false)}
+      />
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>Champion Mastery</h1>

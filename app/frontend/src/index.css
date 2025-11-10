@@ -4,12 +4,29 @@
   box-sizing: border-box;
 }
 
+/* Smooth theme transitions for all elements */
+*,
+*::before,
+*::after {
+  transition: background-color 1.2s linear, 
+              background-image 1.2s linear,
+              border-color 1.2s linear, 
+              color 1.2s linear, 
+              box-shadow 1.2s linear,
+              text-shadow 1.2s linear,
+              fill 1.2s linear,
+              stroke 1.2s linear;
+}
+
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Smooth transitions for theme changes */
+  transition: background-color 1.2s linear, color 1.2s linear;
   
   /* ═══════════════════════════════════════════════════════════
      RUNETERRA DYNAMIC REGION THEME SYSTEM
@@ -90,6 +107,9 @@ body {
   letter-spacing: -0.011em;
   position: relative;
   min-height: 100vh;
+  
+  /* Smooth transitions for theme changes */
+  transition: background 1.2s linear, background-image 1.2s linear, color 1.2s linear;
 }
 
 /* Vignette effect with scan lines */
