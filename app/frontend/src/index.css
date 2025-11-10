@@ -126,11 +126,11 @@ body::after {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.3;
+  opacity: 0.2;
   pointer-events: none;
   z-index: 1;
   mix-blend-mode: screen;
-  filter: blur(4px) brightness(0.6);
+  filter: blur(2px) brightness(0.9);
 }
 
 @keyframes scanlines {
@@ -149,7 +149,7 @@ body::after {
   background-image: var(--region-pattern);
   background-repeat: repeat;
   background-size: 100px 100px;
-  opacity: 0.5;
+  opacity: 0.35;
   pointer-events: none;
   z-index: 0;
   mix-blend-mode: screen;
