@@ -20,6 +20,7 @@ export interface ChampionMatchScore {
   gold: number;
   damage: number;
   vision_score: number;
+  items?: number[];
 }
 
 export interface ChampionProgressTrend {

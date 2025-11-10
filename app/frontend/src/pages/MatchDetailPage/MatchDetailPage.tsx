@@ -550,9 +550,9 @@ export default function MatchDetailPage() {
                                 finalCPS,
                                 isUser: p.puuid === summoner?.puuid
                               };
-                            }).sort((a, b) => b.epsScore - a.epsScore);
+                            }).sort((a: any, b: any) => b.epsScore - a.epsScore);
                             
-                            return playerData.map((player, index) => (
+                            return playerData.map((player: any, index: number) => (
                               <div 
                                 key={player.championName} 
                                 className={`${styles.playerCard} ${player.isUser ? styles.userPlayer : ''} ${player.teamId === 100 ? styles.blueTeam : styles.redTeam}`}

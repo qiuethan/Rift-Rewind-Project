@@ -11,6 +11,10 @@ interface ChampionMastery {
   championId?: number;
   champion_id?: number;
   championName?: string;
+  championLevel?: number;
+  champion_level?: number;
+  championPoints?: number;
+  champion_points?: number;
 }
 
 interface TrackedChampionsProps {
