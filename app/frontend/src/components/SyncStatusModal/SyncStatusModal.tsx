@@ -18,6 +18,14 @@ export default function SyncStatusModal({ isVisible, onDismiss }: SyncStatusModa
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false); // New state
+
+  // Toggle collapse while syncing
+  const toggleCollapse = () => {
+    if (!isComplete) {
+      setIsCollapsed(!isCollapsed);
+    }
+  };
 
   // Check localStorage on mount
   useEffect(() => {
@@ -30,18 +38,16 @@ export default function SyncStatusModal({ isVisible, onDismiss }: SyncStatusModa
         const duration = 5 * 60 * 1000; // 5 minutes
 
         if (elapsed < duration) {
-          // Still syncing
           setShowModal(true);
           setIsComplete(false);
           const currentProgress = Math.min((elapsed / duration) * 100, 95);
           setProgress(currentProgress);
         } else if (elapsed < duration + 10000) {
-          // Just completed (within 10 seconds of completion)
           setShowModal(true);
           setIsComplete(true);
           setProgress(100);
+          setIsCollapsed(false); // Expand when complete
         } else {
-          // Sync completed more than 10 seconds ago, clean up
           localStorage.removeItem(SYNC_STORAGE_KEY);
         }
       }
@@ -54,12 +60,13 @@ export default function SyncStatusModal({ isVisible, onDismiss }: SyncStatusModa
   useEffect(() => {
     if (isVisible && !showModal) {
       const startTime = Date.now();
-      const endTime = startTime + (5 * 60 * 1000);
+      const endTime = startTime + 5 * 60 * 1000;
       const syncStatus: SyncStatus = { startTime, endTime };
       localStorage.setItem(SYNC_STORAGE_KEY, JSON.stringify(syncStatus));
       setShowModal(true);
       setIsComplete(false);
       setProgress(0);
+      setIsCollapsed(false); // Start uncollapsed
     }
   }, [isVisible]);
 
@@ -79,17 +86,15 @@ export default function SyncStatusModal({ isVisible, onDismiss }: SyncStatusModa
         const duration = 5 * 60 * 1000;
 
         if (elapsed >= duration) {
-          // Sync complete!
           setProgress(100);
           setIsComplete(true);
-          // Auto-dismiss after 5 seconds
+          setIsCollapsed(false); // Expand when complete
           setTimeout(() => {
             localStorage.removeItem(SYNC_STORAGE_KEY);
             setShowModal(false);
             if (onDismiss) onDismiss();
           }, 5000);
         } else {
-          // Update progress
           const currentProgress = Math.min((elapsed / duration) * 100, 95);
           setProgress(currentProgress);
         }
@@ -112,55 +117,60 @@ export default function SyncStatusModal({ isVisible, onDismiss }: SyncStatusModa
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <div className={styles.header}>
+        {/* Header clickable to collapse while syncing */}
+        <div className={styles.header} onClick={toggleCollapse} style={{ cursor: isComplete ? 'default' : 'pointer', marginBottom: isCollapsed ? 0 : undefined }}>
           <div className={styles.iconWrapper}>
-            {isComplete ? (
-              <div className={styles.checkmark}>✓</div>
-            ) : (
-              <Spinner size="medium" />
-            )}
+            {isComplete ? <div className={styles.checkmark}>✓</div> : <Spinner size="medium" />}
           </div>
           <h3 className={styles.title}>
             {isComplete ? 'Sync Complete!' : 'Syncing in Progress'}
           </h3>
-        </div>
-        
-        <div className={styles.content}>
-          {isComplete ? (
-            <>
-              <p className={styles.message}>
-                Your match history has been successfully synced! All data is now up to date.
-              </p>
-              <p className={styles.success}>
-                ✓ All done! You can now view your complete match history and statistics.
-              </p>
-            </>
-          ) : (
-            <>
-              <p className={styles.message}>
-                We're fetching your match history from Riot Games. This may take a few moments.
-              </p>
-              <p className={styles.warning}>
-                ⚠️ Information may not be accurate until sync is complete.
-              </p>
-              
-              <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill} 
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              
-              <p className={styles.subtext}>
-                You can continue browsing while we sync your data in the background.
-              </p>
-            </>
+          {!isComplete && (
+            <span style={{ marginLeft: 'auto', fontSize: '1.2rem' }}>
+              {isCollapsed ? '▲' : '▼'}
+            </span>
           )}
         </div>
 
-        <button className={styles.dismissButton} onClick={handleDismiss}>
-          {isComplete ? 'Close' : 'Dismiss'}
-        </button>
+        {/* Collapsible content */}
+        {/* Collapsible wrapper */}
+        <div
+          className={`${styles.collapseWrapper} ${isCollapsed ? styles.collapsed : styles.expanded}`}
+        >
+          <div className={styles.content}>
+            {isComplete ? (
+              <>
+                <p className={styles.message}>
+                  Your match history has been successfully synced! All data is now up to date.
+                </p>
+                <p className={styles.success}>
+                  ✓ All done! You can now view your complete match history and statistics.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className={styles.message}>
+                  We're fetching your match history from Riot Games. This may take a few moments.
+                </p>
+                <p className={styles.warning}>
+                  ⚠️ Information may not be accurate until sync is complete.
+                </p>
+
+                <div className={styles.progressBar}>
+                  <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+                </div>
+
+                <p className={styles.subtext}>
+                  You can continue browsing while we sync your data in the background.
+                </p>
+              </>
+            )}
+
+            <button className={styles.dismissButton} onClick={handleDismiss}>
+              {isComplete ? 'Close' : 'Dismiss'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
