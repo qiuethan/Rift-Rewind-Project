@@ -10,7 +10,8 @@ from models.champions import (
     ChampionRecommendationResponse,
     ChampionSimilarityRequest,
     ChampionSimilarityResponse,
-    ChampionData
+    ChampionData,
+    AbilitySimilarityResponse
 )
 from fastapi import HTTPException, status
 from typing import List
@@ -120,3 +121,40 @@ class ChampionService:
             response.playstyle_similarity = 0.75
         
         return response
+    
+    async def get_ability_similarities(
+        self,
+        champion_id: str,
+        limit_per_ability: int = 3
+    ) -> AbilitySimilarityResponse:
+        """Get ability similarities for a champion"""
+        try:
+            self.champion_domain.validate_champion_id(champion_id)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
+        
+        # Get champion data to verify it exists
+        champion = await self.champion_repository.get_champion_by_id(champion_id)
+        if not champion:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Champion '{champion_id}' not found"
+            )
+        
+        # Get ability similarities
+        abilities = await self.champion_repository.get_ability_similarities(
+            champion_id,
+            limit_per_ability
+        )
+        
+        if not abilities:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No ability similarity data found for champion '{champion_id}'"
+            )
+        
+        return AbilitySimilarityResponse(
+            champion_id=champion_id,
+            champion_name=champion.name,
+            abilities=abilities
+        )

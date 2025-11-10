@@ -9,6 +9,7 @@ import ChampionsPage from '@/pages/ChampionsPage';
 import ChampionDetailPage from '@/pages/ChampionDetailPage';
 import MatchDetailPage from '@/pages/MatchDetailPage';
 import TestChatPage from '@/pages/TestChatPage';
+import RecommendPage from '@/pages/RecommendPage';
 import { Footer, ScrollToTop, AudioControls } from '@/components';
 import { ROUTES, STORAGE_KEYS } from '@/config';
 import { authActions } from '@/actions/auth';
@@ -89,6 +90,7 @@ function App() {
               <Route path={ROUTES.CHAMPIONS} element={<ProtectedRoute><ChampionsPage /></ProtectedRoute>} />
               <Route path="/champion/:championName" element={<ProtectedRoute><ChampionDetailPage /></ProtectedRoute>} />
               <Route path={ROUTES.MATCH} element={<ProtectedRoute><MatchDetailPage /></ProtectedRoute>} />
+              <Route path={ROUTES.RECOMMEND} element={<ProtectedRoute><RecommendPage /></ProtectedRoute>} />
               <Route path={ROUTES.TEST_CHAT} element={<ProtectedRoute><TestChatPage /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to={ROUTES.HOME} />} />
             </Routes>

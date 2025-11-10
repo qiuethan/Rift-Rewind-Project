@@ -28,7 +28,7 @@ from repositories.champion_progress_repository import ChampionProgressRepository
 from infrastructure.auth_repository import AuthRepositorySupabase
 from infrastructure.player_repository import PlayerRepositoryRiot
 from infrastructure.match_repository import MatchRepositoryRiot
-from infrastructure.champion_repository import ChampionRepositorySupabase
+from infrastructure.champion_repository import ChampionRepositoryImpl
 from infrastructure.analytics_repository import AnalyticsRepositorySupabase
 from infrastructure.riot_api_repository import RiotAPIRepositoryImpl
 from infrastructure.champion_progress_repository import ChampionProgressRepositorySupabase
@@ -108,8 +108,8 @@ def get_match_repository() -> MatchRepository:
 
 
 def get_champion_repository() -> ChampionRepository:
-    """Factory for ChampionRepository"""
-    return ChampionRepositorySupabase(supabase_service, settings.OPENROUTER_API_KEY)
+    """Get champion repository instance"""
+    return ChampionRepositoryImpl()
 
 
 def get_analytics_repository() -> AnalyticsRepository:

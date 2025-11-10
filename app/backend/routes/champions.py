@@ -7,7 +7,8 @@ from models.champions import (
     ChampionRecommendationRequest,
     ChampionRecommendationResponse,
     ChampionSimilarityRequest,
-    ChampionSimilarityResponse
+    ChampionSimilarityResponse,
+    AbilitySimilarityResponse
 )
 from services.champion_service import ChampionService
 from dependency.dependencies import get_champion_service
@@ -52,3 +53,13 @@ async def calculate_champion_similarity(
 ):
     """Calculate similarity between two champions (public endpoint)"""
     return await champion_service.calculate_similarity(similarity_request)
+
+
+@router.get("/{champion_id}/ability-similarities", response_model=AbilitySimilarityResponse)
+async def get_ability_similarities(
+    champion_id: str,
+    limit_per_ability: int = 3,
+    champion_service: ChampionService = Depends(get_champion_service)
+):
+    """Get ability similarities for a champion's Q, W, E, R abilities (public endpoint)"""
+    return await champion_service.get_ability_similarities(champion_id, limit_per_ability)

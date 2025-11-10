@@ -72,3 +72,24 @@ class ChampionSimilarityResponse(BaseModel):
     
     class Config:
         extra = "allow"
+
+
+class AbilitySimilarity(BaseModel):
+    """Single ability similarity comparison"""
+    ability_type: str = Field(..., description="Q, W, E, or R")
+    ability_name: str = Field(..., description="Name of the ability")
+    similar_champion: str = Field(..., description="Champion with similar ability")
+    similar_ability_type: str = Field(..., description="Similar ability slot (Q, W, E, R)")
+    similar_ability_name: str = Field(..., description="Name of the similar ability")
+    similarity_score: float = Field(..., ge=0.0, le=1.0, description="Similarity score 0-1")
+    explanation: str = Field(..., description="Why these abilities are similar")
+
+
+class AbilitySimilarityResponse(BaseModel):
+    """Response model for ability similarities"""
+    champion_id: str
+    champion_name: str
+    abilities: List[AbilitySimilarity] = Field(..., description="List of similar abilities for Q, W, E, R")
+    
+    class Config:
+        extra = "allow"
