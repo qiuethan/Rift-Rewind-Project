@@ -10,4 +10,8 @@ export { default as Footer } from './Footer';
 export { default as ScrollToTop } from './ScrollToTop';
 export { default as SyncStatusModal } from './SyncStatusModal';
 export { default as AudioControls } from './AudioControls';
+export { default as BrandHeader } from './BrandHeader';
+export { default as PrimaryCTAGroup } from './PrimaryCTAGroup';
+export { default as SummonerLinkModal } from './SummonerLinkModal';
+export { default as TermsModal } from './TermsModal';
 export { MatchAnalysisChart } from './MatchAnalysisChart';

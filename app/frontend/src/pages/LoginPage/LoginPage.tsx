@@ -24,7 +24,7 @@ export default function LoginPage() {
     if (result.success) {
       // Refresh summoner data after successful login
       await refreshSummoner();
-      navigate(ROUTES.DASHBOARD);
+      navigate(ROUTES.HOME);
     } else {
       setError(result.error || null);
     }
@@ -34,22 +34,11 @@ export default function LoginPage() {
 
   return (
     <>
-      <nav className={styles.nav}>
-        <div className={styles.navContent}>
-          <h2 className={styles.logo} onClick={() => navigate(ROUTES.HOME)}>Rift Rewind</h2>
-          <div className={styles.navButtons}>
-            <Button variant="secondary" onClick={() => navigate(ROUTES.REGISTER)}>
-              Sign Up
-            </Button>
-          </div>
-        </div>
-      </nav>
-      
       <div className={styles.container}>
         <Card className={styles.card}>
         <div className={styles.header}>
           <h1 className={styles.title}>Welcome Back</h1>
-          <p className={styles.subtitle}>Login to Rift Rewind</p>
+          <p className={styles.subtitle}>Login to Heimer Academy</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -83,9 +72,13 @@ export default function LoginPage() {
         <div className={styles.footer}>
           <p>
             Don't have an account?{' '}
-            <Link to={ROUTES.REGISTER} className={styles.link}>
+            <button
+              type="button"
+              className={styles.link}
+              onClick={() => navigate(ROUTES.REGISTER)}
+            >
               Sign up
-            </Link>
+            </button>
           </p>
         </div>
       </Card>

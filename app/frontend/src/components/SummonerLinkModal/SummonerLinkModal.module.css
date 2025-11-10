@@ -1,0 +1,100 @@
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.modalDescription {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  letter-spacing: -0.011em;
+}
+
+.riotIdContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.riotIdField {
+  flex: 1;
+}
+
+.riotIdSeparator {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding-bottom: 0.75rem;
+  letter-spacing: -0.022em;
+}
+
+.selectContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.selectLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.011em;
+}
+
+.select {
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--region-panel-border);
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  background: var(--region-secondary);
+  background-image: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, var(--region-secondary) 100%);
+  color: var(--region-text);
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: 0.01em;
+  opacity: 0.95;
+}
+
+.select option {
+  background: var(--region-secondary);
+  color: var(--region-text);
+}
+
+.select:hover {
+  border-color: var(--region-primary);
+  background: var(--region-panel-hover);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--region-accent);
+  box-shadow: var(--region-shadow-primary);
+  background: var(--region-panel-hover);
+}
+
+.modalError {
+  padding: 0.875rem 1rem;
+  background: rgba(255, 87, 87, 0.15);
+  border: 2px solid #FF5757;
+  border-radius: 0.375rem;
+  color: #FFB3B3;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.011em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.modalSuccess {
+  padding: 0.875rem 1rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid #10B981;
+  border-radius: 0.375rem;
+  color: #6EE7B7;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.011em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}

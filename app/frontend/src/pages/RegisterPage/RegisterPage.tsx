@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styles from './RegisterPage.module.css';
-import { Button, Input, Card, RegionBanner } from '@/components';
+import { Button, Input, Card, RegionBanner, TermsModal } from '@/components';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
 
@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -49,22 +50,11 @@ export default function RegisterPage() {
 
   return (
     <>
-      <nav className={styles.nav}>
-        <div className={styles.navContent}>
-          <h2 className={styles.logo} onClick={() => navigate(ROUTES.HOME)}>Rift Rewind</h2>
-          <div className={styles.navButtons}>
-            <Button variant="secondary" onClick={() => navigate(ROUTES.LOGIN)}>
-              Login
-            </Button>
-          </div>
-        </div>
-      </nav>
-      
       <div className={styles.container}>
         <Card className={styles.card}>
         <div className={styles.header}>
           <h1 className={styles.title}>Create Account</h1>
-          <p className={styles.subtitle}>Join Rift Rewind</p>
+          <p className={styles.subtitle}>Join Heimer Academy</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>
@@ -98,6 +88,17 @@ export default function RegisterPage() {
             fullWidth
           />
 
+          <div className={styles.termsText}>
+            By making an account, you are agreeing to our{' '}
+            <button
+              type="button"
+              className={styles.termsLink}
+              onClick={() => setShowTermsModal(true)}
+            >
+              Terms and Conditions
+            </button>.
+          </div>
+
           {error && <div className={styles.error}>{error}</div>}
           {success && <div className={styles.success}>{success}</div>}
 
@@ -109,12 +110,21 @@ export default function RegisterPage() {
         <div className={styles.footer}>
           <p>
             Already have an account?{' '}
-            <Link to={ROUTES.LOGIN} className={styles.link}>
+            <button
+              type="button"
+              className={styles.termsLink}
+              onClick={() => navigate(ROUTES.LOGIN)}
+            >
               Login
-            </Link>
+            </button>
           </p>
         </div>
       </Card>
+
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
     </>
   );

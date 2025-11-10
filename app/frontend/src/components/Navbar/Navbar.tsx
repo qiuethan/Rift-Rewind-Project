@@ -9,9 +9,10 @@ interface NavbarProps {
   user?: any;
   summoner?: any;
   showAuthButtons?: boolean;
+  onChangeSummonerAccount?: () => void;
 }
 
-export default function Navbar({ user, summoner, showAuthButtons = false }: NavbarProps) {
+export default function Navbar({ user, summoner, showAuthButtons = false, onChangeSummonerAccount }: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -43,12 +44,21 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
     <nav className={styles.navbar}>
       <div className={styles.container}>
         <div className={styles.logo} onClick={() => navigate(ROUTES.HOME)}>
-          <span className={styles.logoText}>Rift Rewind</span>
+          {/* <span className={styles.logoText}>Heimer Academy</span> */}
+          <img 
+            src="/img/emotes/heimerdinger.png" 
+            alt="Heimerdinger" 
+            className={styles.logoEmoji}
+            onError={(e) => {
+              console.error('Failed to load heimerdinger.png');
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
         </div>
 
         {!showAuthButtons && (
           <div className={styles.nav}>
-            <button 
+            {/* <button 
               className={styles.navLink} 
               onClick={() => navigate(ROUTES.DASHBOARD)}
             >
@@ -71,17 +81,18 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
               onClick={() => navigate(ROUTES.RECOMMEND)}
             >
               Recommend
-            </button>
+            </button> */}
           </div>
         )}
 
-        {!hideRegionSelector && (
-          <div className={styles.regionSelector}>
-            <RegionSelector />
-          </div>
-        )}
+        
 
         <div className={styles.rightSection}>
+          {!hideRegionSelector && (
+            <div className={styles.regionSelector}>
+              <RegionSelector />
+            </div>
+          )}
           {showAuthButtons ? (
             <div className={styles.authButtons}>
               <button className={styles.loginButton} onClick={() => navigate(ROUTES.LOGIN)}>Login</button>
@@ -106,6 +117,14 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
                     </div>
                   </div>
                   <div className={styles.dropdownDivider} />
+                  {!showAuthButtons && (
+                    <>
+                      <button className={styles.dropdownItem} onClick={onChangeSummonerAccount || (() => {})}>
+                        Change Summoner Account
+                      </button>
+                      <div className={styles.dropdownDivider} />
+                    </>
+                  )}
                   <button className={styles.dropdownItem} onClick={handleLogout}>Logout</button>
                 </div>
               )}

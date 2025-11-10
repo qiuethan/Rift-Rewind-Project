@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styles from './ChampionDetailPage.module.css';
 import { Navbar, Button, Card, Spinner } from '@/components';
 import { authActions } from '@/actions/auth';
@@ -35,6 +35,7 @@ ChartJS.register(
 
 export default function ChampionDetailPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { championName } = useParams<{ championName: string }>();
   const { summoner } = useSummoner();
   const { setTheme } = useTheme();
@@ -117,38 +118,32 @@ export default function ChampionDetailPage() {
     setUser(userData);
   }, [navigate]);
 
-  // Fetch champion progress
+  // Handle browser back button when coming from dashboard
   useEffect(() => {
-    const fetchChampionProgress = async () => {
-      if (!championId) {
-        setLoadingProgress(false);
-        return;
+    const handlePopState = () => {
+      if (location.state?.from === 'dashboard') {
+        navigate(ROUTES.DASHBOARD, { replace: true });
       }
-
-      setLoadingProgress(true);
-      setProgressError(null);
-
-      const result = await championProgressActions.getChampionProgress(championId, 10);
-      
-      if (result.success && result.data) {
-        setChampionProgress(result.data);
-      } else {
-        setProgressError(result.error || null);
-      }
-      
-      setLoadingProgress(false);
     };
 
-    fetchChampionProgress();
-  }, [championId]);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [location.state, navigate]);
 
   return (
     <>
       <Navbar user={user} summoner={summoner} />
       <div className={styles.container}>
         {/* Back Button */}
-        <Button variant="secondary" onClick={() => navigate(ROUTES.CHAMPIONS)} className={styles.backButton}>
-          ← Back to Champions
+        <Button 
+          variant="secondary" 
+          onClick={() => {
+            const cameFromDashboard = location.state?.from === 'dashboard';
+            navigate(cameFromDashboard ? ROUTES.DASHBOARD : ROUTES.CHAMPIONS);
+          }} 
+          className={styles.backButton}
+        >
+          ← Back to {location.state?.from === 'dashboard' ? 'Dashboard' : 'Champions'}
         </Button>
 
         {/* Champion Title Card */}

@@ -1,0 +1,22 @@
+.content {
+  max-height: 60vh;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.content h3 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--region-primary);
+}
+
+.content p {
+  margin-bottom: 1rem;
+  color: var(--region-text-primary);
+}
+
+.content h3:first-child {
+  margin-top: 0;
+}

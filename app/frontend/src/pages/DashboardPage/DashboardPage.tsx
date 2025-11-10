@@ -8,7 +8,6 @@ import { ROUTES } from '@/config';
 import { REGION_NAMES } from '@/constants';
 import { useSummoner } from '@/contexts';
 import {
-  SummonerInfo,
   TopChampions,
   RecentGames,
 } from './components';
@@ -203,7 +202,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Navbar user={user} summoner={summoner} />
+      <Navbar user={user} summoner={summoner} onChangeSummonerAccount={handleOpenModal} />
       {isLoading ? (
         <div className={styles.container}>
           <div className={styles.loading}>
@@ -214,18 +213,23 @@ export default function DashboardPage() {
       ) : (
         <div className={styles.container}>
         <div className={styles.header}>
+          <div className={styles.headerTop}>
+            <button 
+              className={styles.backButton}
+              onClick={() => navigate(ROUTES.HOME)}
+              aria-label="Back to main menu"
+            >
+              ← Back to Main Menu
+            </button>
+          </div>
           <h1 className={styles.title}>Dashboard</h1>
         </div>
 
       <div className={styles.grid}>
-        <SummonerInfo summoner={summoner} onLinkAccount={handleOpenModal} />
-        <div className={styles.topChampionsWide}>
-          <TopChampions
-            topChampions={summoner?.top_champions}
-            totalMasteryScore={summoner?.total_mastery_score}
-            loading={loading}
-          />
-        </div>
+        <TopChampions
+          champions={summoner?.champion_masteries}
+          loading={loading}
+        />
       </div>
 
       {summoner && (

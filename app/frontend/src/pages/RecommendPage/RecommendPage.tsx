@@ -163,6 +163,15 @@ export default function RecommendPage() {
     <>
       <Navbar user={user} summoner={summoner} />
       <div className={styles.container}>
+        <div className={styles.header}>
+          <button 
+            className={styles.backButton}
+            onClick={() => navigate(ROUTES.HOME)}
+            aria-label="Back to main menu"
+          >
+            ← Back to Main Menu
+          </button>
+        </div>
         <div className={styles.recommendationContainer} role="region" aria-label="Champion recommendations">
           {/* Navigation */}
           <nav className={styles.navigation} aria-label="Recommendation navigation">
