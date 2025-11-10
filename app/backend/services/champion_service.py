@@ -136,10 +136,11 @@ class ChampionService:
     
     async def get_ability_similarities(
         self,
+        user_id: str,
         champion_id: str,
         limit_per_ability: int = 3
     ) -> AbilitySimilarityResponse:
-        """Get ability similarities for a champion"""
+        """Get ability similarities for a champion filtered by user's champion pool"""
         try:
             self.champion_domain.validate_champion_id(champion_id)
         except DomainException as e:
@@ -153,16 +154,38 @@ class ChampionService:
                 detail=f"Champion '{champion_id}' not found"
             )
         
-        # Get ability similarities
+        # Get player's puuid from user_id
+        user_summoner = await self.player_repository.get_user_summoner_basic(user_id)
+        if not user_summoner:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No summoner linked to this account"
+            )
+        
+        puuid = user_summoner.get('puuid')
+        
+        # Get player's champion pool
+        champion_pool = await self.champion_repository.get_player_champion_pool(puuid)
+        
+        logger.info(f"Fetching ability similarities for {champion_id} filtered by champion pool: {champion_pool}")
+        
+        if not champion_pool:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No champion data found. Please play some games first and sync your match history."
+            )
+        
+        # Get ability similarities filtered by champion pool
         abilities = await self.champion_repository.get_ability_similarities(
             champion_id,
-            limit_per_ability
+            limit_per_ability,
+            champion_pool
         )
         
         if not abilities:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No ability similarity data found for champion '{champion_id}'"
+                detail=f"No ability similarity data found for champion '{champion_id}' within your champion pool"
             )
         
         return AbilitySimilarityResponse(

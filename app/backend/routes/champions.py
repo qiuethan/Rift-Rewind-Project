@@ -50,7 +50,8 @@ async def get_champion_recommendations(
 async def get_ability_similarities(
     champion_id: str,
     limit_per_ability: int = 3,
+    current_user: str = Depends(get_current_user),
     champion_service: ChampionService = Depends(get_champion_service)
 ):
-    """Get ability similarities for a champion's Q, W, E, R abilities (public endpoint)"""
-    return await champion_service.get_ability_similarities(champion_id, limit_per_ability)
+    """Get ability similarities for a champion's Q, W, E, R abilities filtered by user's champion pool (protected)"""
+    return await champion_service.get_ability_similarities(current_user, champion_id, limit_per_ability)

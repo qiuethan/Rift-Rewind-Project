@@ -45,6 +45,17 @@ class ChampionRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_ability_similarities(self, champion_id: str, limit_per_ability: int = 3) -> List[AbilitySimilarity]:
-        """Get ability similarities for a champion's Q, W, E, R abilities"""
+    async def get_ability_similarities(
+        self, 
+        champion_id: str, 
+        limit_per_ability: int = 3,
+        champion_pool: Optional[List[str]] = None
+    ) -> List[AbilitySimilarity]:
+        """Get ability similarities for a champion's Q, W, E, R abilities
+        
+        Args:
+            champion_id: The champion to get ability similarities for
+            limit_per_ability: Maximum number of similar abilities to return per ability type
+            champion_pool: Optional list of champion names to filter comparisons by
+        """
         pass

@@ -46,8 +46,22 @@ class ChampionRepositoryImpl(ChampionRepository):
         normalized = name.lower().replace("'", "").replace(" ", "").replace(".", "")
         return normalized
     
-    async def get_ability_similarities(self, champion_id: str, limit_per_ability: int = 3) -> List[AbilitySimilarity]:
-        """Get ability similarities for a champion's Q, W, E, R abilities"""
+    async def get_ability_similarities(
+        self, 
+        champion_id: str, 
+        limit_per_ability: int = 3,
+        champion_pool: Optional[List[str]] = None
+    ) -> List[AbilitySimilarity]:
+        """Get ability similarities for a champion's Q, W, E, R abilities
+        
+        Args:
+            champion_id: The champion to get ability similarities for
+            limit_per_ability: Maximum number of similar abilities to return per ability type
+            champion_pool: Optional list of champion names to filter comparisons by (graph names)
+        
+        Returns:
+            List of ability similarities, filtered by champion pool if provided
+        """
         if ChampionRepositoryImpl._ability_data_cache is None or ChampionRepositoryImpl._ability_data_cache.empty:
             return []
         
@@ -62,6 +76,22 @@ class ChampionRepositoryImpl(ChampionRepository):
         
         if champion_abilities.empty:
             return []
+        
+        # Filter by champion pool if provided
+        if champion_pool:
+            # Normalize champion pool names for comparison
+            normalized_pool = [self._normalize_champion_name(champ) for champ in champion_pool]
+            
+            # Filter to only include comparisons with champions in the pool
+            champion_abilities = champion_abilities[
+                champion_abilities['champ2'].str.lower().str.replace("'", "").str.replace(" ", "").str.replace(".", "").isin(normalized_pool)
+            ]
+            
+            if champion_abilities.empty:
+                logger.info(f"No ability similarities found for {champion_id} within champion pool: {champion_pool}")
+                return []
+            
+            logger.info(f"Found {len(champion_abilities)} ability similarities for {champion_id} within champion pool")
         
         # Group by ability type and get top similarities for each
         abilities = []
@@ -471,34 +501,37 @@ class ChampionRepositoryImpl(ChampionRepository):
         # Calculate dynamic threshold based on score distribution
         scores = [c['score'] for c in scored_champions]
         
-        # Adaptive percentile based on total champion count
-        # - Very few champions (1-3): Include all
-        # - Few champions (4-10): Use 10th percentile (top 90%)
-        # - Medium champions (11-20): Use 20th percentile (top 80%)
-        # - Many champions (21+): Use 30th percentile (top 70%)
+        # Tightened adaptive percentile based on total champion count
+        # Goal: Keep champion pool between 5-12 champions for focused recommendations
+        # - Very few champions (1-5): Include all
+        # - Few champions (6-15): Use 50th percentile (top 50%)
+        # - Medium champions (16-30): Use 60th percentile (top 40%)
+        # - Many champions (31+): Use 70th percentile (top 30%)
         total_champs = len(scored_champions)
         
-        if total_champs <= 3:
+        if total_champs <= 5:
             # Include all champions for new players
             percentile_threshold = 0
             logger.info(f"New player detected ({total_champs} champions) - including all")
-        elif total_champs <= 10:
-            percentile_threshold = 10
-            logger.info(f"Small pool detected ({total_champs} champions) - using 10th percentile")
-        elif total_champs <= 20:
-            percentile_threshold = 20
-            logger.info(f"Medium pool detected ({total_champs} champions) - using 20th percentile")
+        elif total_champs <= 15:
+            percentile_threshold = 50
+            logger.info(f"Small pool detected ({total_champs} champions) - using 50th percentile")
+        elif total_champs <= 30:
+            percentile_threshold = 60
+            logger.info(f"Medium pool detected ({total_champs} champions) - using 60th percentile")
         else:
-            percentile_threshold = 30
-            logger.info(f"Large pool detected ({total_champs} champions) - using 30th percentile")
+            percentile_threshold = 70
+            logger.info(f"Large pool detected ({total_champs} champions) - using 70th percentile")
         
         percentile_value = self._calculate_percentile(scores, percentile_threshold)
         
-        # Include champions above threshold
+        # Include champions above threshold with hard cap
+        MAX_POOL_SIZE = 12  # Hard cap to keep recommendations focused
         champion_pool = []
         included_count = 0
+        
         for champ in scored_champions:
-            if champ['score'] >= percentile_value:
+            if champ['score'] >= percentile_value and included_count < MAX_POOL_SIZE:
                 graph_name = get_graph_name_from_id(int(champ['champion_id']))
                 if graph_name:
                     champion_pool.append(graph_name)
