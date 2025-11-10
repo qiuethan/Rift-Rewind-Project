@@ -30,6 +30,22 @@ export interface ChampionRecommendationResponse {
   based_on_champions: string[];
 }
 
+export interface AbilitySimilarity {
+  ability_type: string;
+  ability_name: string;
+  similar_champion: string;
+  similar_ability_type: string;
+  similar_ability_name: string;
+  similarity_score: number;
+  explanation: string;
+}
+
+export interface AbilitySimilarityResponse {
+  champion_id: string;
+  champion_name: string;
+  abilities: AbilitySimilarity[];
+}
+
 export const championsApi = {
   getAllChampions: async (): Promise<ChampionData[]> => {
     return apiClient.get<ChampionData[]>('/api/champions/');
@@ -43,5 +59,14 @@ export const championsApi = {
     data: ChampionRecommendationRequest
   ): Promise<ChampionRecommendationResponse> => {
     return apiClient.post<ChampionRecommendationResponse>('/api/champions/recommendations', data);
+  },
+
+  getAbilitySimilarities: async (
+    championId: string,
+    limitPerAbility: number = 3
+  ): Promise<AbilitySimilarityResponse> => {
+    return apiClient.get<AbilitySimilarityResponse>(
+      `/api/champions/${championId}/ability-similarities?limit_per_ability=${limitPerAbility}`
+    );
   },
 };
