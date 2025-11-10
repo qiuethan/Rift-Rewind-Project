@@ -108,8 +108,8 @@ def get_match_repository() -> MatchRepository:
 
 
 def get_champion_repository() -> ChampionRepository:
-    """Factory for ChampionRepository"""
-    return ChampionRepositorySupabase(supabase_service, settings.OPENROUTER_API_KEY)
+    """Get champion repository instance"""
+    return ChampionRepositoryImpl()
 
 
 def get_analytics_repository() -> AnalyticsRepository:
