@@ -11,9 +11,9 @@ class BedrockModels:
     CLAUDE_HAIKU_4_5 = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
     CLAUDE_HAIKU_4 = CLAUDE_HAIKU_4_5  # Alias
     
-    # Claude Sonnet 4.5 - Best for all other tasks (main responses)
-    CLAUDE_SONNET_4_5 = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
-    CLAUDE_SONNET_4 = CLAUDE_SONNET_4_5  # Alias
+    # Claude Sonnet 4 - Best for all other tasks (main responses)
+    CLAUDE_SONNET_4 = "anthropic.claude-sonnet-4-20250514-v1:0"
+    CLAUDE_SONNET_4_5 = CLAUDE_SONNET_4  # Alias for backward compatibility
 
 
 # Prompt Router Configuration
@@ -32,13 +32,13 @@ class PromptRouterConfig:
             "description": "Fast responses for simple queries (greetings, basic info, quick lookups)"
         },
         "moderate": {
-            "model": BedrockModels.CLAUDE_SONNET_4_5,
+            "model": BedrockModels.CLAUDE_SONNET_4,
             "max_tokens": 2000,
             "temperature": 0.7,
             "description": "Balanced for most tasks (match analysis, summaries, recommendations)"
         },
         "complex": {
-            "model": BedrockModels.CLAUDE_SONNET_4_5,
+            "model": BedrockModels.CLAUDE_SONNET_4,
             "max_tokens": 4000,
             "temperature": 0.8,
             "description": "Deep analysis for complex reasoning (strategy, predictions, coaching)"
@@ -46,7 +46,7 @@ class PromptRouterConfig:
     }
     
     # Default model if routing fails
-    DEFAULT_MODEL = BedrockModels.CLAUDE_SONNET_4_5
+    DEFAULT_MODEL = BedrockModels.CLAUDE_SONNET_4
     DEFAULT_MAX_TOKENS = 1500
     DEFAULT_TEMPERATURE = 0.7
     DEFAULT_TOP_P = 0.9
@@ -123,7 +123,7 @@ class RiftRewindUseCases:
         "item_lookup": "simple",
         "ability_info": "simple",
         
-        # Moderate tasks - Use Sonnet 3.5
+        # Moderate tasks - Use Sonnet 4
         "match_summary": "moderate",
         "player_analysis": "moderate",
         "champion_tips": "moderate",
@@ -132,7 +132,7 @@ class RiftRewindUseCases:
         "rune_suggestion": "moderate",
         "lane_matchup": "moderate",
         
-        # Complex tasks - Use Sonnet 4.1
+        # Complex tasks - Use Sonnet 4
         "team_comp_analysis": "complex",
         "meta_prediction": "complex",
         "strategic_planning": "complex",
