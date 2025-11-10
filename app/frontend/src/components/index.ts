@@ -18,3 +18,4 @@ export { MatchAnalysisChart } from './MatchAnalysisChart';
 export { GenerateAnalysisButton } from './GenerateAnalysisButton';
 export { AnalysisModal } from './AnalysisModal';
 export { HeimerdingerModal } from './HeimerdingerModal';
+export { HeimerdingerHelper } from './HeimerdingerHelper';

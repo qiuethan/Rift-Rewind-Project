@@ -10,12 +10,13 @@ import ChampionDetailPage from '@/pages/ChampionDetailPage';
 import MatchDetailPage from '@/pages/MatchDetailPage';
 import TestChatPage from '@/pages/TestChatPage';
 import RecommendPage from '@/pages/RecommendPage';
-import { Footer, ScrollToTop, AudioControls } from '@/components';
+import { Footer, ScrollToTop, AudioControls, HeimerdingerHelper } from '@/components';
 import { ROUTES, STORAGE_KEYS } from '@/config';
 import { authActions } from '@/actions/auth';
 import { SummonerProvider, ThemeProvider } from '@/contexts';
 import { AudioProvider } from '@/contexts/AudioContext';
 import { supabase } from '@/lib/supabase';
+import { useLocation } from 'react-router-dom';
 
 // Define props for route components
 interface RouteProps {
@@ -30,6 +31,15 @@ function ProtectedRoute({ children }: RouteProps) {
 function PublicRoute({ children }: RouteProps) {
   const isAuthenticated = authActions.isAuthenticated();
   return !isAuthenticated ? <>{children}</> : <Navigate to={ROUTES.DASHBOARD} />;
+}
+
+function GlobalHeimerdingerHelper() {
+  const location = useLocation();
+  // Don't show on match detail pages (e.g., /match/NA1_123456) or champion detail pages (e.g., /champion/Ahri)
+  if (location.pathname.startsWith("/match/") || location.pathname.startsWith("/champion/")) {
+    return null;
+  }
+  return <HeimerdingerHelper />;
 }
 
 function App() {
@@ -94,6 +104,7 @@ function App() {
               <Route path={ROUTES.TEST_CHAT} element={<ProtectedRoute><TestChatPage /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to={ROUTES.HOME} />} />
             </Routes>
+            <GlobalHeimerdingerHelper />
             <Footer />
             <AudioControls />
           </SummonerProvider>

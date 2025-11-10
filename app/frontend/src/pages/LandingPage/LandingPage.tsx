@@ -143,6 +143,9 @@ export default function LandingPage() {
                 </h1>
             </div>
             <PrimaryCTAGroup />
+            <p className={styles.heimerHelp}>
+              💡 Need help? Ask <strong>Professor Heimerdinger</strong> in the bottom right corner!
+            </p>
           </div>
         </div>
       )}

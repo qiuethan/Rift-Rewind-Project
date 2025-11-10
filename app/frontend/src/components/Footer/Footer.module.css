@@ -53,7 +53,7 @@
   font-size: 0.8rem;
   color: var(--text-dim);
   line-height: 1.6;
-  max-width: 65ch; /* Limits the line length for better readability */
+  max-width: 90ch; /* Wider text bounds to reduce height */
 }
 
 /* --- Simplified Responsive Adjustments --- */
