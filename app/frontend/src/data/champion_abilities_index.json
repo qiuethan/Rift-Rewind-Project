@@ -1,0 +1,3083 @@
+{
+  "version": "15.22.1",
+  "champions": {
+    "aatrox": {
+      "Q": {
+        "name": "The Darkin Blade",
+        "image": "AatroxQ.png"
+      },
+      "W": {
+        "name": "Infernal Chains",
+        "image": "AatroxW.png"
+      },
+      "E": {
+        "name": "Umbral Dash",
+        "image": "AatroxE.png"
+      },
+      "R": {
+        "name": "World Ender",
+        "image": "AatroxR.png"
+      }
+    },
+    "alistar": {
+      "Q": {
+        "name": "Pulverize",
+        "image": "Pulverize.png"
+      },
+      "W": {
+        "name": "Headbutt",
+        "image": "Headbutt.png"
+      },
+      "E": {
+        "name": "Trample",
+        "image": "AlistarE.png"
+      },
+      "R": {
+        "name": "Unbreakable Will",
+        "image": "FerociousHowl.png"
+      }
+    },
+    "ambessa": {
+      "Q": {
+        "name": "Cunning Sweep / Sundering Slam",
+        "image": "AmbessaQ.png"
+      },
+      "W": {
+        "name": "Repudiation",
+        "image": "AmbessaW.png"
+      },
+      "E": {
+        "name": "Lacerate",
+        "image": "AmbessaE.png"
+      },
+      "R": {
+        "name": "Public Execution",
+        "image": "AmbessaR.png"
+      }
+    },
+    "anivia": {
+      "Q": {
+        "name": "Flash Frost",
+        "image": "FlashFrost.png"
+      },
+      "W": {
+        "name": "Crystallize",
+        "image": "Crystallize.png"
+      },
+      "E": {
+        "name": "Frostbite",
+        "image": "Frostbite.png"
+      },
+      "R": {
+        "name": "Glacial Storm",
+        "image": "GlacialStorm.png"
+      }
+    },
+    "amumu": {
+      "Q": {
+        "name": "Bandage Toss",
+        "image": "BandageToss.png"
+      },
+      "W": {
+        "name": "Despair",
+        "image": "AuraofDespair.png"
+      },
+      "E": {
+        "name": "Tantrum",
+        "image": "Tantrum.png"
+      },
+      "R": {
+        "name": "Curse of the Sad Mummy",
+        "image": "CurseoftheSadMummy.png"
+      }
+    },
+    "ahri": {
+      "Q": {
+        "name": "Orb of Deception",
+        "image": "AhriQ.png"
+      },
+      "W": {
+        "name": "Fox-Fire",
+        "image": "AhriW.png"
+      },
+      "E": {
+        "name": "Charm",
+        "image": "AhriE.png"
+      },
+      "R": {
+        "name": "Spirit Rush",
+        "image": "AhriR.png"
+      }
+    },
+    "akali": {
+      "Q": {
+        "name": "Five Point Strike",
+        "image": "AkaliQ.png"
+      },
+      "W": {
+        "name": "Twilight Shroud",
+        "image": "AkaliW.png"
+      },
+      "E": {
+        "name": "Shuriken Flip",
+        "image": "AkaliE.png"
+      },
+      "R": {
+        "name": "Perfect Execution",
+        "image": "AkaliR.png"
+      }
+    },
+    "akshan": {
+      "Q": {
+        "name": "Avengerang",
+        "image": "AkshanQ.png"
+      },
+      "W": {
+        "name": "Going Rogue",
+        "image": "AkshanW.png"
+      },
+      "E": {
+        "name": "Heroic Swing",
+        "image": "AkshanE.png"
+      },
+      "R": {
+        "name": "Comeuppance",
+        "image": "AkshanR.png"
+      }
+    },
+    "ashe": {
+      "Q": {
+        "name": "Ranger's Focus",
+        "image": "AsheQ.png"
+      },
+      "W": {
+        "name": "Volley",
+        "image": "Volley.png"
+      },
+      "E": {
+        "name": "Hawkshot",
+        "image": "AsheSpiritOfTheHawk.png"
+      },
+      "R": {
+        "name": "Enchanted Crystal Arrow",
+        "image": "EnchantedCrystalArrow.png"
+      }
+    },
+    "belveth": {
+      "Q": {
+        "name": "Void Surge",
+        "image": "BelvethQ.png"
+      },
+      "W": {
+        "name": "Above and Below",
+        "image": "BelvethW.png"
+      },
+      "E": {
+        "name": "Royal Maelstrom",
+        "image": "BelvethE.png"
+      },
+      "R": {
+        "name": "Endless Banquet",
+        "image": "BelvethR.png"
+      }
+    },
+    "aurora": {
+      "Q": {
+        "name": "Twofold Hex",
+        "image": "AuroraQ.png"
+      },
+      "W": {
+        "name": "Across the Veil",
+        "image": "AuroraW.png"
+      },
+      "E": {
+        "name": "The Weirding",
+        "image": "AuroraE.png"
+      },
+      "R": {
+        "name": "Between Worlds",
+        "image": "AuroraR.png"
+      }
+    },
+    "aurelionsol": {
+      "Q": {
+        "name": "Breath of Light",
+        "image": "AurelionSolQ.png"
+      },
+      "W": {
+        "name": "Astral Flight",
+        "image": "AurelionSolW.png"
+      },
+      "E": {
+        "name": "Singularity",
+        "image": "AurelionSolE.png"
+      },
+      "R": {
+        "name": "Falling Star / The Skies Descend",
+        "image": "AurelionSolR.png"
+      }
+    },
+    "aphelios": {
+      "Q": {
+        "name": "Weapon Abilites",
+        "image": "ApheliosQ_ClientTooltipWrapper.png"
+      },
+      "W": {
+        "name": "Phase",
+        "image": "ApheliosW.png"
+      },
+      "E": {
+        "name": "Weapon Queue System",
+        "image": "ApheliosE_ClientTooltipWrapper.png"
+      },
+      "R": {
+        "name": "Moonlight Vigil",
+        "image": "ApheliosR.png"
+      }
+    },
+    "azir": {
+      "Q": {
+        "name": "Conquering Sands",
+        "image": "AzirQWrapper.png"
+      },
+      "W": {
+        "name": "Arise!",
+        "image": "AzirW.png"
+      },
+      "E": {
+        "name": "Shifting Sands",
+        "image": "AzirEWrapper.png"
+      },
+      "R": {
+        "name": "Emperor's Divide",
+        "image": "AzirR.png"
+      }
+    },
+    "annie": {
+      "Q": {
+        "name": "Disintegrate",
+        "image": "AnnieQ.png"
+      },
+      "W": {
+        "name": "Incinerate",
+        "image": "AnnieW.png"
+      },
+      "E": {
+        "name": "Molten Shield",
+        "image": "AnnieE.png"
+      },
+      "R": {
+        "name": "Summon: Tibbers",
+        "image": "AnnieR.png"
+      }
+    },
+    "bard": {
+      "Q": {
+        "name": "Cosmic Binding",
+        "image": "BardQ.png"
+      },
+      "W": {
+        "name": "Caretaker's Shrine",
+        "image": "BardW.png"
+      },
+      "E": {
+        "name": "Magical Journey",
+        "image": "BardE.png"
+      },
+      "R": {
+        "name": "Tempered Fate",
+        "image": "BardR.png"
+      }
+    },
+    "cassiopeia": {
+      "Q": {
+        "name": "Noxious Blast",
+        "image": "CassiopeiaQ.png"
+      },
+      "W": {
+        "name": "Miasma",
+        "image": "CassiopeiaW.png"
+      },
+      "E": {
+        "name": "Twin Fang",
+        "image": "CassiopeiaE.png"
+      },
+      "R": {
+        "name": "Petrifying Gaze",
+        "image": "CassiopeiaR.png"
+      }
+    },
+    "braum": {
+      "Q": {
+        "name": "Winter's Bite",
+        "image": "BraumQ.png"
+      },
+      "W": {
+        "name": "Stand Behind Me",
+        "image": "BraumW.png"
+      },
+      "E": {
+        "name": "Unbreakable",
+        "image": "BraumE.png"
+      },
+      "R": {
+        "name": "Glacial Fissure",
+        "image": "BraumRWrapper.png"
+      }
+    },
+    "blitzcrank": {
+      "Q": {
+        "name": "Rocket Grab",
+        "image": "RocketGrab.png"
+      },
+      "W": {
+        "name": "Overdrive",
+        "image": "Overdrive.png"
+      },
+      "E": {
+        "name": "Power Fist",
+        "image": "PowerFist.png"
+      },
+      "R": {
+        "name": "Static Field",
+        "image": "StaticField.png"
+      }
+    },
+    "briar": {
+      "Q": {
+        "name": "Head Rush",
+        "image": "BriarQ.png"
+      },
+      "W": {
+        "name": "Blood Frenzy / Snack Attack",
+        "image": "BriarW.png"
+      },
+      "E": {
+        "name": "Chilling Scream",
+        "image": "BriarE.png"
+      },
+      "R": {
+        "name": "Certain Death",
+        "image": "BriarR.png"
+      }
+    },
+    "caitlyn": {
+      "Q": {
+        "name": "Piltover Peacemaker",
+        "image": "CaitlynQ.png"
+      },
+      "W": {
+        "name": "Yordle Snap Trap",
+        "image": "CaitlynW.png"
+      },
+      "E": {
+        "name": "90 Caliber Net",
+        "image": "CaitlynE.png"
+      },
+      "R": {
+        "name": "Ace in the Hole",
+        "image": "CaitlynR.png"
+      }
+    },
+    "brand": {
+      "Q": {
+        "name": "Sear",
+        "image": "BrandQ.png"
+      },
+      "W": {
+        "name": "Pillar of Flame",
+        "image": "BrandW.png"
+      },
+      "E": {
+        "name": "Conflagration",
+        "image": "BrandE.png"
+      },
+      "R": {
+        "name": "Pyroclasm",
+        "image": "BrandR.png"
+      }
+    },
+    "camille": {
+      "Q": {
+        "name": "Precision Protocol",
+        "image": "CamilleQ.png"
+      },
+      "W": {
+        "name": "Tactical Sweep",
+        "image": "CamilleW.png"
+      },
+      "E": {
+        "name": "Hookshot",
+        "image": "CamilleE.png"
+      },
+      "R": {
+        "name": "The Hextech Ultimatum",
+        "image": "CamilleR.png"
+      }
+    },
+    "chogath": {
+      "Q": {
+        "name": "Rupture",
+        "image": "Rupture.png"
+      },
+      "W": {
+        "name": "Feral Scream",
+        "image": "FeralScream.png"
+      },
+      "E": {
+        "name": "Vorpal Spikes",
+        "image": "VorpalSpikes.png"
+      },
+      "R": {
+        "name": "Feast",
+        "image": "Feast.png"
+      }
+    },
+    "corki": {
+      "Q": {
+        "name": "Phosphorus Bomb",
+        "image": "PhosphorusBomb.png"
+      },
+      "W": {
+        "name": "Valkyrie",
+        "image": "CarpetBomb.png"
+      },
+      "E": {
+        "name": "Gatling Gun",
+        "image": "GGun.png"
+      },
+      "R": {
+        "name": "Missile Barrage",
+        "image": "MissileBarrage.png"
+      }
+    },
+    "drmundo": {
+      "Q": {
+        "name": "Infected Bonesaw",
+        "image": "DrMundoQ.png"
+      },
+      "W": {
+        "name": "Heart Zapper",
+        "image": "DrMundoW.png"
+      },
+      "E": {
+        "name": "Blunt Force Trauma",
+        "image": "DrMundoE.png"
+      },
+      "R": {
+        "name": "Maximum Dosage",
+        "image": "DrMundoR.png"
+      }
+    },
+    "diana": {
+      "Q": {
+        "name": "Crescent Strike",
+        "image": "DianaQ.png"
+      },
+      "W": {
+        "name": "Pale Cascade",
+        "image": "DianaOrbs.png"
+      },
+      "E": {
+        "name": "Lunar Rush",
+        "image": "DianaTeleport.png"
+      },
+      "R": {
+        "name": "Moonfall",
+        "image": "DianaR.png"
+      }
+    },
+    "ekko": {
+      "Q": {
+        "name": "Timewinder",
+        "image": "EkkoQ.png"
+      },
+      "W": {
+        "name": "Parallel Convergence",
+        "image": "EkkoW.png"
+      },
+      "E": {
+        "name": "Phase Dive",
+        "image": "EkkoE.png"
+      },
+      "R": {
+        "name": "Chronobreak",
+        "image": "EkkoR.png"
+      }
+    },
+    "draven": {
+      "Q": {
+        "name": "Spinning Axe",
+        "image": "DravenSpinning.png"
+      },
+      "W": {
+        "name": "Blood Rush",
+        "image": "DravenFury.png"
+      },
+      "E": {
+        "name": "Stand Aside",
+        "image": "DravenDoubleShot.png"
+      },
+      "R": {
+        "name": "Whirling Death",
+        "image": "DravenRCast.png"
+      }
+    },
+    "darius": {
+      "Q": {
+        "name": "Decimate",
+        "image": "DariusCleave.png"
+      },
+      "W": {
+        "name": "Crippling Strike",
+        "image": "DariusNoxianTacticsONH.png"
+      },
+      "E": {
+        "name": "Apprehend",
+        "image": "DariusAxeGrabCone.png"
+      },
+      "R": {
+        "name": "Noxian Guillotine",
+        "image": "DariusExecute.png"
+      }
+    },
+    "evelynn": {
+      "Q": {
+        "name": "Hate Spike",
+        "image": "EvelynnQ.png"
+      },
+      "W": {
+        "name": "Allure",
+        "image": "EvelynnW.png"
+      },
+      "E": {
+        "name": "Whiplash",
+        "image": "EvelynnE.png"
+      },
+      "R": {
+        "name": "Last Caress",
+        "image": "EvelynnR.png"
+      }
+    },
+    "elise": {
+      "Q": {
+        "name": "Neurotoxin / Venomous Bite",
+        "image": "EliseHumanQ.png"
+      },
+      "W": {
+        "name": "Volatile Spiderling / Skittering Frenzy",
+        "image": "EliseHumanW.png"
+      },
+      "E": {
+        "name": "Cocoon / Rappel",
+        "image": "EliseHumanE.png"
+      },
+      "R": {
+        "name": "Spider Form",
+        "image": "EliseR.png"
+      }
+    },
+    "fiddlesticks": {
+      "Q": {
+        "name": "Terrify",
+        "image": "FiddleSticksQ.png"
+      },
+      "W": {
+        "name": "Bountiful Harvest",
+        "image": "FiddleSticksW.png"
+      },
+      "E": {
+        "name": "Reap",
+        "image": "FiddleSticksE.png"
+      },
+      "R": {
+        "name": "Crowstorm",
+        "image": "FiddleSticksR.png"
+      }
+    },
+    "garen": {
+      "Q": {
+        "name": "Decisive Strike",
+        "image": "GarenQ.png"
+      },
+      "W": {
+        "name": "Courage",
+        "image": "GarenW.png"
+      },
+      "E": {
+        "name": "Judgment",
+        "image": "GarenE.png"
+      },
+      "R": {
+        "name": "Demacian Justice",
+        "image": "GarenR.png"
+      }
+    },
+    "fiora": {
+      "Q": {
+        "name": "Lunge",
+        "image": "FioraQ.png"
+      },
+      "W": {
+        "name": "Riposte",
+        "image": "FioraW.png"
+      },
+      "E": {
+        "name": "Bladework",
+        "image": "FioraE.png"
+      },
+      "R": {
+        "name": "Grand Challenge",
+        "image": "FioraR.png"
+      }
+    },
+    "galio": {
+      "Q": {
+        "name": "Winds of War",
+        "image": "GalioQ.png"
+      },
+      "W": {
+        "name": "Shield of Durand",
+        "image": "GalioW.png"
+      },
+      "E": {
+        "name": "Justice Punch",
+        "image": "GalioE.png"
+      },
+      "R": {
+        "name": "Hero's Entrance",
+        "image": "GalioR.png"
+      }
+    },
+    "gnar": {
+      "Q": {
+        "name": "Boomerang Throw / Boulder Toss",
+        "image": "GnarQ.png"
+      },
+      "W": {
+        "name": "Hyper / Wallop",
+        "image": "GnarW.png"
+      },
+      "E": {
+        "name": "Hop / Crunch",
+        "image": "GnarE.png"
+      },
+      "R": {
+        "name": "GNAR!",
+        "image": "GnarR.png"
+      }
+    },
+    "fizz": {
+      "Q": {
+        "name": "Urchin Strike",
+        "image": "FizzQ.png"
+      },
+      "W": {
+        "name": "Seastone Trident",
+        "image": "FizzW.png"
+      },
+      "E": {
+        "name": "Playful / Trickster",
+        "image": "FizzE.png"
+      },
+      "R": {
+        "name": "Chum the Waters",
+        "image": "FizzR.png"
+      }
+    },
+    "gangplank": {
+      "Q": {
+        "name": "Parrrley",
+        "image": "GangplankQWrapper.png"
+      },
+      "W": {
+        "name": "Remove Scurvy",
+        "image": "GangplankW.png"
+      },
+      "E": {
+        "name": "Powder Keg",
+        "image": "GangplankE.png"
+      },
+      "R": {
+        "name": "Cannon Barrage",
+        "image": "GangplankR.png"
+      }
+    },
+    "ezreal": {
+      "Q": {
+        "name": "Mystic Shot",
+        "image": "EzrealQ.png"
+      },
+      "W": {
+        "name": "Essence Flux",
+        "image": "EzrealW.png"
+      },
+      "E": {
+        "name": "Arcane Shift",
+        "image": "EzrealE.png"
+      },
+      "R": {
+        "name": "Trueshot Barrage",
+        "image": "EzrealR.png"
+      }
+    },
+    "hecarim": {
+      "Q": {
+        "name": "Rampage",
+        "image": "HecarimRapidSlash.png"
+      },
+      "W": {
+        "name": "Spirit of Dread",
+        "image": "HecarimW.png"
+      },
+      "E": {
+        "name": "Devastating Charge",
+        "image": "HecarimRamp.png"
+      },
+      "R": {
+        "name": "Onslaught of Shadows",
+        "image": "HecarimUlt.png"
+      }
+    },
+    "gwen": {
+      "Q": {
+        "name": "Snip Snip!",
+        "image": "GwenQ.png"
+      },
+      "W": {
+        "name": "Hallowed Mist",
+        "image": "GwenW.png"
+      },
+      "E": {
+        "name": "Skip 'n Slash",
+        "image": "GwenE.png"
+      },
+      "R": {
+        "name": "Needlework",
+        "image": "GwenR.png"
+      }
+    },
+    "graves": {
+      "Q": {
+        "name": "End of the Line",
+        "image": "GravesQLineSpell.png"
+      },
+      "W": {
+        "name": "Smoke Screen",
+        "image": "GravesSmokeGrenade.png"
+      },
+      "E": {
+        "name": "Quickdraw",
+        "image": "GravesMove.png"
+      },
+      "R": {
+        "name": "Collateral Damage",
+        "image": "GravesChargeShot.png"
+      }
+    },
+    "hwei": {
+      "Q": {
+        "name": "Subject: Disaster",
+        "image": "HweiQ.png"
+      },
+      "W": {
+        "name": "Subject: Serenity",
+        "image": "HweiW.png"
+      },
+      "E": {
+        "name": "Subject: Torment",
+        "image": "HweiE.png"
+      },
+      "R": {
+        "name": "Spiraling Despair",
+        "image": "HweiR.png"
+      }
+    },
+    "illaoi": {
+      "Q": {
+        "name": "Tentacle Smash",
+        "image": "IllaoiQ.png"
+      },
+      "W": {
+        "name": "Harsh Lesson",
+        "image": "IllaoiW.png"
+      },
+      "E": {
+        "name": "Test of Spirit",
+        "image": "IllaoiE.png"
+      },
+      "R": {
+        "name": "Leap of Faith",
+        "image": "IllaoiR.png"
+      }
+    },
+    "gragas": {
+      "Q": {
+        "name": "Barrel Roll",
+        "image": "GragasQ.png"
+      },
+      "W": {
+        "name": "Drunken Rage",
+        "image": "GragasW.png"
+      },
+      "E": {
+        "name": "Body Slam",
+        "image": "GragasE.png"
+      },
+      "R": {
+        "name": "Explosive Cask",
+        "image": "GragasR.png"
+      }
+    },
+    "irelia": {
+      "Q": {
+        "name": "Bladesurge",
+        "image": "IreliaQ.png"
+      },
+      "W": {
+        "name": "Defiant Dance",
+        "image": "IreliaW.png"
+      },
+      "E": {
+        "name": "Flawless Duet",
+        "image": "IreliaE.png"
+      },
+      "R": {
+        "name": "Vanguard's Edge",
+        "image": "IreliaR.png"
+      }
+    },
+    "heimerdinger": {
+      "Q": {
+        "name": "H-28 G Evolution Turret",
+        "image": "HeimerdingerQ.png"
+      },
+      "W": {
+        "name": "Hextech Micro-Rockets",
+        "image": "HeimerdingerW.png"
+      },
+      "E": {
+        "name": "CH-2 Electron Storm Grenade",
+        "image": "HeimerdingerE.png"
+      },
+      "R": {
+        "name": "UPGRADE!!!",
+        "image": "HeimerdingerR.png"
+      }
+    },
+    "jayce": {
+      "Q": {
+        "name": "To the Skies! / Shock Blast",
+        "image": "JayceToTheSkies.png"
+      },
+      "W": {
+        "name": "Lightning Field / Hyper Charge",
+        "image": "JayceStaticField.png"
+      },
+      "E": {
+        "name": "Thundering Blow / Acceleration Gate",
+        "image": "JayceThunderingBlow.png"
+      },
+      "R": {
+        "name": "Mercury Cannon / Mercury Hammer",
+        "image": "JayceStanceHtG.png"
+      }
+    },
+    "ivern": {
+      "Q": {
+        "name": "Rootcaller",
+        "image": "IvernQ.png"
+      },
+      "W": {
+        "name": "Brushmaker",
+        "image": "IvernW.png"
+      },
+      "E": {
+        "name": "Triggerseed",
+        "image": "IvernE.png"
+      },
+      "R": {
+        "name": "Daisy!",
+        "image": "IvernR.png"
+      }
+    },
+    "jax": {
+      "Q": {
+        "name": "Leap Strike",
+        "image": "JaxQ.png"
+      },
+      "W": {
+        "name": "Empower",
+        "image": "JaxW.png"
+      },
+      "E": {
+        "name": "Counter Strike",
+        "image": "JaxE.png"
+      },
+      "R": {
+        "name": "Grandmaster-at-Arms",
+        "image": "JaxR.png"
+      }
+    },
+    "jinx": {
+      "Q": {
+        "name": "Switcheroo!",
+        "image": "JinxQ.png"
+      },
+      "W": {
+        "name": "Zap!",
+        "image": "JinxW.png"
+      },
+      "E": {
+        "name": "Flame Chompers!",
+        "image": "JinxE.png"
+      },
+      "R": {
+        "name": "Super Mega Death Rocket!",
+        "image": "JinxR.png"
+      }
+    },
+    "jarvaniv": {
+      "Q": {
+        "name": "Dragon Strike",
+        "image": "JarvanIVDragonStrike.png"
+      },
+      "W": {
+        "name": "Golden Aegis",
+        "image": "JarvanIVGoldenAegis.png"
+      },
+      "E": {
+        "name": "Demacian Standard",
+        "image": "JarvanIVDemacianStandard.png"
+      },
+      "R": {
+        "name": "Cataclysm",
+        "image": "JarvanIVCataclysm.png"
+      }
+    },
+    "janna": {
+      "Q": {
+        "name": "Howling Gale",
+        "image": "HowlingGale.png"
+      },
+      "W": {
+        "name": "Zephyr",
+        "image": "SowTheWind.png"
+      },
+      "E": {
+        "name": "Eye Of The Storm",
+        "image": "EyeOfTheStorm.png"
+      },
+      "R": {
+        "name": "Monsoon",
+        "image": "ReapTheWhirlwind.png"
+      }
+    },
+    "jhin": {
+      "Q": {
+        "name": "Dancing Grenade",
+        "image": "JhinQ.png"
+      },
+      "W": {
+        "name": "Deadly Flourish",
+        "image": "JhinW.png"
+      },
+      "E": {
+        "name": "Captive Audience",
+        "image": "JhinE.png"
+      },
+      "R": {
+        "name": "Curtain Call",
+        "image": "JhinR.png"
+      }
+    },
+    "kaisa": {
+      "Q": {
+        "name": "Icathian Rain",
+        "image": "KaisaQ.png"
+      },
+      "W": {
+        "name": "Void Seeker",
+        "image": "KaisaW.png"
+      },
+      "E": {
+        "name": "Supercharge",
+        "image": "KaisaE.png"
+      },
+      "R": {
+        "name": "Killer Instinct",
+        "image": "KaisaR.png"
+      }
+    },
+    "kayn": {
+      "Q": {
+        "name": "Reaping Slash",
+        "image": "KaynQ.png"
+      },
+      "W": {
+        "name": "Blade's Reach",
+        "image": "KaynW.png"
+      },
+      "E": {
+        "name": "Shadow Step",
+        "image": "KaynE.png"
+      },
+      "R": {
+        "name": "Umbral Trespass",
+        "image": "KaynR.png"
+      }
+    },
+    "karma": {
+      "Q": {
+        "name": "Inner Flame",
+        "image": "KarmaQ.png"
+      },
+      "W": {
+        "name": "Focused Resolve",
+        "image": "KarmaSpiritBind.png"
+      },
+      "E": {
+        "name": "Inspire",
+        "image": "KarmaSolKimShield.png"
+      },
+      "R": {
+        "name": "Mantra",
+        "image": "KarmaMantra.png"
+      }
+    },
+    "kennen": {
+      "Q": {
+        "name": "Thundering Shuriken",
+        "image": "KennenShurikenHurlMissile1.png"
+      },
+      "W": {
+        "name": "Electrical Surge",
+        "image": "KennenBringTheLight.png"
+      },
+      "E": {
+        "name": "Lightning Rush",
+        "image": "KennenLightningRush.png"
+      },
+      "R": {
+        "name": "Slicing Maelstrom",
+        "image": "KennenShurikenStorm.png"
+      }
+    },
+    "katarina": {
+      "Q": {
+        "name": "Bouncing Blade",
+        "image": "KatarinaQ.png"
+      },
+      "W": {
+        "name": "Preparation",
+        "image": "KatarinaW.png"
+      },
+      "E": {
+        "name": "Shunpo",
+        "image": "KatarinaEWrapper.png"
+      },
+      "R": {
+        "name": "Death Lotus",
+        "image": "KatarinaR.png"
+      }
+    },
+    "kayle": {
+      "Q": {
+        "name": "Radiant Blast",
+        "image": "KayleQ.png"
+      },
+      "W": {
+        "name": "Celestial Blessing",
+        "image": "KayleW.png"
+      },
+      "E": {
+        "name": "Starfire Spellblade",
+        "image": "KayleE.png"
+      },
+      "R": {
+        "name": "Divine Judgment",
+        "image": "KayleR.png"
+      }
+    },
+    "karthus": {
+      "Q": {
+        "name": "Lay Waste",
+        "image": "KarthusLayWasteA1.png"
+      },
+      "W": {
+        "name": "Wall of Pain",
+        "image": "KarthusWallOfPain.png"
+      },
+      "E": {
+        "name": "Defile",
+        "image": "KarthusDefile.png"
+      },
+      "R": {
+        "name": "Requiem",
+        "image": "KarthusFallenOne.png"
+      }
+    },
+    "kalista": {
+      "Q": {
+        "name": "Pierce",
+        "image": "KalistaMysticShot.png"
+      },
+      "W": {
+        "name": "Sentinel",
+        "image": "KalistaW.png"
+      },
+      "E": {
+        "name": "Rend",
+        "image": "KalistaExpungeWrapper.png"
+      },
+      "R": {
+        "name": "Fate's Call",
+        "image": "KalistaRx.png"
+      }
+    },
+    "kassadin": {
+      "Q": {
+        "name": "Null Sphere",
+        "image": "NullLance.png"
+      },
+      "W": {
+        "name": "Nether Blade",
+        "image": "NetherBlade.png"
+      },
+      "E": {
+        "name": "Force Pulse",
+        "image": "ForcePulse.png"
+      },
+      "R": {
+        "name": "Riftwalk",
+        "image": "RiftWalk.png"
+      }
+    },
+    "leesin": {
+      "Q": {
+        "name": "Sonic Wave / Resonating Strike",
+        "image": "LeeSinQOne.png"
+      },
+      "W": {
+        "name": "Safeguard / Iron Will",
+        "image": "LeeSinWOne.png"
+      },
+      "E": {
+        "name": "Tempest / Cripple",
+        "image": "LeeSinEOne.png"
+      },
+      "R": {
+        "name": "Dragon's Rage",
+        "image": "LeeSinR.png"
+      }
+    },
+    "ksante": {
+      "Q": {
+        "name": "Ntofo Strikes",
+        "image": "KSanteQ.png"
+      },
+      "W": {
+        "name": "Path Maker",
+        "image": "KSanteW.png"
+      },
+      "E": {
+        "name": "Footwork",
+        "image": "KSanteE.png"
+      },
+      "R": {
+        "name": "All Out",
+        "image": "KSanteR.png"
+      }
+    },
+    "kled": {
+      "Q": {
+        "name": "Bear Trap on a Rope",
+        "image": "KledQ.png"
+      },
+      "W": {
+        "name": "Violent Tendencies",
+        "image": "KledW.png"
+      },
+      "E": {
+        "name": "Jousting",
+        "image": "KledE.png"
+      },
+      "R": {
+        "name": "Chaaaaaaaarge!!!",
+        "image": "KledR.png"
+      }
+    },
+    "leblanc": {
+      "Q": {
+        "name": "Sigil of Malice",
+        "image": "LeblancQ.png"
+      },
+      "W": {
+        "name": "Distortion",
+        "image": "LeblancW.png"
+      },
+      "E": {
+        "name": "Ethereal Chains",
+        "image": "LeblancE.png"
+      },
+      "R": {
+        "name": "Mimic",
+        "image": "LeblancR.png"
+      }
+    },
+    "khazix": {
+      "Q": {
+        "name": "Taste Their Fear",
+        "image": "KhazixQ.png"
+      },
+      "W": {
+        "name": "Void Spike",
+        "image": "KhazixW.png"
+      },
+      "E": {
+        "name": "Leap",
+        "image": "KhazixE.png"
+      },
+      "R": {
+        "name": "Void Assault",
+        "image": "KhazixR.png"
+      }
+    },
+    "kogmaw": {
+      "Q": {
+        "name": "Caustic Spittle",
+        "image": "KogMawQ.png"
+      },
+      "W": {
+        "name": "Bio-Arcane Barrage",
+        "image": "KogMawBioArcaneBarrage.png"
+      },
+      "E": {
+        "name": "Void Ooze",
+        "image": "KogMawVoidOoze.png"
+      },
+      "R": {
+        "name": "Living Artillery",
+        "image": "KogMawLivingArtillery.png"
+      }
+    },
+    "kindred": {
+      "Q": {
+        "name": "Dance of Arrows",
+        "image": "KindredQ.png"
+      },
+      "W": {
+        "name": "Wolf's Frenzy",
+        "image": "KindredW.png"
+      },
+      "E": {
+        "name": "Mounting Dread",
+        "image": "KindredEWrapper.png"
+      },
+      "R": {
+        "name": "Lamb's Respite",
+        "image": "KindredR.png"
+      }
+    },
+    "leona": {
+      "Q": {
+        "name": "Shield of Daybreak",
+        "image": "LeonaShieldOfDaybreak.png"
+      },
+      "W": {
+        "name": "Eclipse",
+        "image": "LeonaSolarBarrier.png"
+      },
+      "E": {
+        "name": "Zenith Blade",
+        "image": "LeonaZenithBlade.png"
+      },
+      "R": {
+        "name": "Solar Flare",
+        "image": "LeonaSolarFlare.png"
+      }
+    },
+    "lillia": {
+      "Q": {
+        "name": "Blooming Blows",
+        "image": "LilliaQ.png"
+      },
+      "W": {
+        "name": "Watch Out! Eep!",
+        "image": "LilliaW.png"
+      },
+      "E": {
+        "name": "Swirlseed",
+        "image": "LilliaE.png"
+      },
+      "R": {
+        "name": "Lilting Lullaby",
+        "image": "LilliaR.png"
+      }
+    },
+    "maokai": {
+      "Q": {
+        "name": "Bramble Smash",
+        "image": "MaokaiQ.png"
+      },
+      "W": {
+        "name": "Twisted Advance",
+        "image": "MaokaiW.png"
+      },
+      "E": {
+        "name": "Sapling Toss",
+        "image": "MaokaiE.png"
+      },
+      "R": {
+        "name": "Nature's Grasp",
+        "image": "MaokaiR.png"
+      }
+    },
+    "lucian": {
+      "Q": {
+        "name": "Piercing Light",
+        "image": "LucianQ.png"
+      },
+      "W": {
+        "name": "Ardent Blaze",
+        "image": "LucianW.png"
+      },
+      "E": {
+        "name": "Relentless Pursuit",
+        "image": "LucianE.png"
+      },
+      "R": {
+        "name": "The Culling",
+        "image": "LucianR.png"
+      }
+    },
+    "lulu": {
+      "Q": {
+        "name": "Glitterlance",
+        "image": "LuluQ.png"
+      },
+      "W": {
+        "name": "Whimsy",
+        "image": "LuluW.png"
+      },
+      "E": {
+        "name": "Help, Pix!",
+        "image": "LuluE.png"
+      },
+      "R": {
+        "name": "Wild Growth",
+        "image": "LuluR.png"
+      }
+    },
+    "malzahar": {
+      "Q": {
+        "name": "Call of the Void",
+        "image": "MalzaharQ.png"
+      },
+      "W": {
+        "name": "Void Swarm",
+        "image": "MalzaharW.png"
+      },
+      "E": {
+        "name": "Malefic Visions",
+        "image": "MalzaharE.png"
+      },
+      "R": {
+        "name": "Nether Grasp",
+        "image": "MalzaharR.png"
+      }
+    },
+    "lissandra": {
+      "Q": {
+        "name": "Ice Shard",
+        "image": "LissandraQ.png"
+      },
+      "W": {
+        "name": "Ring of Frost",
+        "image": "LissandraW.png"
+      },
+      "E": {
+        "name": "Glacial Path",
+        "image": "LissandraE.png"
+      },
+      "R": {
+        "name": "Frozen Tomb",
+        "image": "LissandraR.png"
+      }
+    },
+    "lux": {
+      "Q": {
+        "name": "Light Binding",
+        "image": "LuxLightBinding.png"
+      },
+      "W": {
+        "name": "Prismatic Barrier",
+        "image": "LuxPrismaticWave.png"
+      },
+      "E": {
+        "name": "Lucent Singularity",
+        "image": "LuxLightStrikeKugel.png"
+      },
+      "R": {
+        "name": "Final Spark",
+        "image": "LuxR.png"
+      }
+    },
+    "malphite": {
+      "Q": {
+        "name": "Seismic Shard",
+        "image": "SeismicShard.png"
+      },
+      "W": {
+        "name": "Thunderclap",
+        "image": "Obduracy.png"
+      },
+      "E": {
+        "name": "Ground Slam",
+        "image": "Landslide.png"
+      },
+      "R": {
+        "name": "Unstoppable Force",
+        "image": "UFSlash.png"
+      }
+    },
+    "monkeyking": {
+      "Q": {
+        "name": "Crushing Blow",
+        "image": "MonkeyKingDoubleAttack.png"
+      },
+      "W": {
+        "name": "Warrior Trickster",
+        "image": "MonkeyKingDecoy.png"
+      },
+      "E": {
+        "name": "Nimbus Strike",
+        "image": "MonkeyKingNimbus.png"
+      },
+      "R": {
+        "name": "Cyclone",
+        "image": "MonkeyKingSpinToWin.png"
+      }
+    },
+    "mordekaiser": {
+      "Q": {
+        "name": "Obliterate",
+        "image": "MordekaiserQ.png"
+      },
+      "W": {
+        "name": "Indestructible",
+        "image": "MordekaiserW.png"
+      },
+      "E": {
+        "name": "Death's Grasp",
+        "image": "MordekaiserE.png"
+      },
+      "R": {
+        "name": "Realm of Death",
+        "image": "MordekaiserR.png"
+      }
+    },
+    "milio": {
+      "Q": {
+        "name": "Ultra Mega Fire Kick",
+        "image": "MilioQ.png"
+      },
+      "W": {
+        "name": "Cozy Campfire",
+        "image": "MilioW.png"
+      },
+      "E": {
+        "name": "Warm Hugs",
+        "image": "MilioE.png"
+      },
+      "R": {
+        "name": "Breath of Life",
+        "image": "MilioR.png"
+      }
+    },
+    "masteryi": {
+      "Q": {
+        "name": "Alpha Strike",
+        "image": "AlphaStrike.png"
+      },
+      "W": {
+        "name": "Meditate",
+        "image": "Meditate.png"
+      },
+      "E": {
+        "name": "Wuju Style",
+        "image": "WujuStyle.png"
+      },
+      "R": {
+        "name": "Highlander",
+        "image": "Highlander.png"
+      }
+    },
+    "missfortune": {
+      "Q": {
+        "name": "Double Up",
+        "image": "MissFortuneRicochetShot.png"
+      },
+      "W": {
+        "name": "Strut",
+        "image": "MissFortuneViciousStrikes.png"
+      },
+      "E": {
+        "name": "Make It Rain",
+        "image": "MissFortuneScattershot.png"
+      },
+      "R": {
+        "name": "Bullet Time",
+        "image": "MissFortuneBulletTime.png"
+      }
+    },
+    "naafiri": {
+      "Q": {
+        "name": "Darkin Daggers",
+        "image": "NaafiriQ.png"
+      },
+      "W": {
+        "name": "The Call of the Pack",
+        "image": "NaafiriR.png"
+      },
+      "E": {
+        "name": "Eviscerate",
+        "image": "NaafiriE.png"
+      },
+      "R": {
+        "name": "Hounds' Pursuit",
+        "image": "NaafiriW.png"
+      }
+    },
+    "morgana": {
+      "Q": {
+        "name": "Dark Binding",
+        "image": "MorganaQ.png"
+      },
+      "W": {
+        "name": "Tormented Shadow",
+        "image": "MorganaW.png"
+      },
+      "E": {
+        "name": "Black Shield",
+        "image": "MorganaE.png"
+      },
+      "R": {
+        "name": "Soul Shackles",
+        "image": "MorganaR.png"
+      }
+    },
+    "mel": {
+      "Q": {
+        "name": "Radiant Volley",
+        "image": "MelQ.png"
+      },
+      "W": {
+        "name": "Rebuttal",
+        "image": "MelW.png"
+      },
+      "E": {
+        "name": "Solar Snare",
+        "image": "MelE.png"
+      },
+      "R": {
+        "name": "Golden Eclipse",
+        "image": "MelR.png"
+      }
+    },
+    "neeko": {
+      "Q": {
+        "name": "Blooming Burst",
+        "image": "NeekoQ.png"
+      },
+      "W": {
+        "name": "Shapesplitter",
+        "image": "NeekoW.png"
+      },
+      "E": {
+        "name": "Tangle-Barbs",
+        "image": "NeekoE.png"
+      },
+      "R": {
+        "name": "Pop Blossom",
+        "image": "NeekoR.png"
+      }
+    },
+    "nocturne": {
+      "Q": {
+        "name": "Duskbringer",
+        "image": "NocturneDuskbringer.png"
+      },
+      "W": {
+        "name": "Shroud of Darkness",
+        "image": "NocturneShroudofDarkness.png"
+      },
+      "E": {
+        "name": "Unspeakable Horror",
+        "image": "NocturneUnspeakableHorror.png"
+      },
+      "R": {
+        "name": "Paranoia",
+        "image": "NocturneParanoia.png"
+      }
+    },
+    "nilah": {
+      "Q": {
+        "name": "Formless Blade",
+        "image": "NilahQ.png"
+      },
+      "W": {
+        "name": "Jubilant Veil",
+        "image": "NilahW.png"
+      },
+      "E": {
+        "name": "Slipstream",
+        "image": "NilahE.png"
+      },
+      "R": {
+        "name": "Apotheosis",
+        "image": "NilahR.png"
+      }
+    },
+    "nidalee": {
+      "Q": {
+        "name": "Javelin Toss / Takedown",
+        "image": "JavelinToss.png"
+      },
+      "W": {
+        "name": "Bushwhack / Pounce",
+        "image": "Bushwhack.png"
+      },
+      "E": {
+        "name": "Primal Surge / Swipe",
+        "image": "PrimalSurge.png"
+      },
+      "R": {
+        "name": "Aspect Of The Cougar",
+        "image": "AspectOfTheCougar.png"
+      }
+    },
+    "nunu": {
+      "Q": {
+        "name": "Consume",
+        "image": "NunuQ.png"
+      },
+      "W": {
+        "name": "Biggest Snowball Ever!",
+        "image": "NunuW.png"
+      },
+      "E": {
+        "name": "Snowball Barrage",
+        "image": "NunuE.png"
+      },
+      "R": {
+        "name": "Absolute Zero",
+        "image": "NunuR.png"
+      }
+    },
+    "nautilus": {
+      "Q": {
+        "name": "Dredge Line",
+        "image": "NautilusAnchorDrag.png"
+      },
+      "W": {
+        "name": "Titan's Wrath",
+        "image": "NautilusPiercingGaze.png"
+      },
+      "E": {
+        "name": "Riptide",
+        "image": "NautilusSplashZone.png"
+      },
+      "R": {
+        "name": "Depth Charge",
+        "image": "NautilusGrandLine.png"
+      }
+    },
+    "nasus": {
+      "Q": {
+        "name": "Siphoning Strike",
+        "image": "NasusQ.png"
+      },
+      "W": {
+        "name": "Wither",
+        "image": "NasusW.png"
+      },
+      "E": {
+        "name": "Spirit Fire",
+        "image": "NasusE.png"
+      },
+      "R": {
+        "name": "Fury of the Sands",
+        "image": "NasusR.png"
+      }
+    },
+    "nami": {
+      "Q": {
+        "name": "Aqua Prison",
+        "image": "NamiQ.png"
+      },
+      "W": {
+        "name": "Ebb and Flow",
+        "image": "NamiW.png"
+      },
+      "E": {
+        "name": "Tidecaller's Blessing",
+        "image": "NamiE.png"
+      },
+      "R": {
+        "name": "Tidal Wave",
+        "image": "NamiR.png"
+      }
+    },
+    "quinn": {
+      "Q": {
+        "name": "Blinding Assault",
+        "image": "QuinnQ.png"
+      },
+      "W": {
+        "name": "Heightened Senses",
+        "image": "QuinnW.png"
+      },
+      "E": {
+        "name": "Vault",
+        "image": "QuinnE.png"
+      },
+      "R": {
+        "name": "Behind Enemy Lines",
+        "image": "QuinnR.png"
+      }
+    },
+    "orianna": {
+      "Q": {
+        "name": "Command: Attack",
+        "image": "OrianaIzunaCommand.png"
+      },
+      "W": {
+        "name": "Command: Dissonance",
+        "image": "OrianaDissonanceCommand.png"
+      },
+      "E": {
+        "name": "Command: Protect",
+        "image": "OrianaRedactCommand.png"
+      },
+      "R": {
+        "name": "Command: Shockwave",
+        "image": "OrianaDetonateCommand.png"
+      }
+    },
+    "qiyana": {
+      "Q": {
+        "name": "Elemental Wrath / Edge of Ixtal",
+        "image": "QiyanaQ.png"
+      },
+      "W": {
+        "name": "Terrashape",
+        "image": "QiyanaW.png"
+      },
+      "E": {
+        "name": "Audacity",
+        "image": "QiyanaE.png"
+      },
+      "R": {
+        "name": "Supreme Display of Talent",
+        "image": "QiyanaR.png"
+      }
+    },
+    "pantheon": {
+      "Q": {
+        "name": "Comet Spear",
+        "image": "PantheonQ.png"
+      },
+      "W": {
+        "name": "Shield Vault",
+        "image": "PantheonW.png"
+      },
+      "E": {
+        "name": "Aegis Assault",
+        "image": "PantheonE.png"
+      },
+      "R": {
+        "name": "Grand Starfall",
+        "image": "PantheonR.png"
+      }
+    },
+    "poppy": {
+      "Q": {
+        "name": "Hammer Shock",
+        "image": "PoppyQ.png"
+      },
+      "W": {
+        "name": "Steadfast Presence",
+        "image": "PoppyW.png"
+      },
+      "E": {
+        "name": "Heroic Charge",
+        "image": "PoppyE.png"
+      },
+      "R": {
+        "name": "Keeper's Verdict",
+        "image": "PoppyR.png"
+      }
+    },
+    "ornn": {
+      "Q": {
+        "name": "Volcanic Rupture",
+        "image": "OrnnQ.png"
+      },
+      "W": {
+        "name": "Bellows Breath",
+        "image": "OrnnW.png"
+      },
+      "E": {
+        "name": "Searing Charge",
+        "image": "OrnnE.png"
+      },
+      "R": {
+        "name": "Call of the Forge God",
+        "image": "OrnnR.png"
+      }
+    },
+    "olaf": {
+      "Q": {
+        "name": "Undertow",
+        "image": "OlafAxeThrowCast.png"
+      },
+      "W": {
+        "name": "Tough It Out",
+        "image": "OlafFrenziedStrikes.png"
+      },
+      "E": {
+        "name": "Reckless Swing",
+        "image": "OlafRecklessStrike.png"
+      },
+      "R": {
+        "name": "Ragnarok",
+        "image": "OlafRagnarok.png"
+      }
+    },
+    "pyke": {
+      "Q": {
+        "name": "Bone Skewer",
+        "image": "PykeQ.png"
+      },
+      "W": {
+        "name": "Ghostwater Dive",
+        "image": "PykeW.png"
+      },
+      "E": {
+        "name": "Phantom Undertow",
+        "image": "PykeE.png"
+      },
+      "R": {
+        "name": "Death From Below",
+        "image": "PykeR.png"
+      }
+    },
+    "riven": {
+      "Q": {
+        "name": "Broken Wings",
+        "image": "RivenTriCleave.png"
+      },
+      "W": {
+        "name": "Ki Burst",
+        "image": "RivenMartyr.png"
+      },
+      "E": {
+        "name": "Valor",
+        "image": "RivenFeint.png"
+      },
+      "R": {
+        "name": "Blade of the Exile",
+        "image": "RivenFengShuiEngine.png"
+      }
+    },
+    "rakan": {
+      "Q": {
+        "name": "Gleaming Quill",
+        "image": "RakanQ.png"
+      },
+      "W": {
+        "name": "Grand Entrance",
+        "image": "RakanW.png"
+      },
+      "E": {
+        "name": "Battle Dance",
+        "image": "RakanE.png"
+      },
+      "R": {
+        "name": "The Quickness",
+        "image": "RakanR.png"
+      }
+    },
+    "renata": {
+      "Q": {
+        "name": "Handshake",
+        "image": "RenataQ.png"
+      },
+      "W": {
+        "name": "Bailout",
+        "image": "RenataW.png"
+      },
+      "E": {
+        "name": "Loyalty Program",
+        "image": "RenataE.png"
+      },
+      "R": {
+        "name": "Hostile Takeover",
+        "image": "RenataR.png"
+      }
+    },
+    "rammus": {
+      "Q": {
+        "name": "Powerball",
+        "image": "PowerBall.png"
+      },
+      "W": {
+        "name": "Defensive Ball Curl",
+        "image": "DefensiveBallCurl.png"
+      },
+      "E": {
+        "name": "Frenzying Taunt",
+        "image": "PuncturingTaunt.png"
+      },
+      "R": {
+        "name": "Soaring Slam",
+        "image": "Tremors2.png"
+      }
+    },
+    "reksai": {
+      "Q": {
+        "name": "Queen's Wrath / Prey Seeker",
+        "image": "RekSaiQ.png"
+      },
+      "W": {
+        "name": "Burrow / Un-burrow",
+        "image": "RekSaiW.png"
+      },
+      "E": {
+        "name": "Furious Bite / Tunnel",
+        "image": "RekSaiE.png"
+      },
+      "R": {
+        "name": "Void Rush",
+        "image": "RekSaiR.png"
+      }
+    },
+    "rengar": {
+      "Q": {
+        "name": "Savagery",
+        "image": "RengarQ.png"
+      },
+      "W": {
+        "name": "Battle Roar",
+        "image": "RengarW.png"
+      },
+      "E": {
+        "name": "Bola Strike",
+        "image": "RengarE.png"
+      },
+      "R": {
+        "name": "Thrill of the Hunt",
+        "image": "RengarR.png"
+      }
+    },
+    "renekton": {
+      "Q": {
+        "name": "Cull the Meek",
+        "image": "RenektonCleave.png"
+      },
+      "W": {
+        "name": "Ruthless Predator",
+        "image": "RenektonPreExecute.png"
+      },
+      "E": {
+        "name": "Slice and Dice",
+        "image": "RenektonSliceAndDice.png"
+      },
+      "R": {
+        "name": "Dominus",
+        "image": "RenektonReignOfTheTyrant.png"
+      }
+    },
+    "rell": {
+      "Q": {
+        "name": "Shattering Strike",
+        "image": "RellQ.png"
+      },
+      "W": {
+        "name": "Ferromancy: Crash Down",
+        "image": "RellW_Dismount.png"
+      },
+      "E": {
+        "name": "Full Tilt",
+        "image": "RellE.png"
+      },
+      "R": {
+        "name": "Magnet Storm",
+        "image": "RellR.png"
+      }
+    },
+    "ryze": {
+      "Q": {
+        "name": "Overload",
+        "image": "RyzeQWrapper.png"
+      },
+      "W": {
+        "name": "Rune Prison",
+        "image": "RyzeW.png"
+      },
+      "E": {
+        "name": "Spell Flux",
+        "image": "RyzeE.png"
+      },
+      "R": {
+        "name": "Realm Warp",
+        "image": "RyzeR.png"
+      }
+    },
+    "sett": {
+      "Q": {
+        "name": "Knuckle Down",
+        "image": "SettQ.png"
+      },
+      "W": {
+        "name": "Haymaker",
+        "image": "SettW.png"
+      },
+      "E": {
+        "name": "Facebreaker",
+        "image": "SettE.png"
+      },
+      "R": {
+        "name": "The Show Stopper",
+        "image": "SettR.png"
+      }
+    },
+    "sejuani": {
+      "Q": {
+        "name": "Arctic Assault",
+        "image": "SejuaniQ.png"
+      },
+      "W": {
+        "name": "Winter's Wrath",
+        "image": "SejuaniW.png"
+      },
+      "E": {
+        "name": "Permafrost",
+        "image": "SejuaniE.png"
+      },
+      "R": {
+        "name": "Glacial Prison",
+        "image": "SejuaniR.png"
+      }
+    },
+    "samira": {
+      "Q": {
+        "name": "Flair",
+        "image": "SamiraQ.png"
+      },
+      "W": {
+        "name": "Blade Whirl",
+        "image": "SamiraW.png"
+      },
+      "E": {
+        "name": "Wild Rush",
+        "image": "SamiraE.png"
+      },
+      "R": {
+        "name": "Inferno Trigger",
+        "image": "SamiraR.png"
+      }
+    },
+    "seraphine": {
+      "Q": {
+        "name": "High Note",
+        "image": "SeraphineQ.png"
+      },
+      "W": {
+        "name": "Surround Sound",
+        "image": "SeraphineW.png"
+      },
+      "E": {
+        "name": "Beat Drop",
+        "image": "SeraphineE.png"
+      },
+      "R": {
+        "name": "Encore",
+        "image": "SeraphineR.png"
+      }
+    },
+    "rumble": {
+      "Q": {
+        "name": "Flamespitter",
+        "image": "RumbleFlameThrower.png"
+      },
+      "W": {
+        "name": "Scrap Shield",
+        "image": "RumbleShield.png"
+      },
+      "E": {
+        "name": "Electro Harpoon",
+        "image": "RumbleGrenade.png"
+      },
+      "R": {
+        "name": "The Equalizer",
+        "image": "RumbleCarpetBomb.png"
+      }
+    },
+    "shaco": {
+      "Q": {
+        "name": "Deceive",
+        "image": "Deceive.png"
+      },
+      "W": {
+        "name": "Jack In The Box",
+        "image": "JackInTheBox.png"
+      },
+      "E": {
+        "name": "Two-Shiv Poison",
+        "image": "TwoShivPoison.png"
+      },
+      "R": {
+        "name": "Hallucinate",
+        "image": "HallucinateFull.png"
+      }
+    },
+    "senna": {
+      "Q": {
+        "name": "Piercing Darkness",
+        "image": "SennaQ.png"
+      },
+      "W": {
+        "name": "Last Embrace",
+        "image": "SennaW.png"
+      },
+      "E": {
+        "name": "Curse of the Black Mist",
+        "image": "SennaE.png"
+      },
+      "R": {
+        "name": "Dawning Shadow",
+        "image": "SennaR.png"
+      }
+    },
+    "shen": {
+      "Q": {
+        "name": "Twilight Assault",
+        "image": "ShenQ.png"
+      },
+      "W": {
+        "name": "Spirit's Refuge",
+        "image": "ShenW.png"
+      },
+      "E": {
+        "name": "Shadow Dash",
+        "image": "ShenE.png"
+      },
+      "R": {
+        "name": "Stand United",
+        "image": "ShenR.png"
+      }
+    },
+    "sion": {
+      "Q": {
+        "name": "Decimating Smash",
+        "image": "SionQ.png"
+      },
+      "W": {
+        "name": "Soul Furnace",
+        "image": "SionW.png"
+      },
+      "E": {
+        "name": "Roar of the Slayer",
+        "image": "SionE.png"
+      },
+      "R": {
+        "name": "Unstoppable Onslaught",
+        "image": "SionR.png"
+      }
+    },
+    "smolder": {
+      "Q": {
+        "name": "Super Scorcher Breath",
+        "image": "SmolderQ.png"
+      },
+      "W": {
+        "name": "Achooo!",
+        "image": "SmolderW.png"
+      },
+      "E": {
+        "name": "Flap, Flap, Flap",
+        "image": "SmolderE.png"
+      },
+      "R": {
+        "name": "MMOOOMMMM!",
+        "image": "SmolderR.png"
+      }
+    },
+    "skarner": {
+      "Q": {
+        "name": "Shattered Earth / Upheaval",
+        "image": "SkarnerQ.png"
+      },
+      "W": {
+        "name": "Seismic Bastion",
+        "image": "SkarnerW.png"
+      },
+      "E": {
+        "name": "Ixtal's Impact",
+        "image": "SkarnerE.png"
+      },
+      "R": {
+        "name": "Impale",
+        "image": "SkarnerR.png"
+      }
+    },
+    "singed": {
+      "Q": {
+        "name": "Poison Trail",
+        "image": "PoisonTrail.png"
+      },
+      "W": {
+        "name": "Mega Adhesive",
+        "image": "MegaAdhesive.png"
+      },
+      "E": {
+        "name": "Fling",
+        "image": "Fling.png"
+      },
+      "R": {
+        "name": "Insanity Potion",
+        "image": "InsanityPotion.png"
+      }
+    },
+    "sivir": {
+      "Q": {
+        "name": "Boomerang Blade",
+        "image": "SivirQ.png"
+      },
+      "W": {
+        "name": "Ricochet",
+        "image": "SivirW.png"
+      },
+      "E": {
+        "name": "Spell Shield",
+        "image": "SivirE.png"
+      },
+      "R": {
+        "name": "On The Hunt",
+        "image": "SivirR.png"
+      }
+    },
+    "sona": {
+      "Q": {
+        "name": "Hymn of Valor",
+        "image": "SonaQ.png"
+      },
+      "W": {
+        "name": "Aria of Perseverance",
+        "image": "SonaW.png"
+      },
+      "E": {
+        "name": "Song of Celerity",
+        "image": "SonaE.png"
+      },
+      "R": {
+        "name": "Crescendo",
+        "image": "SonaR.png"
+      }
+    },
+    "shyvana": {
+      "Q": {
+        "name": "Twin Bite",
+        "image": "ShyvanaDoubleAttack.png"
+      },
+      "W": {
+        "name": "Burnout",
+        "image": "ShyvanaImmolationAura.png"
+      },
+      "E": {
+        "name": "Flame Breath",
+        "image": "ShyvanaFireball.png"
+      },
+      "R": {
+        "name": "Dragon's Descent",
+        "image": "ShyvanaTransformCast.png"
+      }
+    },
+    "sylas": {
+      "Q": {
+        "name": "Chain Lash",
+        "image": "SylasQ.png"
+      },
+      "W": {
+        "name": "Kingslayer",
+        "image": "SylasW.png"
+      },
+      "E": {
+        "name": "Abscond / Abduct",
+        "image": "SylasE.png"
+      },
+      "R": {
+        "name": "Hijack",
+        "image": "SylasR.png"
+      }
+    },
+    "taric": {
+      "Q": {
+        "name": "Starlight's Touch",
+        "image": "TaricQ.png"
+      },
+      "W": {
+        "name": "Bastion",
+        "image": "TaricW.png"
+      },
+      "E": {
+        "name": "Dazzle",
+        "image": "TaricE.png"
+      },
+      "R": {
+        "name": "Cosmic Radiance",
+        "image": "TaricR.png"
+      }
+    },
+    "tahmkench": {
+      "Q": {
+        "name": "Tongue Lash",
+        "image": "TahmKenchQ.png"
+      },
+      "W": {
+        "name": "Abyssal Dive",
+        "image": "TahmKenchW.png"
+      },
+      "E": {
+        "name": "Thick Skin",
+        "image": "TahmKenchE.png"
+      },
+      "R": {
+        "name": "Devour",
+        "image": "TahmKenchRWrapper.png"
+      }
+    },
+    "taliyah": {
+      "Q": {
+        "name": "Threaded Volley",
+        "image": "TaliyahQ.png"
+      },
+      "W": {
+        "name": "Seismic Shove",
+        "image": "TaliyahWVC.png"
+      },
+      "E": {
+        "name": "Unraveled Earth",
+        "image": "TaliyahE.png"
+      },
+      "R": {
+        "name": "Weaver's Wall",
+        "image": "TaliyahR.png"
+      }
+    },
+    "syndra": {
+      "Q": {
+        "name": "Dark Sphere",
+        "image": "SyndraQ.png"
+      },
+      "W": {
+        "name": "Force of Will",
+        "image": "SyndraW.png"
+      },
+      "E": {
+        "name": "Scatter the Weak",
+        "image": "SyndraE.png"
+      },
+      "R": {
+        "name": "Unleashed Power",
+        "image": "SyndraR.png"
+      }
+    },
+    "talon": {
+      "Q": {
+        "name": "Noxian Diplomacy",
+        "image": "TalonQ.png"
+      },
+      "W": {
+        "name": "Rake",
+        "image": "TalonW.png"
+      },
+      "E": {
+        "name": "Assassin's Path",
+        "image": "TalonE.png"
+      },
+      "R": {
+        "name": "Shadow Assault",
+        "image": "TalonR.png"
+      }
+    },
+    "swain": {
+      "Q": {
+        "name": "Death's Hand",
+        "image": "SwainQ.png"
+      },
+      "W": {
+        "name": "Vision of Empire",
+        "image": "SwainW.png"
+      },
+      "E": {
+        "name": "Nevermove",
+        "image": "SwainE.png"
+      },
+      "R": {
+        "name": "Demonic Ascension",
+        "image": "SwainR.png"
+      }
+    },
+    "soraka": {
+      "Q": {
+        "name": "Starcall",
+        "image": "SorakaQ.png"
+      },
+      "W": {
+        "name": "Astral Infusion",
+        "image": "SorakaW.png"
+      },
+      "E": {
+        "name": "Equinox",
+        "image": "SorakaE.png"
+      },
+      "R": {
+        "name": "Wish",
+        "image": "SorakaR.png"
+      }
+    },
+    "twitch": {
+      "Q": {
+        "name": "Ambush",
+        "image": "TwitchHideInShadows.png"
+      },
+      "W": {
+        "name": "Venom Cask",
+        "image": "TwitchVenomCask.png"
+      },
+      "E": {
+        "name": "Contaminate",
+        "image": "TwitchExpunge.png"
+      },
+      "R": {
+        "name": "Spray and Pray",
+        "image": "TwitchFullAutomatic.png"
+      }
+    },
+    "teemo": {
+      "Q": {
+        "name": "Blinding Dart",
+        "image": "TeemoQ.png"
+      },
+      "W": {
+        "name": "Move Quick",
+        "image": "TeemoW.png"
+      },
+      "E": {
+        "name": "Toxic Shot",
+        "image": "TeemoE.png"
+      },
+      "R": {
+        "name": "Noxious Trap",
+        "image": "TeemoR.png"
+      }
+    },
+    "tryndamere": {
+      "Q": {
+        "name": "Bloodlust",
+        "image": "TryndamereQ.png"
+      },
+      "W": {
+        "name": "Mocking Shout",
+        "image": "TryndamereW.png"
+      },
+      "E": {
+        "name": "Spinning Slash",
+        "image": "TryndamereE.png"
+      },
+      "R": {
+        "name": "Undying Rage",
+        "image": "UndyingRage.png"
+      }
+    },
+    "twistedfate": {
+      "Q": {
+        "name": "Wild Cards",
+        "image": "WildCards.png"
+      },
+      "W": {
+        "name": "Pick a Card",
+        "image": "PickACard.png"
+      },
+      "E": {
+        "name": "Stacked Deck",
+        "image": "CardmasterStack.png"
+      },
+      "R": {
+        "name": "Destiny",
+        "image": "Destiny.png"
+      }
+    },
+    "udyr": {
+      "Q": {
+        "name": "Wilding Claw",
+        "image": "UdyrQ.png"
+      },
+      "W": {
+        "name": "Iron Mantle",
+        "image": "UdyrW.png"
+      },
+      "E": {
+        "name": "Blazing Stampede",
+        "image": "UdyrE.png"
+      },
+      "R": {
+        "name": "Wingborne Storm",
+        "image": "UdyrR.png"
+      }
+    },
+    "thresh": {
+      "Q": {
+        "name": "Death Sentence",
+        "image": "ThreshQ.png"
+      },
+      "W": {
+        "name": "Dark Passage",
+        "image": "ThreshW.png"
+      },
+      "E": {
+        "name": "Flay",
+        "image": "ThreshE.png"
+      },
+      "R": {
+        "name": "The Box",
+        "image": "ThreshRPenta.png"
+      }
+    },
+    "tristana": {
+      "Q": {
+        "name": "Rapid Fire",
+        "image": "TristanaQ.png"
+      },
+      "W": {
+        "name": "Rocket Jump",
+        "image": "TristanaW.png"
+      },
+      "E": {
+        "name": "Explosive Charge",
+        "image": "TristanaE.png"
+      },
+      "R": {
+        "name": "Buster Shot",
+        "image": "TristanaR.png"
+      }
+    },
+    "trundle": {
+      "Q": {
+        "name": "Chomp",
+        "image": "TrundleTrollSmash.png"
+      },
+      "W": {
+        "name": "Frozen Domain",
+        "image": "trundledesecrate.png"
+      },
+      "E": {
+        "name": "Pillar of Ice",
+        "image": "TrundleCircle.png"
+      },
+      "R": {
+        "name": "Subjugate",
+        "image": "TrundlePain.png"
+      }
+    },
+    "varus": {
+      "Q": {
+        "name": "Piercing Arrow",
+        "image": "VarusQ.png"
+      },
+      "W": {
+        "name": "Blighted Quiver",
+        "image": "VarusW.png"
+      },
+      "E": {
+        "name": "Hail of Arrows",
+        "image": "VarusE.png"
+      },
+      "R": {
+        "name": "Chain of Corruption",
+        "image": "VarusR.png"
+      }
+    },
+    "velkoz": {
+      "Q": {
+        "name": "Plasma Fission",
+        "image": "VelkozQ.png"
+      },
+      "W": {
+        "name": "Void Rift",
+        "image": "VelkozW.png"
+      },
+      "E": {
+        "name": "Tectonic Disruption",
+        "image": "VelkozE.png"
+      },
+      "R": {
+        "name": "Life Form Disintegration Ray",
+        "image": "VelkozR.png"
+      }
+    },
+    "urgot": {
+      "Q": {
+        "name": "Corrosive Charge",
+        "image": "UrgotQ.png"
+      },
+      "W": {
+        "name": "Purge",
+        "image": "UrgotW.png"
+      },
+      "E": {
+        "name": "Disdain",
+        "image": "UrgotE.png"
+      },
+      "R": {
+        "name": "Fear Beyond Death",
+        "image": "UrgotR.png"
+      }
+    },
+    "veigar": {
+      "Q": {
+        "name": "Baleful Strike",
+        "image": "VeigarBalefulStrike.png"
+      },
+      "W": {
+        "name": "Dark Matter",
+        "image": "VeigarDarkMatter.png"
+      },
+      "E": {
+        "name": "Event Horizon",
+        "image": "VeigarEventHorizon.png"
+      },
+      "R": {
+        "name": "Primordial Burst",
+        "image": "VeigarR.png"
+      }
+    },
+    "vex": {
+      "Q": {
+        "name": "Mistral Bolt",
+        "image": "VexQ.png"
+      },
+      "W": {
+        "name": "Personal Space",
+        "image": "VexW.png"
+      },
+      "E": {
+        "name": "Looming Darkness",
+        "image": "VexE.png"
+      },
+      "R": {
+        "name": "Shadow Surge",
+        "image": "VexR.png"
+      }
+    },
+    "vi": {
+      "Q": {
+        "name": "Vault Breaker",
+        "image": "ViQ.png"
+      },
+      "W": {
+        "name": "Denting Blows",
+        "image": "ViW.png"
+      },
+      "E": {
+        "name": "Relentless Force",
+        "image": "ViE.png"
+      },
+      "R": {
+        "name": "Cease and Desist",
+        "image": "ViR.png"
+      }
+    },
+    "viego": {
+      "Q": {
+        "name": "Blade of the Ruined King",
+        "image": "ViegoQ.png"
+      },
+      "W": {
+        "name": "Spectral Maw",
+        "image": "ViegoW.png"
+      },
+      "E": {
+        "name": "Harrowed Path",
+        "image": "ViegoE.png"
+      },
+      "R": {
+        "name": "Heartbreaker",
+        "image": "ViegoR.png"
+      }
+    },
+    "vayne": {
+      "Q": {
+        "name": "Tumble",
+        "image": "VayneTumble.png"
+      },
+      "W": {
+        "name": "Silver Bolts",
+        "image": "VayneSilveredBolts.png"
+      },
+      "E": {
+        "name": "Condemn",
+        "image": "VayneCondemn.png"
+      },
+      "R": {
+        "name": "Final Hour",
+        "image": "VayneInquisition.png"
+      }
+    },
+    "viktor": {
+      "Q": {
+        "name": "Siphon Power",
+        "image": "ViktorQ.png"
+      },
+      "W": {
+        "name": "Gravity Field",
+        "image": "ViktorW.png"
+      },
+      "E": {
+        "name": "Hextech Ray",
+        "image": "ViktorE.png"
+      },
+      "R": {
+        "name": "Arcane Storm",
+        "image": "ViktorR.png"
+      }
+    },
+    "xayah": {
+      "Q": {
+        "name": "Double Daggers",
+        "image": "XayahQ.png"
+      },
+      "W": {
+        "name": "Deadly Plumage",
+        "image": "XayahW.png"
+      },
+      "E": {
+        "name": "Bladecaller",
+        "image": "XayahE.png"
+      },
+      "R": {
+        "name": "Featherstorm",
+        "image": "XayahR.png"
+      }
+    },
+    "yasuo": {
+      "Q": {
+        "name": "Steel Tempest",
+        "image": "YasuoQ1Wrapper.png"
+      },
+      "W": {
+        "name": "Wind Wall",
+        "image": "YasuoW.png"
+      },
+      "E": {
+        "name": "Sweeping Blade",
+        "image": "YasuoE.png"
+      },
+      "R": {
+        "name": "Last Breath",
+        "image": "YasuoR.png"
+      }
+    },
+    "warwick": {
+      "Q": {
+        "name": "Jaws of the Beast",
+        "image": "WarwickQ.png"
+      },
+      "W": {
+        "name": "Blood Hunt",
+        "image": "WarwickW.png"
+      },
+      "E": {
+        "name": "Primal Howl",
+        "image": "WarwickE.png"
+      },
+      "R": {
+        "name": "Infinite Duress",
+        "image": "WarwickR.png"
+      }
+    },
+    "vladimir": {
+      "Q": {
+        "name": "Transfusion",
+        "image": "VladimirQ.png"
+      },
+      "W": {
+        "name": "Sanguine Pool",
+        "image": "VladimirSanguinePool.png"
+      },
+      "E": {
+        "name": "Tides of Blood",
+        "image": "VladimirE.png"
+      },
+      "R": {
+        "name": "Hemoplague",
+        "image": "VladimirHemoplague.png"
+      }
+    },
+    "volibear": {
+      "Q": {
+        "name": "Thundering Smash",
+        "image": "VolibearQ.png"
+      },
+      "W": {
+        "name": "Frenzied Maul",
+        "image": "VolibearW.png"
+      },
+      "E": {
+        "name": "Sky Splitter",
+        "image": "VolibearE.png"
+      },
+      "R": {
+        "name": "Stormbringer",
+        "image": "VolibearR.png"
+      }
+    },
+    "xerath": {
+      "Q": {
+        "name": "Arcanopulse",
+        "image": "XerathArcanopulseChargeUp.png"
+      },
+      "W": {
+        "name": "Eye of Destruction",
+        "image": "XerathArcaneBarrage2.png"
+      },
+      "E": {
+        "name": "Shocking Orb",
+        "image": "XerathMageSpear.png"
+      },
+      "R": {
+        "name": "Rite of the Arcane",
+        "image": "XerathLocusOfPower2.png"
+      }
+    },
+    "xinzhao": {
+      "Q": {
+        "name": "Three Talon Strike",
+        "image": "XinZhaoQ.png"
+      },
+      "W": {
+        "name": "Wind Becomes Lightning",
+        "image": "XinZhaoW.png"
+      },
+      "E": {
+        "name": "Audacious Charge",
+        "image": "XinZhaoE.png"
+      },
+      "R": {
+        "name": "Crescent Guard",
+        "image": "XinZhaoR.png"
+      }
+    },
+    "yone": {
+      "Q": {
+        "name": "Mortal Steel",
+        "image": "YoneQ.png"
+      },
+      "W": {
+        "name": "Spirit Cleave",
+        "image": "YoneW.png"
+      },
+      "E": {
+        "name": "Soul Unbound",
+        "image": "YoneE.png"
+      },
+      "R": {
+        "name": "Fate Sealed",
+        "image": "YoneR.png"
+      }
+    },
+    "ziggs": {
+      "Q": {
+        "name": "Bouncing Bomb",
+        "image": "ZiggsQ.png"
+      },
+      "W": {
+        "name": "Satchel Charge",
+        "image": "ZiggsW.png"
+      },
+      "E": {
+        "name": "Hexplosive Minefield",
+        "image": "ZiggsE.png"
+      },
+      "R": {
+        "name": "Mega Inferno Bomb",
+        "image": "ZiggsR.png"
+      }
+    },
+    "yunara": {
+      "Q": {
+        "name": "Cultivation of Spirit",
+        "image": "YunaraQ.png"
+      },
+      "W": {
+        "name": "Arc of Judgment | Arc of Ruin",
+        "image": "YunaraW.png"
+      },
+      "E": {
+        "name": "Kanmei's Steps | Untouchable Shadow",
+        "image": "YunaraE.png"
+      },
+      "R": {
+        "name": "Transcend One's Self",
+        "image": "YunaraR.png"
+      }
+    },
+    "zeri": {
+      "Q": {
+        "name": "Burst Fire",
+        "image": "ZeriQ.png"
+      },
+      "W": {
+        "name": "Ultrashock Laser",
+        "image": "ZeriW.png"
+      },
+      "E": {
+        "name": "Spark Surge",
+        "image": "ZeriE.png"
+      },
+      "R": {
+        "name": "Lightning Crash",
+        "image": "ZeriR.png"
+      }
+    },
+    "yuumi": {
+      "Q": {
+        "name": "Prowling Projectile",
+        "image": "YuumiQ.png"
+      },
+      "W": {
+        "name": "You and Me!",
+        "image": "YuumiW.png"
+      },
+      "E": {
+        "name": "Zoomies",
+        "image": "YuumiE.png"
+      },
+      "R": {
+        "name": "Final Chapter",
+        "image": "YuumiR.png"
+      }
+    },
+    "zac": {
+      "Q": {
+        "name": "Stretching Strikes",
+        "image": "ZacQ.png"
+      },
+      "W": {
+        "name": "Unstable Matter",
+        "image": "ZacW.png"
+      },
+      "E": {
+        "name": "Elastic Slingshot",
+        "image": "ZacE.png"
+      },
+      "R": {
+        "name": "Let's Bounce!",
+        "image": "ZacR.png"
+      }
+    },
+    "zed": {
+      "Q": {
+        "name": "Razor Shuriken",
+        "image": "ZedQ.png"
+      },
+      "W": {
+        "name": "Living Shadow",
+        "image": "ZedW.png"
+      },
+      "E": {
+        "name": "Shadow Slash",
+        "image": "ZedE.png"
+      },
+      "R": {
+        "name": "Death Mark",
+        "image": "ZedR.png"
+      }
+    },
+    "yorick": {
+      "Q": {
+        "name": "Last Rites",
+        "image": "YorickQ.png"
+      },
+      "W": {
+        "name": "Dark Procession",
+        "image": "YorickW.png"
+      },
+      "E": {
+        "name": "Mourning Mist",
+        "image": "YorickE.png"
+      },
+      "R": {
+        "name": "Eulogy of the Isles",
+        "image": "YorickR.png"
+      }
+    },
+    "zoe": {
+      "Q": {
+        "name": "Paddle Star!",
+        "image": "ZoeQ.png"
+      },
+      "W": {
+        "name": "Spell Thief",
+        "image": "ZoeW.png"
+      },
+      "E": {
+        "name": "Sleepy Trouble Bubble",
+        "image": "ZoeE.png"
+      },
+      "R": {
+        "name": "Portal Jump",
+        "image": "ZoeR.png"
+      }
+    },
+    "zyra": {
+      "Q": {
+        "name": "Deadly Spines",
+        "image": "ZyraQ.png"
+      },
+      "W": {
+        "name": "Rampant Growth",
+        "image": "ZyraW.png"
+      },
+      "E": {
+        "name": "Grasping Roots",
+        "image": "ZyraE.png"
+      },
+      "R": {
+        "name": "Stranglethorns",
+        "image": "ZyraR.png"
+      }
+    },
+    "zilean": {
+      "Q": {
+        "name": "Time Bomb",
+        "image": "ZileanQ.png"
+      },
+      "W": {
+        "name": "Rewind",
+        "image": "ZileanW.png"
+      },
+      "E": {
+        "name": "Time Warp",
+        "image": "TimeWarp.png"
+      },
+      "R": {
+        "name": "Chronoshift",
+        "image": "ChronoShift.png"
+      }
+    }
+  }
+}

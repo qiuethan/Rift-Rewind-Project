@@ -18,6 +18,10 @@ export interface ChampionRecommendationRequest {
 export interface ChampionRecommendation {
   champion_id: string;
   champion_name: string;
+  champion_title?: string;
+  champion_tags?: string[];
+  champion_image_url?: string;
+  lore_snippet?: string;
   similarity_score: number;
   reasoning?: string;
   similar_abilities?: string[];

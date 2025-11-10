@@ -1,0 +1,443 @@
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: calc(100vh - 200px);
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 400px;
+  color: var(--text-secondary);
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 400px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.error h2 {
+  color: var(--error);
+  margin-bottom: 1rem;
+}
+
+.retryButton {
+  padding: 0.75rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+  background: var(--primary-hover);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 400px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.emptySubtext {
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  margin-top: 0.5rem;
+}
+
+.header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.recommendationContainer {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Navigation */
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.navButton {
+  padding: 0.75rem 1.5rem;
+  background: color-mix(in srgb, var(--primary) 50%, black 50%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.navButton:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.navButton:disabled {
+  background: var(--bg-tertiary);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+  transform: none;
+}
+
+.position {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+}
+
+/* Champion Display */
+.championDisplay {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  align-items: center;
+}
+
+.championImage {
+  flex-shrink: 0;
+  width: 300px;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.championImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.championInfo {
+  flex: 1;
+}
+
+.championName {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.championTitle {
+  font-size: 1.2rem;
+  color: var(--accent);
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.loreSnippet {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  max-width: 600px;
+}
+
+.reasoning {
+  font-size: 1rem;
+  color: var(--text-primary);
+  background: var(--bg-accent);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary);
+  font-weight: 500;
+  margin-top: 1rem;
+}
+
+.learnMoreButton {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: color-mix(in srgb, var(--primary) 50%, black 50%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.learnMoreButton:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+/* Ability Grid */
+.abilityGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.abilityColumn h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary);
+}
+
+.abilityComparison {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.abilityComparison:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.abilityRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.similaritySection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  text-align: center;
+}
+
+.similarityText {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+.similarityScore {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--accent);
+  background: var(--bg-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 2px solid var(--accent);
+}
+
+.similarText {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: normal;
+  font-weight: 500;
+  text-transform: lowercase;
+}
+
+.abilityItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.abilityIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.abilityIcon.Q {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+}
+
+.abilityIcon.W {
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+}
+
+.abilityIcon.E {
+  background: linear-gradient(135deg, #45b7d1, #96c93d);
+}
+
+.abilityIcon.R {
+  background: linear-gradient(135deg, #f7dc6f, #f39c12);
+}
+
+.abilityIcon::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.abilityName {
+  font-weight: 500;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.championNameInAbility {
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.similarText {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.explanation {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+  padding: 0.75rem;
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+  margin-top: 0.75rem;
+  line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .championDisplay {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .championImage {
+    width: 100%;
+    max-width: 400px;
+    height: 250px;
+    align-self: center;
+  }
+
+  .abilityGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .navigation {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .navButton {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .championName {
+    font-size: 1.5rem;
+  }
+
+  .abilityComparison {
+    padding: 1rem;
+  }
+
+  .abilityItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .abilityIcon {
+    align-self: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0.5rem;
+  }
+
+  .recommendationContainer {
+    padding: 1rem;
+  }
+
+  .championImage {
+    height: 180px;
+  }
+
+  .loreSnippet {
+    font-size: 0.9rem;
+  }
+
+  .reasoning {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+  }
+}

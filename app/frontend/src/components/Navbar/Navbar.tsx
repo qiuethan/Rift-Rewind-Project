@@ -64,6 +64,12 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
             >
               Champions
             </button>
+            <button 
+              className={styles.navLink} 
+              onClick={() => navigate(ROUTES.RECOMMEND)}
+            >
+              Recommend
+            </button>
           </div>
         )}
 
