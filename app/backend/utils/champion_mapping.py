@@ -3,6 +3,7 @@ Champion name to ID mapping utility
 """
 from typing import Optional, Dict
 import json
+import glob
 from pathlib import Path
 
 # Champion name to ID mapping (partial list - expand as needed)
@@ -267,7 +268,10 @@ _ID_TO_GRAPH_NAME_CACHE: Optional[Dict[int, str]] = None
 
 def load_id_to_graph_name_mapping() -> Dict[int, str]:
     """
-    Load champion ID to graph name mapping from champion.json
+    Load champion ID to graph name mapping from champion_data folder
+    
+    This matches the approach used in scripts/champion_recommender/utils.py
+    Uses individual champion JSON files which contain the correct graph names.
     
     Returns:
         Dict mapping champion ID (int) to graph name (str)
@@ -279,20 +283,25 @@ def load_id_to_graph_name_mapping() -> Dict[int, str]:
         return _ID_TO_GRAPH_NAME_CACHE
     
     try:
-        # Path to champion.json
-        champion_json_path = Path(__file__).resolve().parents[1] / 'constants' / 'data' / 'champion.json'
+        # Path to champion_data folder (individual champion JSONs)
+        champion_data_dir = Path(__file__).resolve().parents[3] / 'data' / 'champion_data'
         
-        with open(champion_json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        # Build mapping: key (ID) -> id (graph name)
         id_to_name = {}
-        for champion_data in data.get('data', {}).values():
-            champion_id = int(champion_data['key'])
-            graph_name = champion_data['id']  # This is the graph name (e.g., "MonkeyKing")
-            id_to_name[champion_id] = graph_name
+        
+        # Load each champion JSON file
+        for json_path in glob.glob(str(champion_data_dir / "*.json")):
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+                # Each file has one champion in data
+                champion_data = list(data.get('data', {}).values())[0]
+                champion_id = int(champion_data['key'])
+                graph_name = champion_data['id']  # Graph name (e.g., "MonkeyKing")
+                
+                id_to_name[champion_id] = graph_name
         
         _ID_TO_GRAPH_NAME_CACHE = id_to_name
+        print(f"Loaded {len(id_to_name)} champion ID mappings from champion_data folder")
         return id_to_name
         
     except Exception as e:

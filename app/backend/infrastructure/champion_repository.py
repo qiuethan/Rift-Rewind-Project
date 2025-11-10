@@ -160,7 +160,7 @@ class ChampionRepositoryImpl(ChampionRepository):
                 champion_list=champion_pool,
                 top_k=limit * 2,  # Get more candidates for performance re-ranking
                 alpha=0.7,
-                max_occurrences=0  # Exclude champions played more than twice in pool
+                max_occurrences=0  # Exclude all champions in the pool (recommend only new champions)
             )
             
             # Apply performance-based weighting
@@ -210,24 +210,17 @@ class ChampionRepositoryImpl(ChampionRepository):
         """Apply performance-based weighting to recommendations
         
         Champions similar to high-performing champions in the pool get a boost.
-        Weight: 15% performance, 85% base similarity
+        Adds a performance multiplier to the base similarity score.
         """
         if not performance_data:
             return recommendations
         
-        # Calculate average performance across player's pool
-        pool_performances = [perf for champ, perf in performance_data.items() if champ in champion_pool]
-        if not pool_performances:
-            return recommendations
-        
-        avg_pool_eps = sum(p['avg_eps'] for p in pool_performances) / len(pool_performances)
-        avg_pool_cps = sum(p['avg_cps'] for p in pool_performances) / len(pool_performances)
-        
         weighted_recs = []
         for champ_name, base_score in recommendations:
             # Find which pool champions are most similar to this recommendation
-            performance_boost = 0.0
-            total_weight = 0.0
+            performance_multiplier = 1.0  # Default: no change
+            total_similarity = 0.0
+            weighted_performance = 0.0
             
             for pool_champ in champion_pool:
                 if pool_champ not in performance_data:
@@ -247,16 +240,19 @@ class ChampionRepositoryImpl(ChampionRepository):
                     # Combined performance score (50% EPS, 50% CPS)
                     perf_score = (eps_norm + cps_norm) / 2.0
                     
-                    # Weight by similarity to this pool champion
-                    performance_boost += perf_score * similarity
-                    total_weight += similarity
+                    # Accumulate weighted performance
+                    weighted_performance += perf_score * similarity
+                    total_similarity += similarity
             
-            # Average the performance boost
-            if total_weight > 0:
-                performance_boost /= total_weight
+            # Calculate performance multiplier
+            if total_similarity > 0:
+                avg_performance = weighted_performance / total_similarity
+                # Multiplier ranges from 0.85 (poor performance) to 1.15 (great performance)
+                # This gives a ±15% adjustment based on performance
+                performance_multiplier = 0.85 + (0.30 * avg_performance)
             
-            # Combine: 85% base similarity, 15% performance weighting
-            final_score = (0.85 * base_score) + (0.15 * performance_boost)
+            # Apply multiplier to base score
+            final_score = base_score * performance_multiplier
             weighted_recs.append((champ_name, final_score))
         
         # Re-sort by weighted score
@@ -276,23 +272,36 @@ class ChampionRepositoryImpl(ChampionRepository):
             similar_to = []
             high_performers = []
             
-            for pool_champ in champion_pool[:5]:  # Check top 5 from pool
+            for pool_champ in champion_pool[:10]:  # Check top 10 from pool
+                # Check BOTH directions in the graph since it's directional
+                weight = 0.0
+                
+                # Check recommended -> pool direction
                 if pool_champ in recommender.graph.get(recommended_champ, {}):
-                    weight = recommender.graph[recommended_champ][pool_champ]
-                    if weight > 0.05:  # Significant similarity threshold
-                        similar_to.append(pool_champ)
-                        
-                        # Check if this is a high-performing champion
-                        if performance_data and pool_champ in performance_data:
-                            perf = performance_data[pool_champ]
-                            if perf['avg_eps'] > 70 or perf['avg_cps'] > 70:
-                                high_performers.append(pool_champ)
+                    weight = max(weight, recommender.graph[recommended_champ][pool_champ])
+                
+                # Check pool -> recommended direction
+                if recommended_champ in recommender.graph.get(pool_champ, {}):
+                    weight = max(weight, recommender.graph[pool_champ][recommended_champ])
+                
+                if weight > 0.08:  # Higher threshold for more meaningful similarities
+                    similar_to.append((pool_champ, weight))
+                    
+                    # Check if this is a high-performing champion
+                    if performance_data and pool_champ in performance_data:
+                        perf = performance_data[pool_champ]
+                        if perf['avg_eps'] > 70 or perf['avg_cps'] > 70:
+                            high_performers.append((pool_champ, weight))
+            
+            # Sort by weight (strongest similarities first)
+            similar_to.sort(key=lambda x: x[1], reverse=True)
+            high_performers.sort(key=lambda x: x[1], reverse=True)
             
             if high_performers:
-                champs_str = ", ".join(high_performers[:2])
+                champs_str = ", ".join([champ for champ, _ in high_performers[:2]])
                 return f"Similar to your high-performing {champs_str}"
             elif similar_to:
-                champs_str = ", ".join(similar_to[:3])
+                champs_str = ", ".join([champ for champ, _ in similar_to[:3]])
                 return f"Similar playstyle to your {champs_str}"
             else:
                 return "Recommended based on your champion pool"
@@ -338,9 +347,10 @@ class ChampionRepositoryImpl(ChampionRepository):
     async def get_player_champion_pool(self, puuid: str) -> List[str]:
         """Get player's champion pool using dynamic mastery distribution
         
-        Uses a weighted scoring system based on mastery level and games played:
-        - Higher mastery = higher weight
-        - More games = higher weight
+        Uses a weighted scoring system based on multiple factors:
+        - Higher mastery = higher weight (exponential)
+        - More games = higher weight (logarithmic)
+        - Recently played = higher weight (exponential decay)
         - Includes champions above a dynamic percentile threshold
         
         Returns:
@@ -350,7 +360,7 @@ class ChampionRepositoryImpl(ChampionRepository):
             # Query champion_progress table for this player's champions
             # Order by total_games to prioritize most played
             result = await self.db.table(DatabaseTable.CHAMPION_PROGRESS).select(
-                'champion_id, champion_name, mastery_level, total_games, mastery_points'
+                'champion_id, champion_name, mastery_level, total_games, mastery_points, last_played'
             ).eq('puuid', puuid).order('total_games', desc=True).limit(200).execute()
             
             if not result.data:
@@ -388,9 +398,10 @@ class ChampionRepositoryImpl(ChampionRepository):
         - Mastery weight: mastery_level^2 (exponential - mastery 7 = 49x more than mastery 1)
         - Games weight: log(total_games + 1) (logarithmic - diminishing returns)
         - Points weight: log(mastery_points + 1) / 10 (minor boost)
+        - Recency weight: exponential decay based on days since last played
         
         Threshold:
-        - Include champions scoring above the 30th percentile
+        - Include champions scoring above adaptive percentile
         - Ensures we capture "frequently played" champions
         - Adapts to player's overall distribution
         
@@ -404,6 +415,10 @@ class ChampionRepositoryImpl(ChampionRepository):
             return []
         
         import math
+        import time
+        
+        # Get current timestamp for recency calculation
+        current_time = int(time.time())
         
         # Calculate score for each champion
         scored_champions = []
@@ -412,6 +427,7 @@ class ChampionRepositoryImpl(ChampionRepository):
             mastery_level = champ.get('mastery_level') or 0
             total_games = champ.get('total_games') or 0
             mastery_points = champ.get('mastery_points') or 0
+            last_played = champ.get('last_played') or 0
             
             if not champion_id or total_games == 0:
                 continue
@@ -421,14 +437,27 @@ class ChampionRepositoryImpl(ChampionRepository):
             games_weight = math.log(total_games + 1)  # Logarithmic: diminishing returns
             points_weight = math.log(mastery_points + 1) / 10  # Minor boost
             
+            # Recency weight: exponential decay
+            # Recent = high weight, old = low weight
+            if last_played > 0:
+                days_since_played = (current_time - last_played) / 86400  # Convert to days
+                # Decay formula: e^(-days/30) 
+                # - Played today: ~1.0
+                # - Played 30 days ago: ~0.37
+                # - Played 90 days ago: ~0.05
+                recency_weight = math.exp(-days_since_played / 30) * 10  # Scale to ~10 max
+            else:
+                recency_weight = 0  # No last_played data
+            
             # Combined score
-            score = mastery_weight + games_weight + points_weight
+            score = mastery_weight + games_weight + points_weight + recency_weight
             
             scored_champions.append({
                 'champion_id': champion_id,
                 'score': score,
                 'mastery_level': mastery_level,
-                'total_games': total_games
+                'total_games': total_games,
+                'days_since_played': (current_time - last_played) / 86400 if last_played > 0 else 999
             })
         
         if not scored_champions:
