@@ -9,4 +9,5 @@ export { default as RegionSelector } from './RegionSelector';
 export { default as Footer } from './Footer';
 export { default as ScrollToTop } from './ScrollToTop';
 export { default as SyncStatusModal } from './SyncStatusModal';
+export { default as AudioControls } from './AudioControls';
 export { MatchAnalysisChart } from './MatchAnalysisChart';

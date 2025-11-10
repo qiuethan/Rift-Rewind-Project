@@ -32,9 +32,10 @@ interface MatchAnalysisChartProps {
   title?: string;
   skipThemeColors?: boolean; // Skip theme color application if colors are pre-set
   height?: number; // Custom height override
+  enableLegendClick?: boolean; // Enable legend click to hide/show datasets (default: false)
 }
 
-export default function MatchAnalysisChart({ chartConfig, title, skipThemeColors = false, height }: MatchAnalysisChartProps) {
+export default function MatchAnalysisChart({ chartConfig, title, skipThemeColors = false, height, enableLegendClick = false }: MatchAnalysisChartProps) {
   const chartRef = useRef<ChartJS>(null);
   const { theme } = useTheme(); // Get current theme to trigger re-render on change
   const [chartKey, setChartKey] = useState(0);
@@ -276,6 +277,7 @@ export default function MatchAnalysisChart({ chartConfig, title, skipThemeColors
           display: true,
           position: 'top' as const,
           align: 'center' as const,
+          onClick: enableLegendClick ? undefined : () => {}, // Use default click behavior if enabled, otherwise disable
           labels: {
             color: getThemeColor('--region-text'),
             font: {
