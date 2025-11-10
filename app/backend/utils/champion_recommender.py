@@ -187,6 +187,7 @@ class ChampionRecommender:
     def recommend_from_champion_pool(
         self,
         champion_list: List[str],
+        performance_data: Dict[str, Dict[str, float]],
         top_k: int = 5,
         alpha: float = 0.7,
         filters: Optional[Dict[str, any]] = None,
@@ -220,12 +221,21 @@ class ChampionRecommender:
                 logger.warning(f"Champion '{champ}' not in graph, skipping")
                 continue
             
+            if champ in performance_data:
+                eps_score = performance_data[champ]["avg_eps"] / 100.0
+                cps_score = performance_data[champ]["avg_cps"]
+
+                performance_weight = 0.7 * eps_score + 0.3 * cps_score
+            else:
+                performance_weight = 0.5
+            logger.info(f"{champ}: {performance_weight}")
+            
             # Get similarities for this champion
             recs = self._combined_similarity(champ, alpha=alpha, allowed=allowed)
             
             # Add to aggregate scores
             for r, score in recs.items():
-                combined_scores[r] += score
+                combined_scores[r] += 0.8 * score + 0.2 * performance_weight
         
         # Sort by aggregated score
         sorted_recs = sorted(combined_scores.items(), key=lambda x: x[1], reverse=True)

@@ -71,9 +71,20 @@ class ChampionRepositoryImpl(ChampionRepository):
         # Find rows where champ1 matches the requested champion
         # Expected CSV columns: champ1, ability1_type, ability1_name, champ2, ability2_type, ability2_name, score, explanation
         champion_abilities = df[
-            df['champ1'].str.lower().str.replace("'", "").str.replace(" ", "").str.replace(".", "") == normalized_champion
-        ].copy()
-        
+                (df['champ1'].str.lower().str.replace("'", "").str.replace(" ", "").str.replace(".", "") == normalized_champion)
+                |
+                (df['champ2'].str.lower().str.replace("'", "").str.replace(" ", "").str.replace(".", "") == normalized_champion)
+            ].copy()
+        champion_abilities['champ2_norm'] = df['champ2'].str.lower().str.replace("'", "").str.replace(" ", "").str.replace(".", "")
+
+        mask_swap = champion_abilities['champ2_norm'] == normalized_champion
+        for col1, col2 in [('champ1', 'champ2'),
+                        ('ability1_type', 'ability2_type'),
+                        ('ability1_name', 'ability2_name')]:
+            temp = champion_abilities.loc[mask_swap, col1].copy()
+            champion_abilities.loc[mask_swap, col1] = champion_abilities.loc[mask_swap, col2]
+            champion_abilities.loc[mask_swap, col2] = temp
+
         if champion_abilities.empty:
             return []
         
@@ -188,22 +199,23 @@ class ChampionRepositoryImpl(ChampionRepository):
             # alpha=0.7 means 70% graph similarity, 30% feature similarity
             recommendations = recommender.recommend_from_champion_pool(
                 champion_list=champion_pool,
+                performance_data=performance_data,
                 top_k=limit * 2,  # Get more candidates for performance re-ranking
                 alpha=0.7,
                 max_occurrences=0  # Exclude all champions in the pool (recommend only new champions)
             )
             
-            # Apply performance-based weighting
-            weighted_recommendations = self._apply_performance_weighting(
-                recommendations,
-                champion_pool,
-                performance_data,
-                recommender
-            )
+            # # Apply performance-based weighting
+            # weighted_recommendations = self._apply_performance_weighting(
+            #     recommendations,
+            #     champion_pool,
+            #     performance_data,
+            #     recommender
+            # )
             
             # Convert to ChampionRecommendation objects
             result = []
-            for champ_name, score in weighted_recommendations[:limit]:
+            for champ_name, score in recommendations[:limit]:
                 # Normalize score to 0-1 range (scores can be > 1 due to aggregation)
                 normalized_score = min(score / len(champion_pool), 1.0)
                 
