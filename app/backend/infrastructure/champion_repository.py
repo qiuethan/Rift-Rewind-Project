@@ -330,10 +330,28 @@ class ChampionRepositoryImpl(ChampionRepository):
             high_performers.sort(key=lambda x: x[1], reverse=True)
             
             if high_performers:
-                champs_str = ", ".join([champ for champ, _ in high_performers[:2]])
+                # Deduplicate champion names for display
+                unique_high_performers = []
+                seen_champs = set()
+                for champ, weight in high_performers:
+                    if champ not in seen_champs:
+                        unique_high_performers.append(champ)
+                        seen_champs.add(champ)
+                        if len(unique_high_performers) >= 2:
+                            break
+                champs_str = ", ".join(unique_high_performers)
                 return f"Similar to your high-performing {champs_str}"
             elif similar_to:
-                champs_str = ", ".join([champ for champ, _ in similar_to[:3]])
+                # Deduplicate champion names for display
+                unique_similar = []
+                seen_champs = set()
+                for champ, weight in similar_to:
+                    if champ not in seen_champs:
+                        unique_similar.append(champ)
+                        seen_champs.add(champ)
+                        if len(unique_similar) >= 3:
+                            break
+                champs_str = ", ".join(unique_similar)
                 return f"Similar playstyle to your {champs_str}"
             else:
                 return "Recommended based on your champion pool"
