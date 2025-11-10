@@ -9,11 +9,11 @@ import ChampionsPage from '@/pages/ChampionsPage';
 import ChampionDetailPage from '@/pages/ChampionDetailPage';
 import MatchDetailPage from '@/pages/MatchDetailPage';
 import TestChatPage from '@/pages/TestChatPage';
-import { Footer, ScrollToTop } from '@/components';
+import { Footer, ScrollToTop, AudioControls } from '@/components';
 import { ROUTES, STORAGE_KEYS } from '@/config';
 import { authActions } from '@/actions/auth';
 import { SummonerProvider, ThemeProvider } from '@/contexts';
-import { AudioProvider } from '@/contexts/AudioContext'; // Import the new AudioProvider
+import { AudioProvider } from '@/contexts/AudioContext';
 import { supabase } from '@/lib/supabase';
 
 // Define props for route components
@@ -93,6 +93,7 @@ function App() {
               <Route path="*" element={<Navigate to={ROUTES.HOME} />} />
             </Routes>
             <Footer />
+            <AudioControls />
           </SummonerProvider>
         </ThemeProvider>
       </BrowserRouter>

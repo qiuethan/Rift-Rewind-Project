@@ -4,11 +4,6 @@ import styles from './Navbar.module.css';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
 import RegionSelector from '../RegionSelector';
-import { useAudio } from '@/contexts/AudioContext';
-
-// Define the paths to your sound icons, relative to the `public` folder.
-const soundOnIconPath = '/img/emotes/sound.png';
-const soundOffIconPath = '/img/emotes/soundoff.png'; // Updated to your new file name
 
 interface NavbarProps {
   user?: any;
@@ -20,9 +15,6 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  // Get the global audio state and toggle function
-  const { isPlaying, toggleAudio } = useAudio();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -63,14 +55,6 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
           </div>
 
           <div className={styles.rightSection}>
-          <button onClick={toggleAudio} className={styles.soundButton} aria-label="Toggle music">
-            <img
-              src={isPlaying ? soundOnIconPath : soundOffIconPath}
-              alt={isPlaying ? 'Mute audio' : 'Unmute audio'}
-              className={styles.soundIcon} 
-            />
-          </button>
-
           {showAuthButtons ? (
             <div className={styles.authButtons}>
               <button className={styles.loginButton} onClick={() => navigate(ROUTES.LOGIN)}>Login</button>

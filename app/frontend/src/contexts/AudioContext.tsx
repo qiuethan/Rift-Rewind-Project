@@ -10,7 +10,9 @@ import React, {
 
 interface AudioContextType {
   isPlaying: boolean;
+  volume: number;
   toggleAudio: () => void;
+  setVolume: (volume: number) => void;
 }
 
 
@@ -32,6 +34,7 @@ interface AudioProviderProps {
 
 export const AudioProvider: React.FC<AudioProviderProps> = ({ children, audioSrc }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolumeState] = useState(0); // Default volume 0%
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -39,8 +42,16 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children, audioSrc
     if (!audioRef.current) {
         audioRef.current = new Audio(audioSrc);
         audioRef.current.loop = true;
+        audioRef.current.volume = volume;
     }
-  }, [audioSrc]);
+  }, [audioSrc, volume]);
+
+  // Update audio volume when volume state changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   const toggleAudio = useCallback(() => {
     const audio = audioRef.current;
@@ -57,7 +68,12 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children, audioSrc
     setIsPlaying(prevIsPlaying => !prevIsPlaying);
   }, [isPlaying]);
 
-  const value: AudioContextType = { isPlaying, toggleAudio };
+  const setVolume = useCallback((newVolume: number) => {
+    const clampedVolume = Math.max(0, Math.min(1, newVolume));
+    setVolumeState(clampedVolume);
+  }, []);
+
+  const value: AudioContextType = { isPlaying, volume, toggleAudio, setVolume };
 
   return (
     <AudioContext.Provider value={value}>
