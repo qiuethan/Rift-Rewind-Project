@@ -212,8 +212,9 @@
 .abilityGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, minmax(min-content, 1fr));
+  grid-auto-rows: minmax(0, auto); 
   gap: 2rem;
+  align-items: stretch; 
 }
 
 .abilityColumn h3 {

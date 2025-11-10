@@ -223,155 +223,77 @@ export default function RecommendPage() {
 
           {/* Ability Comparison Grid */}
           <section className={styles.abilityGrid} aria-labelledby="ability-comparisons">
-            <div className={styles.abilityColumn}>
-              {['Q', 'W'].map(abilityType => {
-                const ability = abilitySimilarities.find(a => a.ability_type === abilityType);
-                if (!ability) return null;
-                return (
-                  <div key={abilityType} className={styles.abilityComparison}>
-                    <div className={styles.abilityRow}>
-                      <div className={styles.abilityItem}>
-                        {(() => {
-                          const asset = getAbilityAsset(currentRecommendation.champion_name, ability.ability_type as 'Q' | 'W' | 'E' | 'R');
-                          return asset ? (
-                            <img
-                              src={asset.imageUrl}
-                              alt={`${currentRecommendation.champion_name} ${ability.ability_name} (${ability.ability_type})`}
-                              className={styles.abilityIcon}
-                              onError={(e) => {
-                                // Fallback to letter icon
-                                const img = e.target as HTMLImageElement;
-                                img.style.display = 'none';
-                                const fallback = document.createElement('div');
-                                fallback.className = `${styles.abilityIcon} ${styles[ability.ability_type]}`;
-                                fallback.textContent = ability.ability_type;
-                                img.parentElement?.appendChild(fallback);
-                              }}
-                            />
-                          ) : (
-                            <div className={`${styles.abilityIcon} ${styles[ability.ability_type]}`}>
-                              {ability.ability_type}
-                            </div>
-                          );
-                        })()}
-                        <span className={styles.abilityName}><span className={styles.championNameInAbility}>{currentRecommendation.champion_name}'s</span> {ability.ability_name} ({ability.ability_type})</span>
-                      </div>
-                      <div className={styles.similaritySection}>
-                        <div className={styles.similarityScore}>
-                          {ability.similarity_score.toFixed(2)}
-                        </div>
-                        <div className={styles.similarText}>is similar to</div>
-                      </div>
-                      <div className={styles.abilityItem}>
-                        {(() => {
-                          const asset = getAbilityAsset(ability.similar_champion, ability.similar_ability_type as 'Q' | 'W' | 'E' | 'R');
-                          return asset ? (
-                            <img
-                              src={asset.imageUrl}
-                              alt={`${ability.similar_champion} ${ability.similar_ability_name} (${ability.similar_ability_type})`}
-                              className={styles.abilityIcon}
-                              onError={(e) => {
-                                // Fallback to letter icon
-                                const img = e.target as HTMLImageElement;
-                                img.style.display = 'none';
-                                const fallback = document.createElement('div');
-                                fallback.className = `${styles.abilityIcon} ${styles[ability.similar_ability_type]}`;
-                                fallback.textContent = ability.similar_ability_type;
-                                img.parentElement?.appendChild(fallback);
-                              }}
-                            />
-                          ) : (
-                            <div className={`${styles.abilityIcon} ${styles[ability.similar_ability_type]}`}>
-                              {ability.similar_ability_type}
-                            </div>
-                          );
-                        })()}
-                        <span className={styles.abilityName}>
-                          <span className={styles.championNameInAbility}>{ability.similar_champion}'s</span> {ability.similar_ability_name} ({ability.similar_ability_type})
-                        </span>
-                      </div>
+            {['Q', 'W', 'E', 'R'].map((abilityType) => {
+              const ability = abilitySimilarities.find(a => a.ability_type === abilityType);
+              if (!ability) return null;
+
+              return (
+                <div key={abilityType} className={styles.abilityComparison}>
+                  <div className={styles.abilityRow}>
+                    <div className={styles.abilityItem}>
+                      {(() => {
+                        const asset = getAbilityAsset(
+                          currentRecommendation.champion_name,
+                          ability.ability_type as 'Q' | 'W' | 'E' | 'R'
+                        );
+                        return asset ? (
+                          <img
+                            src={asset.imageUrl}
+                            alt={`${currentRecommendation.champion_name} ${ability.ability_name} (${ability.ability_type})`}
+                            className={styles.abilityIcon}
+                          />
+                        ) : (
+                          <div className={`${styles.abilityIcon} ${styles[ability.ability_type]}`}>
+                            {ability.ability_type}
+                          </div>
+                        );
+                      })()}
+                      <span className={styles.abilityName}>
+                        <span className={styles.championNameInAbility}>
+                          {currentRecommendation.champion_name}'s
+                        </span>{' '}
+                        {ability.ability_name} ({ability.ability_type})
+                      </span>
                     </div>
-                    <div className={styles.explanation} title={ability.explanation}>
-                      {ability.explanation}
+
+                    <div className={styles.similaritySection}>
+                      <div className={styles.similarityScore}>
+                        {ability.similarity_score.toFixed(2)}
+                      </div>
+                      <div className={styles.similarText}>is similar to</div>
+                    </div>
+
+                    <div className={styles.abilityItem}>
+                      {(() => {
+                        const asset = getAbilityAsset(
+                          ability.similar_champion,
+                          ability.similar_ability_type as 'Q' | 'W' | 'E' | 'R'
+                        );
+                        return asset ? (
+                          <img
+                            src={asset.imageUrl}
+                            alt={`${ability.similar_champion} ${ability.similar_ability_name} (${ability.similar_ability_type})`}
+                            className={styles.abilityIcon}
+                          />
+                        ) : (
+                          <div className={`${styles.abilityIcon} ${styles[ability.similar_ability_type]}`}>
+                            {ability.similar_ability_type}
+                          </div>
+                        );
+                      })()}
+                      <span className={styles.abilityName}>
+                        <span className={styles.championNameInAbility}>{ability.similar_champion}'s</span>{' '}
+                        {ability.similar_ability_name} ({ability.similar_ability_type})
+                      </span>
                     </div>
                   </div>
-                );
-              })}
-            </div>            <div className={styles.abilityColumn}>
-              {['E', 'R'].map(abilityType => {
-                const ability = abilitySimilarities.find(a => a.ability_type === abilityType);
-                if (!ability) return null;
-                return (
-                  <div key={abilityType} className={styles.abilityComparison}>
-                    <div className={styles.abilityRow}>
-                      <div className={styles.abilityItem}>
-                        {(() => {
-                          const asset = getAbilityAsset(currentRecommendation.champion_name, ability.ability_type as 'Q' | 'W' | 'E' | 'R');
-                          return asset ? (
-                            <img
-                              src={asset.imageUrl}
-                              alt={`${currentRecommendation.champion_name} ${ability.ability_name} (${ability.ability_type})`}
-                              className={styles.abilityIcon}
-                              onError={(e) => {
-                                // Fallback to letter icon
-                                const img = e.target as HTMLImageElement;
-                                img.style.display = 'none';
-                                const fallback = document.createElement('div');
-                                fallback.className = `${styles.abilityIcon} ${styles[ability.ability_type]}`;
-                                fallback.textContent = ability.ability_type;
-                                img.parentElement?.appendChild(fallback);
-                              }}
-                            />
-                          ) : (
-                            <div className={`${styles.abilityIcon} ${styles[ability.ability_type]}`}>
-                              {ability.ability_type}
-                            </div>
-                          );
-                        })()}
-                        <span className={styles.abilityName}><span className={styles.championNameInAbility}>{currentRecommendation.champion_name}'s</span> {ability.ability_name} ({ability.ability_type})</span>
-                      </div>
-                      <div className={styles.similaritySection}>
-                        <div className={styles.similarityScore}>
-                          {ability.similarity_score.toFixed(2)}
-                        </div>
-                        <div className={styles.similarText}>is similar to</div>
-                      </div>
-                      <div className={styles.abilityItem}>
-                        {(() => {
-                          const asset = getAbilityAsset(ability.similar_champion, ability.similar_ability_type as 'Q' | 'W' | 'E' | 'R');
-                          return asset ? (
-                            <img
-                              src={asset.imageUrl}
-                              alt={`${ability.similar_champion} ${ability.similar_ability_name} (${ability.similar_ability_type})`}
-                              className={styles.abilityIcon}
-                              onError={(e) => {
-                                // Fallback to letter icon
-                                const img = e.target as HTMLImageElement;
-                                img.style.display = 'none';
-                                const fallback = document.createElement('div');
-                                fallback.className = `${styles.abilityIcon} ${styles[ability.similar_ability_type]}`;
-                                fallback.textContent = ability.similar_ability_type;
-                                img.parentElement?.appendChild(fallback);
-                              }}
-                            />
-                          ) : (
-                            <div className={`${styles.abilityIcon} ${styles[ability.similar_ability_type]}`}>
-                              {ability.similar_ability_type}
-                            </div>
-                          );
-                        })()}
-                        <span className={styles.abilityName}>
-                          <span className={styles.championNameInAbility}>{ability.similar_champion}'s</span> {ability.similar_ability_name} ({ability.similar_ability_type})
-                        </span>
-                      </div>
-                    </div>
-                    <div className={styles.explanation} title={ability.explanation}>
-                      {ability.explanation}
-                    </div>
+
+                  <div className={styles.explanation} title={ability.explanation}>
+                    {ability.explanation}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </section>
         </div>
       </div>
