@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     AWS_REGION: str = "us-east-1"
     AWS_BEDROCK_MODEL: str = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
     
+    # OpenRouter API
+    OPENROUTER_API_KEY: Optional[str] = None
+    
     class Config:
         env_file = ".env"
         case_sensitive = True
