@@ -336,7 +336,12 @@ class ChampionRepositoryImpl(ChampionRepository):
         return None
     
     async def get_player_champion_pool(self, puuid: str) -> List[str]:
-        """Get player's most played champions by querying champion_progress table
+        """Get player's champion pool using dynamic mastery distribution
+        
+        Uses a weighted scoring system based on mastery level and games played:
+        - Higher mastery = higher weight
+        - More games = higher weight
+        - Includes champions above a dynamic percentile threshold
         
         Returns:
             List of graph champion names (e.g., ['Ahri', 'MonkeyKing', 'Syndra'])
@@ -345,36 +350,22 @@ class ChampionRepositoryImpl(ChampionRepository):
             # Query champion_progress table for this player's champions
             # Order by total_games to prioritize most played
             result = await self.db.table(DatabaseTable.CHAMPION_PROGRESS).select(
-                'champion_id, champion_name, mastery_level, total_games'
+                'champion_id, champion_name, mastery_level, total_games, mastery_points'
             ).eq('puuid', puuid).order('total_games', desc=True).limit(200).execute()
             
             if not result.data:
                 logger.warning(f"No champion progress found for puuid: {puuid}")
                 return []
             
-            # Filter for champions with mastery level 4+
-            mastery_threshold = 4
+            # Calculate champion scores and determine dynamic threshold
+            champion_pool = self._calculate_champion_pool_by_distribution(result.data)
             
-            champion_pool = []
-            for champ in result.data:
-                champion_id = champ.get('champion_id')
-                mastery_level = champ.get('mastery_level') or 0
-                
-                # Include if mastery level 4 or higher
-                if mastery_level >= mastery_threshold:
-                    if champion_id:
-                        # Convert champion ID to graph name (e.g., 62 -> "MonkeyKing")
-                        graph_name = get_graph_name_from_id(int(champion_id))
-                        if graph_name:
-                            champion_pool.append(graph_name)
-            
-            # Return top 10 champions with mastery 4+ (by total_games order)
             if champion_pool:
-                logger.info(f"Champion pool (mastery {mastery_threshold}+): {champion_pool[:10]}")
-                return champion_pool[:10]
+                logger.info(f"Champion pool (distribution-based): {len(champion_pool)} champions - {champion_pool}")
+                return champion_pool
             
             # Fallback: if no mastery data, return top 5 by total_games
-            logger.warning(f"No champions with mastery {mastery_threshold}+ found, falling back to top by games")
+            logger.warning(f"No champions met distribution threshold, falling back to top by games")
             fallback_pool = []
             for champ in result.data[:5]:
                 champion_id = champ.get('champion_id')
@@ -389,6 +380,138 @@ class ChampionRepositoryImpl(ChampionRepository):
         except Exception as e:
             logger.error(f"Error fetching player champion pool: {e}")
             return []
+    
+    def _calculate_champion_pool_by_distribution(self, champion_data: List[Dict]) -> List[str]:
+        """Calculate champion pool using weighted scoring based on mastery distribution
+        
+        Scoring formula:
+        - Mastery weight: mastery_level^2 (exponential - mastery 7 = 49x more than mastery 1)
+        - Games weight: log(total_games + 1) (logarithmic - diminishing returns)
+        - Points weight: log(mastery_points + 1) / 10 (minor boost)
+        
+        Threshold:
+        - Include champions scoring above the 30th percentile
+        - Ensures we capture "frequently played" champions
+        - Adapts to player's overall distribution
+        
+        Args:
+            champion_data: List of champion progress records
+            
+        Returns:
+            List of graph champion names that meet the distribution threshold
+        """
+        if not champion_data:
+            return []
+        
+        import math
+        
+        # Calculate score for each champion
+        scored_champions = []
+        for champ in champion_data:
+            champion_id = champ.get('champion_id')
+            mastery_level = champ.get('mastery_level') or 0
+            total_games = champ.get('total_games') or 0
+            mastery_points = champ.get('mastery_points') or 0
+            
+            if not champion_id or total_games == 0:
+                continue
+            
+            # Weighted scoring formula
+            mastery_weight = mastery_level ** 2  # Exponential: 1, 4, 9, 16, 25, 36, 49
+            games_weight = math.log(total_games + 1)  # Logarithmic: diminishing returns
+            points_weight = math.log(mastery_points + 1) / 10  # Minor boost
+            
+            # Combined score
+            score = mastery_weight + games_weight + points_weight
+            
+            scored_champions.append({
+                'champion_id': champion_id,
+                'score': score,
+                'mastery_level': mastery_level,
+                'total_games': total_games
+            })
+        
+        if not scored_champions:
+            return []
+        
+        # Sort by score descending
+        scored_champions.sort(key=lambda x: x['score'], reverse=True)
+        
+        # Calculate dynamic threshold based on score distribution
+        scores = [c['score'] for c in scored_champions]
+        
+        # Adaptive percentile based on total champion count
+        # - Very few champions (1-3): Include all
+        # - Few champions (4-10): Use 10th percentile (top 90%)
+        # - Medium champions (11-20): Use 20th percentile (top 80%)
+        # - Many champions (21+): Use 30th percentile (top 70%)
+        total_champs = len(scored_champions)
+        
+        if total_champs <= 3:
+            # Include all champions for new players
+            percentile_threshold = 0
+            logger.info(f"New player detected ({total_champs} champions) - including all")
+        elif total_champs <= 10:
+            percentile_threshold = 10
+            logger.info(f"Small pool detected ({total_champs} champions) - using 10th percentile")
+        elif total_champs <= 20:
+            percentile_threshold = 20
+            logger.info(f"Medium pool detected ({total_champs} champions) - using 20th percentile")
+        else:
+            percentile_threshold = 30
+            logger.info(f"Large pool detected ({total_champs} champions) - using 30th percentile")
+        
+        percentile_value = self._calculate_percentile(scores, percentile_threshold)
+        
+        # Include champions above threshold
+        champion_pool = []
+        included_count = 0
+        for champ in scored_champions:
+            if champ['score'] >= percentile_value:
+                graph_name = get_graph_name_from_id(int(champ['champion_id']))
+                if graph_name:
+                    champion_pool.append(graph_name)
+                    included_count += 1
+        
+        # Ensure minimum of 3 champions (for very edge cases)
+        if included_count < 3 and total_champs >= 3:
+            logger.warning(f"Only {included_count} champions included, adding top 3")
+            champion_pool = []
+            for champ in scored_champions[:3]:
+                graph_name = get_graph_name_from_id(int(champ['champion_id']))
+                if graph_name:
+                    champion_pool.append(graph_name)
+        
+        logger.info(
+            f"Distribution analysis: {total_champs} total champions, "
+            f"{percentile_threshold}th percentile score = {percentile_value:.2f}, "
+            f"included {len(champion_pool)} champions"
+        )
+        
+        return champion_pool
+    
+    def _calculate_percentile(self, values: List[float], percentile: int) -> float:
+        """Calculate the Nth percentile of a list of values
+        
+        Args:
+            values: List of numeric values (should be sorted)
+            percentile: Percentile to calculate (0-100)
+            
+        Returns:
+            Value at the specified percentile
+        """
+        if not values:
+            return 0.0
+        
+        sorted_values = sorted(values)
+        index = (percentile / 100) * (len(sorted_values) - 1)
+        
+        # Linear interpolation between two nearest values
+        lower_index = int(index)
+        upper_index = min(lower_index + 1, len(sorted_values) - 1)
+        weight = index - lower_index
+        
+        return sorted_values[lower_index] * (1 - weight) + sorted_values[upper_index] * weight
     
     async def get_player_champion_performance(self, puuid: str) -> Dict[str, Dict[str, float]]:
         """Get player's performance metrics (EPS/CPS) for their champion pool
