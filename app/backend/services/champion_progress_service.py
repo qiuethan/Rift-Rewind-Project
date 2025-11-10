@@ -77,6 +77,7 @@ class ChampionProgressService:
             # Return empty progress data instead of 404 - champion hasn't been played yet or needs sync
             logger.info(f"No progress data found for champion {request.champion_id}, returning empty response")
             from models.champion_progress import ChampionProgressTrend
+            from datetime import datetime, timezone
             return ChampionProgressResponse(
                 user_id=user_id,
                 champion_id=request.champion_id,
@@ -91,10 +92,10 @@ class ChampionProgressService:
                     avg_eps_score=0.0,
                     avg_cps_score=0.0,
                     avg_kda=0.0,
-                    recent_trend="stable",
-                    eps_trend="stable",
-                    cps_trend="stable",
-                    last_played=None,
+                    recent_trend=0.0,
+                    eps_trend=0.0,
+                    cps_trend=0.0,
+                    last_played=int(datetime.now(timezone.utc).timestamp()),
                     mastery_level=None,
                     mastery_points=None
                 ),
