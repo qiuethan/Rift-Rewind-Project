@@ -39,7 +39,7 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
     <nav className={styles.navbar}>
       <div className={styles.container}>
         <div className={styles.logo} onClick={() => navigate(ROUTES.HOME)}>
-          <span className={styles.logoText}>Rift Rewind</span>
+          <span className={styles.logoText}>Heimer Academy</span>
         </div>
 
         {!showAuthButtons && (

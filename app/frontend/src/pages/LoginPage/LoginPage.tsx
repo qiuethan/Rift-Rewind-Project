@@ -34,22 +34,11 @@ export default function LoginPage() {
 
   return (
     <>
-      <nav className={styles.nav}>
-        <div className={styles.navContent}>
-          <h2 className={styles.logo} onClick={() => navigate(ROUTES.HOME)}>Rift Rewind</h2>
-          <div className={styles.navButtons}>
-            <Button variant="secondary" onClick={() => navigate(ROUTES.REGISTER)}>
-              Sign Up
-            </Button>
-          </div>
-        </div>
-      </nav>
-      
       <div className={styles.container}>
         <Card className={styles.card}>
         <div className={styles.header}>
           <h1 className={styles.title}>Welcome Back</h1>
-          <p className={styles.subtitle}>Login to Rift Rewind</p>
+          <p className={styles.subtitle}>Login to Heimer Academy</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.form}>

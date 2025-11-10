@@ -1,58 +1,5 @@
-.nav {
-  border-bottom: 2px solid var(--region-panel-border);
-  padding: 1rem 2rem;
-  background: var(--region-secondary);
-  background-image: linear-gradient(180deg, var(--region-secondary) 0%, rgba(0,0,0,0.3) 100%);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), var(--region-shadow-primary);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  backdrop-filter: blur(10px);
-}
-
-.nav::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--region-primary) 50%, transparent 100%);
-  opacity: 0.5;
-}
-
-.navContent {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--region-primary);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  text-shadow: var(--region-shadow-primary);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.logo:hover {
-  color: var(--region-accent);
-  text-shadow: var(--region-shadow-secondary);
-}
-
-.navButtons {
-  display: flex;
-  gap: 0.75rem;
-}
-
 .container {
-  min-height: calc(100vh - 80px);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
