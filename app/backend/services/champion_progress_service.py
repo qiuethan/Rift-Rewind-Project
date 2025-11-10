@@ -74,9 +74,32 @@ class ChampionProgressService:
         )
         
         if not result:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No progress data found for champion {request.champion_id}"
+            # Return empty progress data instead of 404 - champion hasn't been played yet or needs sync
+            logger.info(f"No progress data found for champion {request.champion_id}, returning empty response")
+            from models.champion_progress import ChampionProgressTrend
+            return ChampionProgressResponse(
+                user_id=user_id,
+                champion_id=request.champion_id,
+                champion_name="Unknown",  # Will be updated when first match is played
+                trend=ChampionProgressTrend(
+                    champion_id=request.champion_id,
+                    champion_name="Unknown",
+                    total_games=0,
+                    wins=0,
+                    losses=0,
+                    win_rate=0.0,
+                    avg_eps_score=0.0,
+                    avg_cps_score=0.0,
+                    avg_kda=0.0,
+                    recent_trend="stable",
+                    eps_trend="stable",
+                    cps_trend="stable",
+                    last_played=None,
+                    mastery_level=None,
+                    mastery_points=None
+                ),
+                recent_matches=[],
+                performance_summary={'history': [], 'total_data_points': 0}
             )
         
         logger.info(f"Successfully retrieved champion progress")
