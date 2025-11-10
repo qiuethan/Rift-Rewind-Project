@@ -24,7 +24,7 @@ export default function LoginPage() {
     if (result.success) {
       // Refresh summoner data after successful login
       await refreshSummoner();
-      navigate(ROUTES.DASHBOARD);
+      navigate(ROUTES.HOME);
     } else {
       setError(result.error || null);
     }

@@ -50,7 +50,7 @@ export default function SummonerLinkModal({ isOpen, onClose }: SummonerLinkModal
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Link Your Summoner">
+    <Modal isOpen={isOpen} onClose={onClose} title="Link Your Summoner" showCloseButton={false}>
       <form onSubmit={handleSubmit} className={styles.modalForm}>
         <p className={styles.modalDescription}>
           Enter your Riot ID to link your League of Legends account. We'll fetch your
