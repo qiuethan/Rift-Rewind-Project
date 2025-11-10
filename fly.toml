@@ -34,4 +34,8 @@ primary_region = "iad"
 [[vm]]
   cpu_kind = "shared"
   cpus = 1
-  memory_mb = 2048
+  memory_mb = 1024
+
+[restart]
+  policy = "on-failure"
+  max_retries = 10
