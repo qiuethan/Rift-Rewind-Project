@@ -102,7 +102,7 @@
 }
 
 .authenticatedContainer {
-  height: 65vh;
+  height: 60vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -119,7 +119,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
 
 .heroAuthenticated {

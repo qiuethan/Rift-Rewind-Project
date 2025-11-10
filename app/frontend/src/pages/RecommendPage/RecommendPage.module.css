@@ -5,6 +5,35 @@
   min-height: calc(100vh - 200px);
 }
 
+.header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.backButton {
+  background: var(--region-panel);
+  border: 2px solid var(--region-panel-border);
+  color: var(--region-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backButton:hover {
+  border-color: var(--region-primary);
+  background: var(--region-primary);
+  color: var(--region-secondary);
+  box-shadow: var(--region-shadow-secondary);
+}
+
 .loading {
   display: flex;
   flex-direction: column;

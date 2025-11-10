@@ -201,13 +201,16 @@
 
 .termsLink {
   color: var(--region-primary);
-  text-decoration: none;
+  text-decoration: underline;
   font-weight: 600;
-  border-bottom: 1px solid transparent;
-  transition: var(--transition);
+  background: none;
+  border: none; 
 }
 
 .termsLink:hover {
-  border-bottom-color: var(--region-primary);
-  text-shadow: var(--region-shadow-primary);
+  opacity: 0.8;
+}
+
+.card:hover::after {
+  opacity: 0 !important;
 }

@@ -12,11 +12,66 @@
   font-size: 0.9375rem;
 }
 
-.championsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 1rem;
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--region-primary);
+  margin: 0;
+  text-shadow: var(--region-shadow-primary);
+}
+
+.searchContainer {
+  width: 250px;
+}
+
+.searchInput {
+  width: 100%;
+}
+
+.championsScroll {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--region-primary) var(--region-panel-border);
+}
+
+.championsScroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.championsScroll::-webkit-scrollbar-track {
+  background: var(--region-panel-border);
+  border-radius: 3px;
+}
+
+.championsScroll::-webkit-scrollbar-thumb {
+  background: var(--region-primary);
+  border-radius: 3px;
+}
+
+.championsScroll::-webkit-scrollbar-thumb:hover {
+  background: var(--region-accent);
+}
+
+.noResults {
+  text-align: center;
+  padding: 2rem;
+  color: var(--region-text-secondary);
+  font-size: 0.9375rem;
+}
+
+.noResults p {
+  margin: 0;
 }
 
 .championCard {
@@ -30,6 +85,9 @@
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  min-width: 140px;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 .championCard::before {
@@ -46,7 +104,6 @@
 
 .championCard:hover {
   border-color: var(--region-primary);
-  transform: translateY(-4px);
   box-shadow: var(--region-shadow-secondary);
 }
 

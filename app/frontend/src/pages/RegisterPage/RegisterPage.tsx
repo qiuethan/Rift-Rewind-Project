@@ -96,7 +96,7 @@ export default function RegisterPage() {
               onClick={() => setShowTermsModal(true)}
             >
               Terms and Conditions
-            </button>
+            </button>.
           </div>
 
           {error && <div className={styles.error}>{error}</div>}
@@ -110,9 +110,13 @@ export default function RegisterPage() {
         <div className={styles.footer}>
           <p>
             Already have an account?{' '}
-            <Link to={ROUTES.LOGIN} className={styles.link}>
+            <button
+              type="button"
+              className={styles.termsLink}
+              onClick={() => navigate(ROUTES.LOGIN)}
+            >
               Login
-            </Link>
+            </button>
           </p>
         </div>
       </Card>

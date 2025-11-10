@@ -72,9 +72,13 @@ export default function LoginPage() {
         <div className={styles.footer}>
           <p>
             Don't have an account?{' '}
-            <Link to={ROUTES.REGISTER} className={styles.link}>
+            <button
+              type="button"
+              className={styles.link}
+              onClick={() => navigate(ROUTES.REGISTER)}
+            >
               Sign up
-            </Link>
+            </button>
           </p>
         </div>
       </Card>

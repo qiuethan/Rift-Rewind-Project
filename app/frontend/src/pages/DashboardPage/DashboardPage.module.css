@@ -44,10 +44,17 @@
   max-width: 1200px;
   margin: 0 auto 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   position: relative;
   z-index: 1;
+  gap: 1.5rem;
+}
+
+.headerTop {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .title {
@@ -71,11 +78,34 @@
   background: linear-gradient(90deg, var(--region-primary), transparent);
 }
 
+.backButton {
+  background: var(--region-panel);
+  border: 2px solid var(--region-panel-border);
+  color: var(--region-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backButton:hover {
+  border-color: var(--region-primary);
+  background: var(--region-primary);
+  color: var(--region-secondary);
+  box-shadow: var(--region-shadow-secondary);
+}
+
 .grid {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   position: relative;
   z-index: 1;
@@ -85,10 +115,6 @@
   .grid {
     grid-template-columns: 1fr;
   }
-}
-
-.topChampionsWide {
-  grid-column: span 1;
 }
 
 .recentGamesSection {

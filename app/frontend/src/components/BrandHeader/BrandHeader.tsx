@@ -15,6 +15,7 @@ export default function BrandHeader({ size = 'large' }: BrandHeaderProps) {
           className={styles.emoji}
         />
       </h1>
+      <p className={styles.subtitle}>learning league the <span className={styles.rightWord}>RIGHT</span> way</p>
     </header>
   );
 }

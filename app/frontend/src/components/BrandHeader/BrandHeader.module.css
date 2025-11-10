@@ -1,8 +1,9 @@
 .header {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-bottom: 3.5rem;
+  margin-bottom: 5rem;
   margin-top: 0;
 }
 
@@ -15,14 +16,33 @@
 }
 
 .emoji {
-  width: 3rem;
-  height: 3rem;
+  width: 5rem;
+  height: 5rem;
 }
 
-.large .title {
-  font-size: 3rem;
+/* .large .title {
+  font-size: 2.5rem;
 }
 
 .small .title {
   font-size: 2rem;
+} */
+
+.title { 
+    font-size: 4.5rem;
+}
+
+.subtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--region-text-secondary);
+  text-align: center;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.rightWord {
+  font-weight: 700;
+  color: var(--primary);
 }

@@ -135,12 +135,12 @@ export default function LandingPage() {
         <div className={styles.authenticatedContainer}>
           <div className={`${styles.centeredContent} ${styles.authenticatedContent}`}>
             <div className={styles.welcomeGroup}>
-              <BrandHeader size="small" />
+              <BrandHeader/>
               <section className={styles.heroAuthenticated}>
-                <h1 className={styles.welcomeTitle}>
+              </section>
+              <h1 className={styles.welcomeTitle}>
                   Welcome back, <span className={styles.underlinedName}>{summoner.game_name}</span>.
                 </h1>
-              </section>
             </div>
             <PrimaryCTAGroup />
           </div>
