@@ -24,10 +24,9 @@ class ChampionRepositoryImpl(ChampionRepository):
         if not ChampionRepositoryImpl._cache_loaded:
             try:
                 # Path to the CSV file (in project root output folder)
-                csv_path = Path(__file__).resolve().parents[3] / 'output' / 'final_comparisons_20251107_194606'
-                
+                pq_path = Path(__file__).resolve().parents[3] / 'data' / 'final_comparisons_20251107_194606.parquet'
                 # Load CSV with pandas
-                ChampionRepositoryImpl._ability_data_cache = pd.read_csv(csv_path)
+                ChampionRepositoryImpl._ability_data_cache = pd.read_parquet(pq_path)
                 ChampionRepositoryImpl._cache_loaded = True
                 print(f"Loaded ability similarity data: {len(ChampionRepositoryImpl._ability_data_cache)} rows")
             except Exception as e:
