@@ -238,7 +238,7 @@ export default function MatchDetailPage() {
                   ← Back
                 </button>
                 <button onClick={() => setShowInfoModal(true)} className={styles.infoButton} title="Learn about metrics">
-                  ℹ️ Metrics Info
+                  Metrics Info
                 </button>
               </div>
               <div className={styles.headerCenter}>
@@ -264,7 +264,7 @@ export default function MatchDetailPage() {
                       {hasUserData && (
                         <div className={`${styles.winnerBanner} ${userWon ? styles.victoryBanner : styles.defeatBanner}`}>
                           <span className={styles.resultText}>
-                            {userWon ? '🏆 VICTORY' : '💔 DEFEAT'}
+                            {userWon ? 'VICTORY' : 'DEFEAT'}
                           </span>
                         </div>
                       )}
@@ -872,6 +872,7 @@ export default function MatchDetailPage() {
                         <MatchAnalysisChart 
                           chartConfig={match.analysis.charts?.epsBreakdown}
                           title="Player Performance Breakdown"
+                          enableLegendClick={true}
                         />
                       </div>
 

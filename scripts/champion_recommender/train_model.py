@@ -1,14 +1,13 @@
 import os
-import torch
+import numpy as np
 import pandas as pd
-from torch_geometric.data import Data
 from collections import defaultdict, Counter
-from utils import champion_node_rep, get_champs_from_puuid, get_puuid
+from utils import champion_node_rep, get_champs_from_puuid, get_puuid, load_champion_mappings
 import json
 
 
 def cosine_sim(a, b):
-    return torch.dot(a, b) / (torch.norm(a) * torch.norm(b) + 1e-9)
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9)
 
 
 def clean_recent_champions(recent_champs, max_occurrences=5):
@@ -136,8 +135,8 @@ def load_graph_and_nodes(path="data/graph_data"):
         champ_to_id = mappings["champ_to_id"]
         id_to_champ = {int(k): v for k, v in mappings["id_to_champ"].items()}
 
-    feat_embeddings = torch.tensor(champ_node_data.drop(columns=["championName", "index"]).values, dtype=torch.float)
-    feat_embeddings = torch.nn.functional.normalize(feat_embeddings, dim=1)
+    feat_embeddings = np.array(champ_node_data.drop(columns=["championName", "index"]).values, dtype=np.float64)
+    feat_embeddings = feat_embeddings / np.linalg.norm(feat_embeddings, axis=1, keepdims=True)
 
     print(f"Loaded graph and {len(champ_node_data)} champions.")
     return graph, champ_node_data, champ_to_id, id_to_champ, feat_embeddings
@@ -179,8 +178,9 @@ if __name__=="__main__":
     #         graph[a][b] /= max_w
 
     graph, champ_node_data, champ_to_id, id_to_champ, feat_embeddings = load_graph_and_nodes()
-    puuid = get_puuid("swaner", "NA1")
-    recent_champs = get_champs_from_puuid(puuid)
+    # puuid = get_puuid("swaner", "NA1")
+    # recent_champs = get_champs_from_puuid(puuid)
+    recent_champs = ["Ahri", "Annie", "Velkoz", "Zed"]
 
     result = recommend_from_list(
         recent_champs,
@@ -194,3 +194,7 @@ if __name__=="__main__":
     )
     print("recently played: ", recent_champs)
     print("recommendations: ", result)
+
+    dd_champ_to_id, _ = load_champion_mappings()
+    result = [dd_champ_to_id[champ] for champ in result]
+    print(result)

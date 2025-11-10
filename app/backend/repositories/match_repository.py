@@ -35,16 +35,28 @@ class MatchRepository(ABC):
         pass
     
     @abstractmethod
-    async def save_match(self, match_id: str, match_data: Dict[str, Any]) -> bool:
+    async def save_match(
+        self, 
+        match_id: str, 
+        match_data: Dict[str, Any],
+        puuid: str = None,
+        timeline_data: Dict[str, Any] = None,
+        mastery_level: Optional[int] = None,
+        mastery_points: Optional[int] = None
+    ) -> bool:
         """
         Save complete match data to database
         
         Args:
-            match_id: Unique match identifier from Riot API
-            match_data: Complete match data from Riot Match API v5
+            match_id: Match ID
+            match_data: Full match data from Riot API
+            puuid: Optional PUUID of summoner to track
+            timeline_data: Optional timeline data
+            mastery_level: Optional mastery level for champion progress
+            mastery_points: Optional mastery points for champion progress
             
         Returns:
-            True if saved successfully, False otherwise
+            True if successful, False otherwise
         """
         pass
     

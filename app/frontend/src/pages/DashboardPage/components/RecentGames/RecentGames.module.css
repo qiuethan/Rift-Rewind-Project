@@ -195,6 +195,74 @@
   object-fit: cover;
 }
 
+.loadMoreContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--region-panel-border);
+}
+
+.loadMoreButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, var(--region-primary) 0%, var(--region-accent) 100%);
+  color: rgba(0, 0, 0, 0.85);
+  border: 2px solid var(--region-primary);
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    0 0 20px var(--region-primary-glow, rgba(0, 0, 0, 0.1));
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.02em;
+  position: relative;
+  overflow: hidden;
+}
+
+.loadMoreButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.loadMoreButton:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--region-accent) 0%, var(--region-primary) 100%);
+  border-color: var(--region-accent);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    0 0 30px var(--region-accent-glow, var(--region-accent));
+}
+
+.loadMoreButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 0 15px var(--region-primary-glow, rgba(0, 0, 0, 0.1));
+}
+
+.loadMoreButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
 @media (max-width: 768px) {
   .gameDetails {
     flex-direction: column;
@@ -203,5 +271,10 @@
 
   .itemsSection {
     margin-left: 0;
+  }
+  
+  .loadMoreButton {
+    width: 100%;
+    justify-content: center;
   }
 }

@@ -1,7 +1,13 @@
 """
 Champion name to ID mapping utility
 """
-from typing import Optional
+from typing import Optional, Dict, List
+import json
+import glob
+from pathlib import Path
+
+# Cache for champion data
+_CHAMPION_DATA_CACHE: Dict[str, Dict] = {}
 
 # Champion name to ID mapping (partial list - expand as needed)
 CHAMPION_NAME_TO_ID = {
@@ -257,3 +263,106 @@ def extract_champion_from_text(text: str) -> Optional[str]:
             return champion_name
     
     return None
+
+
+# Cache for ID to graph name mapping
+_ID_TO_GRAPH_NAME_CACHE: Optional[Dict[int, str]] = None
+
+
+def load_id_to_graph_name_mapping() -> Dict[int, str]:
+    """
+    Load champion ID to graph name mapping from champion_data folder
+    
+    This matches the approach used in scripts/champion_recommender/utils.py
+    Uses individual champion JSON files which contain the correct graph names.
+    
+    Returns:
+        Dict mapping champion ID (int) to graph name (str)
+        Example: {62: "MonkeyKing", 103: "Ahri", ...}
+    """
+    global _ID_TO_GRAPH_NAME_CACHE
+    
+    if _ID_TO_GRAPH_NAME_CACHE is not None:
+        return _ID_TO_GRAPH_NAME_CACHE
+    
+    try:
+        # Path to champion_data folder (individual champion JSONs)
+        champion_data_dir = Path(__file__).resolve().parents[3] / 'data' / 'champion_data'
+        
+        id_to_name = {}
+        
+        # Load each champion JSON file
+        for json_path in glob.glob(str(champion_data_dir / "*.json")):
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+                # Each file has one champion in data
+                champion_data = list(data.get('data', {}).values())[0]
+                champion_id = int(champion_data['key'])
+                graph_name = champion_data['id']  # Graph name (e.g., "MonkeyKing")
+                
+                id_to_name[champion_id] = graph_name
+        
+        _ID_TO_GRAPH_NAME_CACHE = id_to_name
+        print(f"Loaded {len(id_to_name)} champion ID mappings from champion_data folder")
+        return id_to_name
+        
+    except Exception as e:
+        print(f"Error loading champion ID to name mapping: {e}")
+        return {}
+
+
+def get_champion_tags(champion_name: str) -> List[str]:
+    """
+    Get champion tags (roles) from champion data JSON files
+    
+    Args:
+        champion_name: Champion name (e.g., "Kayn", "Jinx")
+        
+    Returns:
+        List of tags (e.g., ["Fighter", "Assassin"]) or empty list if not found
+    """
+    try:
+        # Normalize champion name
+        normalized_name = champion_name.replace("'", "").replace(" ", "").lower()
+        
+        # Check cache first
+        if normalized_name in _CHAMPION_DATA_CACHE:
+            return _CHAMPION_DATA_CACHE[normalized_name].get('tags', [])
+        
+        # Find champion data file
+        champion_data_dir = Path(__file__).resolve().parents[1] / 'constants' / 'data' / 'champion_data'
+        
+        # Try to find the JSON file (case-insensitive)
+        for json_file in champion_data_dir.glob('*.json'):
+            file_name = json_file.stem.lower()
+            if file_name == normalized_name or file_name == champion_name.lower():
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    # Get the first (and only) champion data
+                    champion_data = list(data.get('data', {}).values())[0]
+                    tags = champion_data.get('tags', [])
+                    
+                    # Cache it
+                    _CHAMPION_DATA_CACHE[normalized_name] = {'tags': tags}
+                    return tags
+        
+        return []
+        
+    except Exception as e:
+        print(f"Error loading champion tags for {champion_name}: {e}")
+        return []
+
+
+def get_graph_name_from_id(champion_id: int) -> Optional[str]:
+    """
+    Get graph champion name from champion ID
+    
+    Args:
+        champion_id: Riot API champion ID (e.g., 62 for Wukong)
+        
+    Returns:
+        Graph champion name (e.g., "MonkeyKing") or None if not found
+    """
+    mapping = load_id_to_graph_name_mapping()
+    return mapping.get(champion_id)

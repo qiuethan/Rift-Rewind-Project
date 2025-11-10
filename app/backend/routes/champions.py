@@ -7,7 +7,8 @@ from models.champions import (
     ChampionRecommendationRequest,
     ChampionRecommendationResponse,
     ChampionSimilarityRequest,
-    ChampionSimilarityResponse
+    ChampionSimilarityResponse,
+    AbilitySimilarityResponse
 )
 from services.champion_service import ChampionService
 from dependency.dependencies import get_champion_service
@@ -42,13 +43,15 @@ async def get_champion_recommendations(
     champion_service: ChampionService = Depends(get_champion_service)
 ):
     """Get champion recommendations for player (protected)"""
-    return await champion_service.get_champion_recommendations(recommendation_request)
+    return await champion_service.get_champion_recommendations(current_user, recommendation_request)
 
 
-@router.post("/similarity", response_model=ChampionSimilarityResponse)
-async def calculate_champion_similarity(
-    similarity_request: ChampionSimilarityRequest,
+@router.get("/{champion_id}/ability-similarities", response_model=AbilitySimilarityResponse)
+async def get_ability_similarities(
+    champion_id: str,
+    limit_per_ability: int = 3,
+    current_user: str = Depends(get_current_user),
     champion_service: ChampionService = Depends(get_champion_service)
 ):
-    """Calculate similarity between two champions (public endpoint)"""
-    return await champion_service.calculate_similarity(similarity_request)
+    """Get ability similarities for a champion's Q, W, E, R abilities filtered by user's champion pool (protected)"""
+    return await champion_service.get_ability_similarities(current_user, champion_id, limit_per_ability)

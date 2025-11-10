@@ -153,12 +153,31 @@ class ChampionProgressService:
             )
         
         puuid = user_summoner.get('puuid')
+        region = user_summoner.get('region', 'americas')
         
-        # Update progress
+        # Fetch current mastery data for this champion
+        mastery_level = None
+        mastery_points = None
+        try:
+            mastery_data = await self.player_repository.get_champion_mastery_by_champion(
+                puuid,
+                update_request.champion_id,
+                region
+            )
+            if mastery_data:
+                mastery_level = mastery_data.champion_level
+                mastery_points = mastery_data.champion_points
+                logger.info(f"Fetched mastery for champion {update_request.champion_id}: Level {mastery_level}, {mastery_points} points")
+        except Exception as e:
+            logger.warning(f"Could not fetch mastery data for champion {update_request.champion_id}: {e}")
+        
+        # Update progress with mastery data
         result = await self.champion_progress_repository.update_champion_progress(
             user_id,
             puuid,
-            update_request
+            update_request,
+            mastery_level,
+            mastery_points
         )
         
         if not result:

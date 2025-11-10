@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import styles from './ChampionDetailPage.module.css';
 import { Navbar, Button, Card, Spinner } from '@/components';
 import { authActions } from '@/actions/auth';
@@ -35,6 +35,7 @@ ChartJS.register(
 
 export default function ChampionDetailPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { championName } = useParams<{ championName: string }>();
   const { summoner } = useSummoner();
   const { setTheme } = useTheme();
@@ -117,23 +118,25 @@ export default function ChampionDetailPage() {
     setUser(userData);
   }, [navigate]);
 
-  // Fetch champion progress
+  // Fetch champion progress data
   useEffect(() => {
     const fetchChampionProgress = async () => {
-      if (!championId) {
+      if (!championId || championId === 0) {
         setLoadingProgress(false);
+        setProgressError('Invalid champion ID');
         return;
       }
 
       setLoadingProgress(true);
       setProgressError(null);
 
-      const result = await championProgressActions.getChampionProgress(championId, 10);
+      const result = await championProgressActions.getChampionProgress(championId, 20);
       
       if (result.success && result.data) {
         setChampionProgress(result.data);
+        setProgressError(null);
       } else {
-        setProgressError(result.error || null);
+        setProgressError(result.error || 'Failed to load champion progress data');
       }
       
       setLoadingProgress(false);
@@ -142,13 +145,42 @@ export default function ChampionDetailPage() {
     fetchChampionProgress();
   }, [championId]);
 
+  // Handle browser back button when coming from dashboard
+  useEffect(() => {
+    const handlePopState = () => {
+      if (location.state?.from === 'dashboard') {
+        navigate(ROUTES.DASHBOARD, { replace: true });
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [location.state, navigate]);
+
   return (
     <>
       <Navbar user={user} summoner={summoner} />
       <div className={styles.container}>
         {/* Back Button */}
-        <Button variant="secondary" onClick={() => navigate(ROUTES.CHAMPIONS)} className={styles.backButton}>
-          ← Back to Champions
+        <Button 
+          variant="secondary" 
+          onClick={() => {
+            const from = location.state?.from;
+            if (from === 'dashboard') {
+              navigate(ROUTES.DASHBOARD);
+            } else if (from === 'recommend') {
+              navigate(ROUTES.RECOMMEND);
+            } else {
+              navigate(ROUTES.CHAMPIONS);
+            }
+          }} 
+          className={styles.backButton}
+        >
+          ← Back to {
+            location.state?.from === 'dashboard' ? 'Dashboard' : 
+            location.state?.from === 'recommend' ? 'Learn Champions' : 
+            'Champions'
+          }
         </Button>
 
         {/* Champion Title Card */}

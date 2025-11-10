@@ -10,10 +10,12 @@ from models.champions import (
     ChampionRecommendationResponse,
     ChampionSimilarityRequest,
     ChampionSimilarityResponse,
-    ChampionData
+    ChampionData,
+    AbilitySimilarityResponse
 )
 from fastapi import HTTPException, status
 from typing import List
+from utils.logger import logger
 
 
 class ChampionService:
@@ -50,6 +52,7 @@ class ChampionService:
     
     async def get_champion_recommendations(
         self,
+        user_id: str,
         request: ChampionRecommendationRequest
     ) -> ChampionRecommendationResponse:
         """Get champion recommendations for player"""
@@ -58,20 +61,31 @@ class ChampionService:
         except DomainException as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
-        # Get player's champion pool
-        champion_pool = await self.champion_repository.get_player_champion_pool(
-            request.summoner_id
-        )
+        # Get player's puuid from user_id
+        user_summoner = await self.player_repository.get_user_summoner_basic(user_id)
+        if not user_summoner:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No summoner linked to this account"
+            )
         
+        puuid = user_summoner.get('puuid')
+        
+        # Get player's champion pool from recent games (last 30 games with EPS/CPS scores)
+        champion_pool = await self.champion_repository.get_champion_pool_from_recent_games(puuid, game_limit=30)
+        
+        logger.info(f"Champion pool from recent games for user {user_id} (puuid: {puuid}): {champion_pool}")
+
         if not champion_pool:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No champion data found for this player"
+                detail="No champion data found. Please play some games first and sync your match history to get champion recommendations."
             )
         
-        main_champion = champion_pool[0]
+        # Get recommendations based on player's recent games champion pool (using puuid)
+        # Note: get_similar_champions internally calls get_champion_pool_from_recent_games
         recommendations = await self.champion_repository.get_similar_champions(
-            main_champion.lower(),
+            puuid,  # Pass puuid, not champion name
             request.limit
         )
         
@@ -81,7 +95,7 @@ class ChampionService:
         )
         
         return ChampionRecommendationResponse(
-            summoner_id=request.summoner_id,
+            summoner_id=user_id,
             recommendations=[rec for rec in recommendations],
             based_on_champions=champion_pool
         )
@@ -120,3 +134,63 @@ class ChampionService:
             response.playstyle_similarity = 0.75
         
         return response
+    
+    async def get_ability_similarities(
+        self,
+        user_id: str,
+        champion_id: str,
+        limit_per_ability: int = 3
+    ) -> AbilitySimilarityResponse:
+        """Get ability similarities for a champion filtered by user's champion pool"""
+        try:
+            self.champion_domain.validate_champion_id(champion_id)
+        except DomainException as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
+        
+        # Get champion data to verify it exists
+        champion = await self.champion_repository.get_champion_by_id(champion_id)
+        if not champion:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Champion '{champion_id}' not found"
+            )
+        
+        # Get player's puuid from user_id
+        user_summoner = await self.player_repository.get_user_summoner_basic(user_id)
+        if not user_summoner:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No summoner linked to this account"
+            )
+        
+        puuid = user_summoner.get('puuid')
+        
+        # Get player's champion pool
+        champion_pool = await self.champion_repository.get_player_champion_pool(puuid)
+        
+        logger.info(f"Fetching ability similarities for {champion_id} filtered by champion pool: {champion_pool}")
+        
+        if not champion_pool:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No champion data found. Please play some games first and sync your match history."
+            )
+        
+        # Get ability similarities filtered by champion pool
+        abilities = await self.champion_repository.get_ability_similarities(
+            champion_id,
+            limit_per_ability,
+            champion_pool
+        )
+        
+        if not abilities:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No ability similarity data found for champion '{champion_id}' within your champion pool"
+            )
+        
+        return AbilitySimilarityResponse(
+            champion_id=champion_id,
+            champion_name=champion.name,
+            abilities=abilities
+        )

@@ -84,8 +84,79 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   position: relative;
   z-index: 1;
+  padding: 2rem 0;
+}
+
+.centeredContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  padding-top: 0;
+}
+
+.authenticatedContainer {
+  height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.welcomeGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.unauthenticatedGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.heroAuthenticated {
+  position: relative;
+  text-align: center;
+}
+
+.heroAuthenticated::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, var(--region-primary) 0%, transparent 70%);
+  opacity: 0.08;
+  pointer-events: none;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.heroAuthenticated::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, var(--region-accent) 0%, transparent 3%),
+    radial-gradient(circle at 80% 70%, var(--region-primary) 0%, transparent 2%),
+    radial-gradient(circle at 40% 80%, var(--region-accent) 0%, transparent 2.5%),
+    radial-gradient(circle at 90% 20%, var(--region-primary) 0%, transparent 2%),
+    radial-gradient(circle at 10% 90%, var(--region-accent) 0%, transparent 3%);
+  opacity: 0.4;
+  pointer-events: none;
+  animation: particleFloat 20s ease-in-out infinite;
 }
 
 .regionBannerWrapper {
@@ -97,9 +168,10 @@
 .hero {
   max-width: 800px;
   margin: 0 auto;
-  padding: 4rem 2rem 4rem;
+  padding: 0;
   text-align: center;
   position: relative;
+  width: 100%;
 }
 
 .hero::before {
@@ -146,7 +218,7 @@
 
 .title {
   margin: 0 0 1.5rem 0;
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 4vw + 1rem, 3.5rem);
   font-weight: 700;
   color: var(--region-text);
   letter-spacing: 0.02em;
@@ -169,7 +241,7 @@
 
 .subtitle {
   margin: 0 0 2.5rem 0;
-  font-size: 1.125rem;
+  font-size: clamp(1rem, 1.2vw + 0.5rem, 1.25rem);
   color: var(--region-text-secondary);
   line-height: 1.6;
   letter-spacing: 0.01em;
@@ -177,11 +249,32 @@
   z-index: 1;
 }
 
+.welcomeTitle {
+  margin: 0 0 2rem 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--region-text);
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  text-shadow: var(--region-shadow-primary);
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.underlinedName {
+  text-decoration: underline;
+  text-decoration-color: var(--primary);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+
 .cta {
   display: flex;
   gap: 1rem;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .features {
@@ -189,8 +282,8 @@
   margin: 4rem auto;
   padding: 0 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(1rem, 2.5vw, 2rem);
 }
 
 .feature {
@@ -204,7 +297,7 @@
   display: flex;
   flex-direction: column;
   text-align: center;
-  min-height: 300px; /* NEW: Makes all cards taller */
+  min-height: clamp(220px, 28vw, 320px);
 }
 
 .feature::before {
@@ -237,8 +330,8 @@
 }
 
 .emote {
-  width: 64px;
-  height: 64px;
+  width: clamp(48px, 6vw, 72px);
+  height: clamp(48px, 6vw, 72px);
   object-fit: contain;
   flex-shrink: 0;
   display: block;
@@ -311,11 +404,11 @@
 
 @media (max-width: 768px) {
   .title {
-    font-size: 2.5rem;
+    font-size: clamp(1.75rem, 6vw, 2.5rem);
   }
 
   .hero {
-    padding: 4rem 2rem 3rem;
+    padding: 3rem 1.25rem 2.5rem;
   }
 
   .cta {
@@ -324,5 +417,45 @@
 
   .features {
     grid-template-columns: 1fr;
+  }
+
+  .navContent {
+    padding: 0 1rem;
+  }
+
+  .navButtons {
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 2.5rem 1rem 2rem;
+  }
+
+  .subtitle {
+    margin-bottom: 2rem;
+  }
+
+  /* Make CTA buttons full-width on very small screens */
+  .cta button {
+    width: 100%;
+  }
+
+  .navContent {
+    gap: 0.5rem;
+  }
+
+  .logo {
+    font-size: 1.125rem;
+  }
+}
+
+/* Ensure four cards stay on one row on wider screens */
+@media (min-width: 1100px) {
+  .features {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

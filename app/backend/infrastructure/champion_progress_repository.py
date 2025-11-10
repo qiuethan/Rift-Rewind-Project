@@ -160,7 +160,9 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
         self,
         user_id: str,
         puuid: str,
-        update_request: UpdateChampionProgressRequest
+        update_request: UpdateChampionProgressRequest,
+        mastery_level: Optional[int] = None,
+        mastery_points: Optional[int] = None
     ) -> Optional[ChampionProgressRecord]:
         """Update champion progress after a match"""
         try:
