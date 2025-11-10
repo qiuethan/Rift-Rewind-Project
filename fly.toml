@@ -20,11 +20,16 @@ primary_region = "iad"
   processes = ["app"]
 
 [[http_service.checks]]
-  grace_period = "10s"
+  grace_period = "60s"
   interval = "30s"
   method = "GET"
-  timeout = "5s"
-  path = "/api/health/"
+  timeout = "10s"
+  path = "/api/health/ping"
+  
+[http_service.concurrency]
+  type = "requests"
+  soft_limit = 200
+  hard_limit = 250
 
 [[vm]]
   cpu_kind = "shared"
