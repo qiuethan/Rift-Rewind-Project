@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Spinner } from '@/components';
 import { getChampionKey, getChampionIconUrl } from '@/constants';
 import styles from './RecentGames.module.css';
-import championData from '@/data/champion.json';
 
 interface RecentGame {
   match_id: string;
@@ -26,9 +25,11 @@ interface RecentGamesProps {
   recentGames?: RecentGame[];
   loading?: boolean;
   showCard?: boolean; // Whether to wrap in Card component
+  onLoadMore?: () => void;
+  loadingMore?: boolean;
 }
 
-export default function RecentGames({ recentGames, loading, showCard = true }: RecentGamesProps) {
+export default function RecentGames({ recentGames, loading, showCard = true, onLoadMore, loadingMore }: RecentGamesProps) {
   const navigate = useNavigate();
 
   if (loading) {
@@ -115,63 +116,83 @@ export default function RecentGames({ recentGames, loading, showCard = true }: R
   };
 
   const gamesContent = (
-    <div className={styles.gamesContainer}>
-      {recentGames.map((game) => {
-        const championKey = getChampionKey(game.champion_id);
-        const kdaColor = getKDAColor(game.kills, game.deaths, game.assists);
+    <>
+      <div className={styles.gamesContainer}>
+        {recentGames.map((game) => {
+          const championKey = getChampionKey(game.champion_id);
+          const kdaColor = getKDAColor(game.kills, game.deaths, game.assists);
 
-        return (
-          <div
-            key={game.match_id}
-            className={`${styles.gameCard} ${game.win ? styles.win : styles.loss}`}
-            onClick={() => handleGameClick(game.match_id)}
-            style={{ cursor: 'pointer' }}
-          >
-            <div className={styles.gameResult}>
-              <span className={styles.resultText}>{game.win ? 'Victory' : 'Defeat'}</span>
-              <span className={styles.gameMode}>{formatGameMode(game.game_mode)}</span>
-              <span className={styles.duration}>{formatDuration(game.game_duration)}</span>
-              <span className={styles.gameTime}>{formatGameTime(game.game_creation)}</span>
-            </div>
-
-            <div className={styles.gameDetails}>
-              <div className={styles.championSection}>
-                <img
-                  src={getChampionIconUrl(championKey)}
-                  alt={game.champion_name}
-                  className={styles.championIcon}
-                />
-                <span className={styles.championName}>{game.champion_name}</span>
+          return (
+            <div
+              key={game.match_id}
+              className={`${styles.gameCard} ${game.win ? styles.win : styles.loss}`}
+              onClick={() => handleGameClick(game.match_id)}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className={styles.gameResult}>
+                <span className={styles.resultText}>{game.win ? 'Victory' : 'Defeat'}</span>
+                <span className={styles.gameMode}>{formatGameMode(game.game_mode)}</span>
+                <span className={styles.duration}>{formatDuration(game.game_duration)}</span>
+                <span className={styles.gameTime}>{formatGameTime(game.game_creation)}</span>
               </div>
 
-              <div className={styles.statsSection}>
-                <div className={styles.kda}>
-                  <span className={kdaColor}>{formatKDA(game.kills, game.deaths, game.assists)}</span>
+              <div className={styles.gameDetails}>
+                <div className={styles.championSection}>
+                  <img
+                    src={getChampionIconUrl(championKey)}
+                    alt={game.champion_name}
+                    className={styles.championIcon}
+                  />
+                  <span className={styles.championName}>{game.champion_name}</span>
                 </div>
-                <div className={styles.stats}>
-                  <span>{game.cs} CS</span>
-                  <span>{(game.gold / 1000).toFixed(1)}k Gold</span>
-                </div>
-              </div>
 
-              <div className={styles.itemsSection}>
-                {game.items.slice(0, 6).map((itemId, index) => (
-                  <div key={index} className={styles.itemSlot}>
-                    {itemId !== 0 && (
-                      <img
-                        src={getItemIconUrl(itemId)!}
-                        alt={`Item ${itemId}`}
-                        className={styles.itemIcon}
-                      />
-                    )}
+                <div className={styles.statsSection}>
+                  <div className={styles.kda}>
+                    <span className={kdaColor}>{formatKDA(game.kills, game.deaths, game.assists)}</span>
                   </div>
-                ))}
+                  <div className={styles.stats}>
+                    <span>{game.cs} CS</span>
+                    <span>{(game.gold / 1000).toFixed(1)}k Gold</span>
+                  </div>
+                </div>
+
+                <div className={styles.itemsSection}>
+                  {game.items.slice(0, 6).map((itemId, index) => (
+                    <div key={index} className={styles.itemSlot}>
+                      {itemId !== 0 && (
+                        <img
+                          src={getItemIconUrl(itemId)!}
+                          alt={`Item ${itemId}`}
+                          className={styles.itemIcon}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+      {onLoadMore && (
+        <div className={styles.loadMoreContainer}>
+          <button 
+            className={styles.loadMoreButton}
+            onClick={onLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? (
+              <>
+                <Spinner size="small" />
+                <span>Loading more games...</span>
+              </>
+            ) : (
+              'Load More Games'
+            )}
+          </button>
+        </div>
+      )}
+    </>
   );
 
   return showCard ? (

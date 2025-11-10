@@ -8,7 +8,7 @@ from constants.database import DatabaseTable
 from typing import Optional, List, Dict, Any
 from utils.logger import logger
 from utils.champion_recommender import get_recommender
-from utils.champion_mapping import get_graph_name_from_id
+from utils.champion_mapping import get_graph_name_from_id, get_champion_tags
 import pandas as pd
 from pathlib import Path
 
@@ -215,13 +215,17 @@ class ChampionRepositoryImpl(ChampionRepository):
                     performance_data
                 )
                 
+                # Get champion tags
+                champion_tags = get_champion_tags(champ_name)
+                
                 result.append(ChampionRecommendation(
                     champion_id=champ_name,
                     champion_name=champ_name,
                     similarity_score=normalized_score,
                     reasoning=reasoning,
-                    similar_abilities=None,  # Could be enhanced with ability similarity
-                    playstyle_match=self._get_playstyle_match(champ_name, recommender)
+                    similar_abilities=None,
+                    playstyle_match=self._get_playstyle_match(champ_name, recommender),
+                    champion_tags=champion_tags if champion_tags else None
                 ))
             
             return result

@@ -28,6 +28,8 @@ export default function DashboardPage() {
   const [recentGames, setRecentGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [gamesLoading, setGamesLoading] = useState(false);
+  const [gamesCount, setGamesCount] = useState(10);
+  const [loadingMoreGames, setLoadingMoreGames] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -128,7 +130,7 @@ export default function DashboardPage() {
     }
 
     try {
-      const gamesResult = await playersActions.getRecentGames(10);
+      const gamesResult = await playersActions.getRecentGames(gamesCount);
       if (gamesResult.success && gamesResult.data) {
         setRecentGames(gamesResult.data);
         // Save to cache
@@ -140,6 +142,27 @@ export default function DashboardPage() {
       if (!backgroundUpdate) {
         setGamesLoading(false);
       }
+    }
+  };
+
+  const handleLoadMoreGames = async () => {
+    const newCount = gamesCount + 10;
+    setGamesCount(newCount);
+    setLoadingMoreGames(true);
+    
+    try {
+      const gamesResult = await playersActions.getRecentGames(newCount);
+      if (gamesResult.success && gamesResult.data) {
+        setRecentGames(gamesResult.data);
+        // Update cache
+        if (summoner?.puuid) {
+          saveRecentGamesToCache(gamesResult.data, summoner.puuid);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading more games:', error);
+    } finally {
+      setLoadingMoreGames(false);
     }
   };
 
@@ -234,7 +257,12 @@ export default function DashboardPage() {
 
       {summoner && (
         <div className={styles.recentGamesSection}>
-          <RecentGames recentGames={recentGames} loading={gamesLoading} />
+          <RecentGames 
+            recentGames={recentGames} 
+            loading={gamesLoading}
+            onLoadMore={handleLoadMoreGames}
+            loadingMore={loadingMoreGames}
+          />
         </div>
       )}
 

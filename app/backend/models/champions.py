@@ -42,6 +42,7 @@ class ChampionRecommendation(BaseModel):
     reasoning: Optional[str] = None
     similar_abilities: Optional[List[str]] = None
     playstyle_match: Optional[str] = None
+    champion_tags: Optional[List[str]] = None
 
 
 class ChampionRecommendationResponse(BaseModel):

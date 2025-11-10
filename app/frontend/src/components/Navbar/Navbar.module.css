@@ -131,6 +131,18 @@
   width: 80%;
 }
 
+.navLink.active {
+  background: var(--region-panel);
+  color: var(--region-primary);
+  border-color: var(--region-primary);
+  box-shadow: var(--region-shadow-primary);
+}
+
+.navLink.active::before {
+  width: 100%;
+  background: var(--region-accent);
+}
+
 .rightSection {
   flex: 1;
   display: flex;

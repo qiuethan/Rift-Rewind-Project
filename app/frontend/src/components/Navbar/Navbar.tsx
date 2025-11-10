@@ -58,30 +58,18 @@ export default function Navbar({ user, summoner, showAuthButtons = false, onChan
 
         {!showAuthButtons && (
           <div className={styles.nav}>
-            {/* <button 
-              className={styles.navLink} 
+            <button 
+              className={`${styles.navLink} ${location.pathname === ROUTES.DASHBOARD ? styles.active : ''}`}
               onClick={() => navigate(ROUTES.DASHBOARD)}
             >
-              Dashboard
+              Monitor Progress
             </button>
             <button 
-              className={styles.navLink} 
-              onClick={() => navigate(ROUTES.GAMES)}
-            >
-              Games
-            </button>
-            <button 
-              className={styles.navLink} 
-              onClick={() => navigate(ROUTES.CHAMPIONS)}
-            >
-              Champions
-            </button>
-            <button 
-              className={styles.navLink} 
+              className={`${styles.navLink} ${location.pathname === ROUTES.RECOMMEND ? styles.active : ''}`}
               onClick={() => navigate(ROUTES.RECOMMEND)}
             >
-              Recommend
-            </button> */}
+              Learn Champions
+            </button>
           </div>
         )}
 

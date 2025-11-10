@@ -9,13 +9,13 @@ export default function PrimaryCTAGroup() {
   return (
     <div className={styles.container}>
       <Button
+        variant="secondary"
         onClick={() => navigate(ROUTES.DASHBOARD)}
         className={styles.ctaButton}
       >
         Monitor Your Progress
       </Button>
       <Button
-        variant="secondary"
         onClick={() => navigate(ROUTES.RECOMMEND)}
         className={styles.ctaButton}
       >

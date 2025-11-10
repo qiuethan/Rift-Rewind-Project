@@ -97,10 +97,18 @@
   text-decoration: none;
   font-weight: 600;
   transition: var(--transition);
-  border-bottom: 2px solid transparent;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  font-size: inherit;
+  border-bottom: 2px solid var(--region-primary);
+  text-shadow: var(--region-shadow-primary);
 }
 
 .link:hover {
-  border-bottom-color: var(--region-primary);
-  text-shadow: var(--region-shadow-primary);
+  color: var(--region-accent);
+  border-bottom-color: var(--region-accent);
+  text-shadow: var(--region-shadow-secondary);
 }

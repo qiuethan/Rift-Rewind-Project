@@ -118,6 +118,33 @@ export default function ChampionDetailPage() {
     setUser(userData);
   }, [navigate]);
 
+  // Fetch champion progress data
+  useEffect(() => {
+    const fetchChampionProgress = async () => {
+      if (!championId || championId === 0) {
+        setLoadingProgress(false);
+        setProgressError('Invalid champion ID');
+        return;
+      }
+
+      setLoadingProgress(true);
+      setProgressError(null);
+
+      const result = await championProgressActions.getChampionProgress(championId, 20);
+      
+      if (result.success && result.data) {
+        setChampionProgress(result.data);
+        setProgressError(null);
+      } else {
+        setProgressError(result.error || 'Failed to load champion progress data');
+      }
+      
+      setLoadingProgress(false);
+    };
+
+    fetchChampionProgress();
+  }, [championId]);
+
   // Handle browser back button when coming from dashboard
   useEffect(() => {
     const handlePopState = () => {
@@ -138,12 +165,22 @@ export default function ChampionDetailPage() {
         <Button 
           variant="secondary" 
           onClick={() => {
-            const cameFromDashboard = location.state?.from === 'dashboard';
-            navigate(cameFromDashboard ? ROUTES.DASHBOARD : ROUTES.CHAMPIONS);
+            const from = location.state?.from;
+            if (from === 'dashboard') {
+              navigate(ROUTES.DASHBOARD);
+            } else if (from === 'recommend') {
+              navigate(ROUTES.RECOMMEND);
+            } else {
+              navigate(ROUTES.CHAMPIONS);
+            }
           }} 
           className={styles.backButton}
         >
-          ← Back to {location.state?.from === 'dashboard' ? 'Dashboard' : 'Champions'}
+          ← Back to {
+            location.state?.from === 'dashboard' ? 'Dashboard' : 
+            location.state?.from === 'recommend' ? 'Learn Champions' : 
+            'Champions'
+          }
         </Button>
 
         {/* Champion Title Card */}

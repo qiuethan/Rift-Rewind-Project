@@ -1,10 +1,13 @@
 """
 Champion name to ID mapping utility
 """
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 import json
 import glob
 from pathlib import Path
+
+# Cache for champion data
+_CHAMPION_DATA_CACHE: Dict[str, Dict] = {}
 
 # Champion name to ID mapping (partial list - expand as needed)
 CHAMPION_NAME_TO_ID = {
@@ -307,6 +310,48 @@ def load_id_to_graph_name_mapping() -> Dict[int, str]:
     except Exception as e:
         print(f"Error loading champion ID to name mapping: {e}")
         return {}
+
+
+def get_champion_tags(champion_name: str) -> List[str]:
+    """
+    Get champion tags (roles) from champion data JSON files
+    
+    Args:
+        champion_name: Champion name (e.g., "Kayn", "Jinx")
+        
+    Returns:
+        List of tags (e.g., ["Fighter", "Assassin"]) or empty list if not found
+    """
+    try:
+        # Normalize champion name
+        normalized_name = champion_name.replace("'", "").replace(" ", "").lower()
+        
+        # Check cache first
+        if normalized_name in _CHAMPION_DATA_CACHE:
+            return _CHAMPION_DATA_CACHE[normalized_name].get('tags', [])
+        
+        # Find champion data file
+        champion_data_dir = Path(__file__).resolve().parents[1] / 'constants' / 'data' / 'champion_data'
+        
+        # Try to find the JSON file (case-insensitive)
+        for json_file in champion_data_dir.glob('*.json'):
+            file_name = json_file.stem.lower()
+            if file_name == normalized_name or file_name == champion_name.lower():
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    # Get the first (and only) champion data
+                    champion_data = list(data.get('data', {}).values())[0]
+                    tags = champion_data.get('tags', [])
+                    
+                    # Cache it
+                    _CHAMPION_DATA_CACHE[normalized_name] = {'tags': tags}
+                    return tags
+        
+        return []
+        
+    except Exception as e:
+        print(f"Error loading champion tags for {champion_name}: {e}")
+        return []
 
 
 def get_graph_name_from_id(champion_id: int) -> Optional[str]:
