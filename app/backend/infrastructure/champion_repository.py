@@ -233,9 +233,10 @@ class ChampionRepositoryImpl(ChampionRepository):
                 
                 if similarity > 0.05:  # Only consider significant similarities
                     perf = performance_data[pool_champ]
-                    # Normalize EPS/CPS to 0-1 range (assuming max ~100)
+                    # Normalize to 0-1 range
+                    # EPS: max ~100, CPS: max 1.0 (already normalized)
                     eps_norm = min(perf['avg_eps'] / 100.0, 1.0)
-                    cps_norm = min(perf['avg_cps'] / 100.0, 1.0)
+                    cps_norm = min(perf['avg_cps'], 1.0)  # CPS is already 0-1
                     
                     # Combined performance score (50% EPS, 50% CPS)
                     perf_score = (eps_norm + cps_norm) / 2.0
@@ -247,9 +248,10 @@ class ChampionRepositoryImpl(ChampionRepository):
             # Calculate performance multiplier
             if total_similarity > 0:
                 avg_performance = weighted_performance / total_similarity
-                # Multiplier ranges from 0.85 (poor performance) to 1.15 (great performance)
-                # This gives a ±15% adjustment based on performance
-                performance_multiplier = 0.85 + (0.30 * avg_performance)
+                # Multiplier ranges from 0.70 (poor performance) to 1.30 (great performance)
+                # This gives a ±30% adjustment based on performance
+                # Balance: 70% frequency/similarity, 30% performance (EPS/CPS)
+                performance_multiplier = 0.70 + (0.60 * avg_performance)
             
             # Apply multiplier to base score
             final_score = base_score * performance_multiplier
