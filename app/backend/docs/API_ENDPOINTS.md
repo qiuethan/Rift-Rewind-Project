@@ -326,6 +326,75 @@ Response: 200 OK
 }
 ```
 
+### Get Ability Similarities
+```http
+GET /api/champions/{champion_id}/ability-similarities?limit_per_ability=3
+
+Response: 200 OK
+{
+  "champion_id": "heimerdinger",
+  "champion_name": "Heimerdinger",
+  "abilities": [
+    {
+      "ability_type": "Q",
+      "ability_name": "H-28G Evolution Turret",
+      "similar_champion": "Zyra",
+      "similar_ability_type": "W",
+      "similar_ability_name": "Rampant Growth",
+      "similarity_score": 0.82,
+      "explanation": "Both abilities place deployable units that zone enemies and provide area control"
+    },
+    {
+      "ability_type": "Q",
+      "ability_name": "H-28G Evolution Turret",
+      "similar_champion": "Shaco",
+      "similar_ability_type": "W",
+      "similar_ability_name": "Jack In The Box",
+      "similarity_score": 0.78,
+      "explanation": "Both place stationary objects that attack enemies in their area"
+    },
+    {
+      "ability_type": "W",
+      "ability_name": "Hextech Micro-Rockets",
+      "similar_champion": "Corki",
+      "similar_ability_type": "R",
+      "similar_ability_name": "Missile Barrage",
+      "similarity_score": 0.85,
+      "explanation": "Both are multi-projectile skill shots that spread out for area damage"
+    },
+    {
+      "ability_type": "E",
+      "ability_name": "CH-2 Electron Storm Grenade",
+      "similar_champion": "Ziggs",
+      "similar_ability_type": "W",
+      "similar_ability_name": "Satchel Charge",
+      "similarity_score": 0.76,
+      "explanation": "Both are skill-shot grenades with crowd control effects"
+    },
+    {
+      "ability_type": "R",
+      "ability_name": "UPGRADE!!!",
+      "similar_champion": "Illaoi",
+      "similar_ability_type": "R",
+      "similar_ability_name": "Leap of Faith",
+      "similarity_score": 0.71,
+      "explanation": "Both ultimates empower existing deployed units/tentacles to deal more damage"
+    }
+  ]
+}
+
+Error Responses:
+404 Not Found - Champion not found or no similarity data available
+{
+  "detail": "No ability similarity data found for champion 'champname'"
+}
+```
+
+**Query Parameters:**
+- `limit_per_ability` (optional, default: 3): Number of similar abilities to return for each ability slot (Q, W, E, R)
+
+**Note:** This endpoint returns the top similar abilities for each of the champion's Q, W, E, and R abilities based on pre-computed similarity analysis. The similarities help new players understand how a champion's abilities compare to champions they've already played.
+
 ---
 
 ## 📊 Analytics Endpoints

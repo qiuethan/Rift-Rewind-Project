@@ -2,17 +2,82 @@
 Champion repository implementation
 """
 from repositories.champion_repository import ChampionRepository
-from models.champions import ChampionData, ChampionRecommendation
+from models.champions import ChampionData, ChampionRecommendation, AbilitySimilarity
 from infrastructure.database.database_client import DatabaseClient
 from typing import Optional, List, Dict, Any
+import pandas as pd
+from pathlib import Path
 
 
-class ChampionRepositorySupabase(ChampionRepository):
-    """Supabase + LLM implementation of champion repository"""
+class ChampionRepositoryImpl(ChampionRepository):
+    """Implementation of champion repository"""
     
-    def __init__(self, client: DatabaseClient, openrouter_api_key: Optional[str] = None):
-        self.client = client
-        self.openrouter_api_key = openrouter_api_key
+    # Class-level cache for ability similarity data
+    _ability_data_cache: Optional[pd.DataFrame] = None
+    _cache_loaded: bool = False
+    
+    def __init__(self):
+        self._load_ability_data()
+    
+    def _load_ability_data(self):
+        """Load ability similarity data from CSV file into cache"""
+        if not ChampionRepositoryImpl._cache_loaded:
+            try:
+                # Path to the CSV file (in project root output folder)
+                csv_path = Path(__file__).resolve().parents[3] / 'output' / 'final_comparisons_20251107_194606'
+                
+                # Load CSV with pandas
+                ChampionRepositoryImpl._ability_data_cache = pd.read_csv(csv_path)
+                ChampionRepositoryImpl._cache_loaded = True
+                print(f"Loaded ability similarity data: {len(ChampionRepositoryImpl._ability_data_cache)} rows")
+            except Exception as e:
+                print(f"Error loading ability similarity data: {e}")
+                ChampionRepositoryImpl._ability_data_cache = pd.DataFrame()
+                ChampionRepositoryImpl._cache_loaded = True
+    
+    def _normalize_champion_name(self, name: str) -> str:
+        """Normalize champion name for comparison (handle special characters, case)"""
+        # Remove special characters and spaces, lowercase
+        normalized = name.lower().replace("'", "").replace(" ", "").replace(".", "")
+        return normalized
+    
+    async def get_ability_similarities(self, champion_id: str, limit_per_ability: int = 3) -> List[AbilitySimilarity]:
+        """Get ability similarities for a champion's Q, W, E, R abilities"""
+        if ChampionRepositoryImpl._ability_data_cache is None or ChampionRepositoryImpl._ability_data_cache.empty:
+            return []
+        
+        df = ChampionRepositoryImpl._ability_data_cache
+        normalized_champion = self._normalize_champion_name(champion_id)
+        
+        # Find rows where champ1 matches the requested champion
+        # Expected CSV columns: champ1, ability1_type, ability1_name, champ2, ability2_type, ability2_name, score, explanation
+        champion_abilities = df[
+            df['champ1'].str.lower().str.replace("'", "").str.replace(" ", "").str.replace(".", "") == normalized_champion
+        ].copy()
+        
+        if champion_abilities.empty:
+            return []
+        
+        # Group by ability type and get top similarities for each
+        abilities = []
+        for ability_type in ['Q', 'W', 'E', 'R']:
+            ability_matches = champion_abilities[
+                champion_abilities['ability1_type'] == ability_type
+            ].nlargest(limit_per_ability, 'score')
+            
+            for _, row in ability_matches.iterrows():
+                abilities.append(AbilitySimilarity(
+                    ability_type=row['ability1_type'],
+                    ability_name=row['ability1_name'],
+                    similar_champion=row['champ2'],
+                    similar_ability_type=row['ability2_type'],
+                    similar_ability_name=row['ability2_name'],
+                    similarity_score=float(row['score']),
+                    explanation=row['explanation']
+                ))
+        
+        return abilities
+
     
     async def get_champion_by_id(self, champion_id: str) -> Optional[ChampionData]:
         """Get champion data by ID (DEMO)"""
@@ -75,9 +140,7 @@ class ChampionRepositorySupabase(ChampionRepository):
     
     async def save_champion_data(self, champion_data: dict) -> Optional[ChampionData]:
         """Save champion data to database"""
-        if self.client:
-            await self.client.table('champions').upsert(champion_data).execute()
-            return ChampionData(**champion_data)
+        # Not implemented for this repository
         return None
     
     async def get_player_champion_pool(self, summoner_id: str) -> List[str]:

@@ -52,9 +52,30 @@ export default function Navbar({ user, summoner, showAuthButtons = false }: Navb
 
         {!showAuthButtons && (
           <div className={styles.nav}>
-            <button className={styles.navLink} onClick={() => navigate(ROUTES.DASHBOARD)}>Dashboard</button>
-            <button className={styles.navLink} onClick={() => navigate(ROUTES.GAMES)}>Games</button>
-            <button className={styles.navLink} onClick={() => navigate(ROUTES.CHAMPIONS)}>Champions</button>
+            <button 
+              className={styles.navLink} 
+              onClick={() => navigate(ROUTES.DASHBOARD)}
+            >
+              Dashboard
+            </button>
+            <button 
+              className={styles.navLink} 
+              onClick={() => navigate(ROUTES.GAMES)}
+            >
+              Games
+            </button>
+            <button 
+              className={styles.navLink} 
+              onClick={() => navigate(ROUTES.CHAMPIONS)}
+            >
+              Champions
+            </button>
+            <button 
+              className={styles.navLink} 
+              onClick={() => navigate(ROUTES.RECOMMEND)}
+            >
+              Recommend
+            </button>
           </div>
         )}
 

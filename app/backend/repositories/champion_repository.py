@@ -3,7 +3,7 @@ Champion repository interface - Abstract contract for champion data access
 """
 from abc import ABC, abstractmethod
 from typing import Optional, List, Dict, Any
-from models.champions import ChampionData, ChampionRecommendation
+from models.champions import ChampionData, ChampionRecommendation, AbilitySimilarity
 
 
 class ChampionRepository(ABC):
@@ -42,4 +42,9 @@ class ChampionRepository(ABC):
     @abstractmethod
     async def get_player_champion_pool(self, summoner_id: str) -> List[str]:
         """Get player's most played champions"""
+        pass
+    
+    @abstractmethod
+    async def get_ability_similarities(self, champion_id: str, limit_per_ability: int = 3) -> List[AbilitySimilarity]:
+        """Get ability similarities for a champion's Q, W, E, R abilities"""
         pass
