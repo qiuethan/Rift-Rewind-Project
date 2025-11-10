@@ -1,0 +1,257 @@
+.trackedCard {
+  margin-bottom: 2rem;
+  background: var(--region-panel);
+  border: 1px solid var(--region-panel-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--region-primary);
+  margin: 0;
+}
+
+.count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--region-text-secondary);
+  background: var(--region-panel-hover);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+}
+
+.error {
+  padding: 1rem;
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid var(--region-danger);
+  border-radius: 8px;
+  color: var(--region-danger);
+  text-align: center;
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--region-text-secondary);
+}
+
+.empty p:first-child {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.hint {
+  font-size: 0.875rem;
+  color: var(--region-text-dim);
+}
+
+.championGrid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  max-width: 100%;
+}
+
+.championCard {
+  position: relative;
+  background: var(--region-panel);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 2px solid var(--region-panel-border);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.championCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    var(--region-primary) 0%, 
+    transparent 50%, 
+    var(--region-accent) 100%
+  );
+  opacity: 0.1;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.championCard:hover {
+  border-color: var(--region-primary);
+  box-shadow: var(--region-shadow-secondary);
+  transform: translateY(-4px);
+}
+
+.championCard:hover::before {
+  opacity: 0.2;
+}
+
+.championCard.greyedOut {
+  opacity: 0.6;
+  filter: grayscale(0.7);
+  cursor: default;
+}
+
+.championCard.greyedOut:hover {
+  transform: none;
+  border-color: var(--region-panel-border);
+  box-shadow: none;
+}
+
+.championCard.greyedOut::before {
+  opacity: 0.05;
+}
+
+.untrackButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.untrackButton:hover {
+  background: var(--region-danger);
+  transform: scale(1.1);
+}
+
+.championImageWrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.championIcon {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid var(--region-primary);
+}
+
+.masteryBadge {
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border: 2px solid var(--region-panel);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.mastery7 {
+  background: linear-gradient(135deg, #f5c96a 0%, #d4a853 100%);
+  color: #1a1a1a;
+}
+
+.mastery5 {
+  background: linear-gradient(135deg, #6a9ef5 0%, #5385d4 100%);
+  color: #fff;
+}
+
+.mastery4 {
+  background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+  color: #fff;
+}
+
+.mastery1 {
+  background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
+  color: #fff;
+}
+
+.championInfo {
+  text-align: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.championName {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--region-text);
+  margin: 0;
+}
+
+.championPoints {
+  font-size: 0.875rem;
+  color: var(--region-text-secondary);
+  margin: 0;
+}
+
+.championMeta {
+  font-size: 0.75rem;
+  color: var(--region-text-dim);
+}
+
+.noGamesLabel {
+  display: inline-block;
+  font-size: 0.875rem;
+  color: var(--region-text-dim);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .championGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .championIcon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .championName {
+    font-size: 0.875rem;
+  }
+}

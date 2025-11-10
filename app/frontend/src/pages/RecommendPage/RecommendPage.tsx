@@ -1,14 +1,15 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './RecommendPage.module.css';
-import { Navbar, Spinner, Card, Modal, SummonerLinkModal } from '@/components';
+import { Navbar, Spinner, Card, Modal, SummonerLinkModal, TrackedChampions } from '@/components';
 import { authActions } from '@/actions/auth';
 import { ROUTES } from '@/config';
 import { useSummoner } from '@/contexts';
 import { championsApi } from '@/api/champions';
 import { getAbilityAsset } from '@/utils/abilities';
-import { getChampionIconUrl, getChampionKey } from '@/constants';
+import { getChampionIconUrl, getChampionKey, getChampionIdByName } from '@/constants';
 import type { ChampionRecommendation, AbilitySimilarity } from '@/api/champions';
+import { getTrackedChampions, trackChampion, untrackChampion } from '@/api/trackedChampions';
 
 interface ChampionRecommendationWithDetails extends ChampionRecommendation {}
 
@@ -19,7 +20,14 @@ interface ChampionMastery {
 }
 
 // Separate component for recommendations card
-function RecommendationsCard({ summonerId, championMasteries }: { summonerId: string; championMasteries?: ChampionMastery[] }) {
+const RecommendationsCard = React.forwardRef<
+  { refreshTrackedIds: () => void },
+  { 
+    summonerId: string; 
+    championMasteries?: ChampionMastery[];
+    onTrackedChampionsChange?: () => void;
+  }
+>(({ summonerId, championMasteries, onTrackedChampionsChange }, ref) => {
   const navigate = useNavigate();
   const [recommendations, setRecommendations] = useState<ChampionRecommendationWithDetails[]>([]);
   const [selectedChampion, setSelectedChampion] = useState<any>(null);
@@ -29,6 +37,27 @@ function RecommendationsCard({ summonerId, championMasteries }: { summonerId: st
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [trackedChampionIds, setTrackedChampionIds] = useState<number[]>([]);
+  const [trackingInProgress, setTrackingInProgress] = useState<number | null>(null);
+
+  // Fetch tracked champions
+  const fetchTrackedIds = async () => {
+    try {
+      const response = await getTrackedChampions();
+      setTrackedChampionIds(response.tracked_champions.map(tc => tc.champion_id));
+    } catch (err) {
+      console.error('Failed to fetch tracked champions:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchTrackedIds();
+  }, []);
+
+  // Expose refresh method to parent
+  useImperativeHandle(ref, () => ({
+    refreshTrackedIds: fetchTrackedIds
+  }));
 
   // Fetch recommendations
   useEffect(() => {
@@ -96,6 +125,50 @@ function RecommendationsCard({ summonerId, championMasteries }: { summonerId: st
     setIsModalOpen(false);
     setSelectedChampion(null);
     setAbilitySimilarities([]);
+  };
+
+  const handleTrackToggle = async (championId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    // Convert champion name to numeric ID
+    const champId = getChampionIdByName(championId);
+    if (champId === 0) {
+      console.error('Could not find champion ID for:', championId);
+      return;
+    }
+    
+    const isTracked = trackedChampionIds.includes(champId);
+    
+    try {
+      setTrackingInProgress(champId);
+      
+      if (isTracked) {
+        await untrackChampion(champId);
+        setTrackedChampionIds(prev => prev.filter(id => id !== champId));
+      } else {
+        // Check if already at max
+        if (trackedChampionIds.length >= 5) {
+          alert('You can only track up to 5 champions. Remove one to add another.');
+          return;
+        }
+        await trackChampion(champId);
+        setTrackedChampionIds(prev => [...prev, champId]);
+      }
+      
+      // Notify parent to refresh tracked champions
+      onTrackedChampionsChange?.();
+    } catch (err: any) {
+      console.error('Failed to toggle tracking:', err);
+      const errorMsg = err?.response?.data?.detail || 'Failed to update tracking';
+      alert(errorMsg);
+    } finally {
+      setTrackingInProgress(null);
+    }
+  };
+
+  const isChampionTracked = (championId: string): boolean => {
+    const champId = getChampionIdByName(championId);
+    return champId !== 0 && trackedChampionIds.includes(champId);
   };
 
   const hasPlayedChampion = (championName: string): boolean => {
@@ -168,27 +241,40 @@ function RecommendationsCard({ summonerId, championMasteries }: { summonerId: st
     <>
       <Card className={styles.recommendationCard}>
         <div className={styles.recommendationsList}>
-          {recommendations.map((champion, index) => (
-            <div
-              key={champion.champion_id}
-              className={styles.championCard}
-              onClick={() => handleChampionClick(champion)}
-            >
-              <div className={styles.championRank}>#{index + 1}</div>
-              <img
-                src={getChampionIconUrl(champion.champion_name)}
-                alt={champion.champion_name}
-                className={styles.championIcon}
-              />
-              <div className={styles.championCardInfo}>
-                <h3 className={styles.championCardName}>{champion.champion_name}</h3>
-                {champion.reasoning && (
-                  <p className={styles.championCardReasoning}>{champion.reasoning}</p>
-                )}
+          {recommendations.map((champion, index) => {
+            const isTracked = isChampionTracked(champion.champion_id);
+            const isTracking = trackingInProgress === getChampionIdByName(champion.champion_id);
+            
+            return (
+              <div
+                key={champion.champion_id}
+                className={styles.championCard}
+                onClick={() => handleChampionClick(champion)}
+              >
+                <div className={styles.championRank}>#{index + 1}</div>
+                <img
+                  src={getChampionIconUrl(champion.champion_name)}
+                  alt={champion.champion_name}
+                  className={styles.championIcon}
+                />
+                <div className={styles.championCardInfo}>
+                  <h3 className={styles.championCardName}>{champion.champion_name}</h3>
+                  {champion.reasoning && (
+                    <p className={styles.championCardReasoning}>{champion.reasoning}</p>
+                  )}
+                </div>
+                <button
+                  className={`${styles.trackButton} ${isTracked ? styles.tracked : ''}`}
+                  onClick={(e) => handleTrackToggle(champion.champion_id, e)}
+                  disabled={isTracking}
+                  title={isTracked ? 'Remove from tracked' : 'Track this champion'}
+                >
+                  {isTracking ? '...' : isTracked ? '★' : '☆'}
+                </button>
+                <div className={styles.championCardArrow}>→</div>
               </div>
-              <div className={styles.championCardArrow}>→</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Card>
 
@@ -197,6 +283,7 @@ function RecommendationsCard({ summonerId, championMasteries }: { summonerId: st
         <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={selectedChampion.champion_name}>
           <div className={styles.modalContent}>
             <div className={styles.modalTopSection}>
+              {/* Left: Champion Splash Image */}
               <div className={styles.modalSplashContainer}>
                 <img
                   src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${selectedChampion.champion_name}_0.jpg`}
@@ -208,12 +295,8 @@ function RecommendationsCard({ summonerId, championMasteries }: { summonerId: st
                 />
               </div>
               
+              {/* Right: Info Grid */}
               <div className={styles.modalTopInfo}>
-                {selectedChampion.champion_title && (
-                  <p className={styles.championTitle}>
-                    {selectedChampion.champion_title}
-                  </p>
-                )}
                 {selectedChampion.reasoning && (
                   <div className={styles.reasoningBox}>
                     <strong>Why this champion?</strong>
@@ -222,29 +305,45 @@ function RecommendationsCard({ summonerId, championMasteries }: { summonerId: st
                 )}
                 
                 {selectedChampion.champion_tags && selectedChampion.champion_tags.length > 0 && (
-                  <div className={styles.championInfo}>
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Role:</span>
-                      <span className={styles.infoValue}>{selectedChampion.champion_tags.join(', ')}</span>
-                    </div>
+                  <div className={styles.roleBox}>
+                    <span className={styles.roleLabel}>Role:</span>
+                    <span className={styles.roleValue}>{selectedChampion.champion_tags.join(', ')}</span>
                   </div>
                 )}
 
-                <button
-                  className={styles.viewStatsButton}
-                  onClick={() => {
-                    if (hasPlayedChampion(selectedChampion.champion_name)) {
-                      handleCloseModal();
-                      navigate(`/champion/${selectedChampion.champion_name.toLowerCase()}`, { state: { from: 'recommend' } });
+                {/* Button group with track and view stats */}
+                <div className={styles.modalButtonGroup}>
+                  <button
+                    className={`${styles.modalTrackButton} ${isChampionTracked(selectedChampion.champion_id) ? styles.tracked : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTrackToggle(selectedChampion.champion_id, e);
+                    }}
+                    disabled={trackingInProgress === getChampionIdByName(selectedChampion.champion_id)}
+                  >
+                    {trackingInProgress === getChampionIdByName(selectedChampion.champion_id) 
+                      ? 'Updating...' 
+                      : isChampionTracked(selectedChampion.champion_id) 
+                        ? '★ Tracked' 
+                        : '☆ Track'}
+                  </button>
+                  
+                  <button
+                    className={styles.viewStatsButton}
+                    onClick={() => {
+                      if (hasPlayedChampion(selectedChampion.champion_name)) {
+                        handleCloseModal();
+                        navigate(`/champion/${selectedChampion.champion_name.toLowerCase()}`, { state: { from: 'recommend' } });
+                      }
+                    }}
+                    disabled={!hasPlayedChampion(selectedChampion.champion_name)}
+                  >
+                    {hasPlayedChampion(selectedChampion.champion_name) 
+                      ? `View Your Stats on ${selectedChampion.champion_name}`
+                      : 'You have not played this champion yet'
                     }
-                  }}
-                  disabled={!hasPlayedChampion(selectedChampion.champion_name)}
-                >
-                  {hasPlayedChampion(selectedChampion.champion_name) 
-                    ? `View Your Stats on ${selectedChampion.champion_name}`
-                    : 'You have not played this champion yet'
-                  }
-                </button>
+                  </button>
+                </div>
               </div>
             </div>
             
@@ -324,13 +423,15 @@ function RecommendationsCard({ summonerId, championMasteries }: { summonerId: st
       )}
     </>
   );
-}
+});
 
 export default function RecommendPage() {
   const navigate = useNavigate();
   const { summoner, loading: summonerLoading } = useSummoner();
   const [user, setUser] = useState<any>(null);
   const [showSummonerLinkModal, setShowSummonerLinkModal] = useState(false);
+  const [refreshTrackedChampions, setRefreshTrackedChampions] = useState(0);
+  const recommendationsCardRef = useRef<{ refreshTrackedIds: () => void }>(null);
 
   // Check authentication
   useEffect(() => {
@@ -379,7 +480,27 @@ export default function RecommendPage() {
           </button>
           <h1 className={styles.pageTitle}>Champion Recommendations</h1>
         </div>
-        {summoner?.id && <RecommendationsCard summonerId={summoner.id} championMasteries={summoner.champion_masteries} />}
+        {summoner?.id && (
+          <>
+            <TrackedChampions 
+              key={refreshTrackedChampions}
+              championMasteries={summoner.champion_masteries}
+              onTrackingChange={() => {
+                // Refresh recommendation buttons when untracking from TrackedChampions
+                recommendationsCardRef.current?.refreshTrackedIds();
+              }}
+            />
+            <RecommendationsCard 
+              ref={recommendationsCardRef}
+              summonerId={summoner.id} 
+              championMasteries={summoner.champion_masteries}
+              onTrackedChampionsChange={() => {
+                // Refresh TrackedChampions component when tracking from recommendations
+                setRefreshTrackedChampions(prev => prev + 1);
+              }}
+            />
+          </>
+        )}
       </div>
     </>
   );

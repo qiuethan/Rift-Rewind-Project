@@ -12,13 +12,13 @@ CREATE TABLE IF NOT EXISTS tracked_champions (
 -- Create index for faster lookups
 CREATE INDEX IF NOT EXISTS idx_tracked_champions_user_id ON tracked_champions(user_id);
 
--- Add constraint to limit 3 champions per user
+-- Add constraint to limit 5 champions per user
 -- This will be enforced in the application logic as well
 CREATE OR REPLACE FUNCTION check_tracked_champions_limit()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF (SELECT COUNT(*) FROM tracked_champions WHERE user_id = NEW.user_id) >= 3 THEN
-        RAISE EXCEPTION 'User can only track up to 3 champions';
+    IF (SELECT COUNT(*) FROM tracked_champions WHERE user_id = NEW.user_id) >= 5 THEN
+        RAISE EXCEPTION 'User can only track up to 5 champions';
     END IF;
     RETURN NEW;
 END;

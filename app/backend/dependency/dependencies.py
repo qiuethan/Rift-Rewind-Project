@@ -14,6 +14,7 @@ from domain.champion_domain import ChampionDomain
 from domain.analytics_domain import AnalyticsDomain
 from domain.riot_api_domain import RiotAPIDomain
 from domain.champion_progress_domain import ChampionProgressDomain
+from domain.tracked_champions_domain import TrackedChampionsDomain
 
 # Repositories (Interfaces)
 from repositories.auth_repository import AuthRepository
@@ -23,6 +24,7 @@ from repositories.champion_repository import ChampionRepository
 from repositories.analytics_repository import AnalyticsRepository
 from repositories.riot_api_repository import RiotAPIRepository
 from repositories.champion_progress_repository import ChampionProgressRepository
+from repositories.tracked_champions_repository import TrackedChampionsRepository
 
 # Infrastructure (Implementations)
 from infrastructure.auth_repository import AuthRepositorySupabase
@@ -32,6 +34,7 @@ from infrastructure.champion_repository import ChampionRepositoryImpl
 from infrastructure.analytics_repository import AnalyticsRepositorySupabase
 from infrastructure.riot_api_repository import RiotAPIRepositoryImpl
 from infrastructure.champion_progress_repository import ChampionProgressRepositorySupabase
+from infrastructure.tracked_champions_repository import TrackedChampionsRepositorySupabase
 
 # Services
 from services.auth_service import AuthService
@@ -41,6 +44,7 @@ from services.champion_service import ChampionService
 from services.analytics_service import AnalyticsService
 from services.llm_service import LLMService
 from services.champion_progress_service import ChampionProgressService
+from services.tracked_champions_service import TrackedChampionsService
 
 
 # ============================================================================
@@ -80,6 +84,11 @@ def get_riot_api_domain() -> RiotAPIDomain:
 def get_champion_progress_domain() -> ChampionProgressDomain:
     """Factory for ChampionProgressDomain"""
     return ChampionProgressDomain()
+
+
+def get_tracked_champions_domain() -> TrackedChampionsDomain:
+    """Factory for TrackedChampionsDomain"""
+    return TrackedChampionsDomain()
 
 
 # ============================================================================
@@ -221,4 +230,17 @@ def get_champion_progress_service() -> ChampionProgressService:
         champion_progress_repository=get_champion_progress_repository(),
         player_repository=get_player_repository(),
         champion_progress_domain=get_champion_progress_domain()
+    )
+
+
+def get_tracked_champions_repository() -> TrackedChampionsRepository:
+    """Factory for TrackedChampionsRepository"""
+    return TrackedChampionsRepositorySupabase(supabase_service)
+
+
+def get_tracked_champions_service() -> TrackedChampionsService:
+    """Factory for TrackedChampionsService"""
+    return TrackedChampionsService(
+        repository=get_tracked_champions_repository(),
+        domain=get_tracked_champions_domain()
     )

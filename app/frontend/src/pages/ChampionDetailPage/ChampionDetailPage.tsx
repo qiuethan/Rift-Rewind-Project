@@ -9,7 +9,7 @@ import { ROUTES } from '@/config';
 import { useSummoner, useTheme } from '@/contexts';
 import { getChampionKey, getChampionIconUrl } from '@/constants';
 import type { ChampionProgressResponse } from '@/api/championProgress';
-import { getCachedChampionAnalysis, cacheChampionAnalysis } from '@/utils/analysisCache';
+import { getCachedChampionAnalysis, cacheChampionAnalysis, isChampionCacheValid } from '@/utils/analysisCache';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -141,6 +141,22 @@ export default function ChampionDetailPage() {
       if (result.success && result.data) {
         setChampionProgress(result.data);
         setProgressError(null);
+        
+        // Check if cached analysis is still valid
+        const lastGameTimestamp = result.data.trend.last_played;
+        if (lastGameTimestamp && isChampionCacheValid(championId, lastGameTimestamp)) {
+          // Cache is valid - load it
+          const cached = getCachedChampionAnalysis(championId);
+          if (cached) {
+            const data = { summary: cached.summary, fullAnalysis: cached.fullAnalysis };
+            setCachedAnalysis(data);
+            setAnalysisData(data);
+          }
+        } else {
+          // Cache is invalid or doesn't exist - clear any existing cached data
+          setCachedAnalysis(null);
+          setAnalysisData(null);
+        }
       } else {
         setProgressError(result.error || 'Failed to load champion progress data');
       }
@@ -149,16 +165,6 @@ export default function ChampionDetailPage() {
     };
 
     fetchChampionProgress();
-    
-    // Load cached analysis if available
-    if (championId && championId !== 0) {
-      const cached = getCachedChampionAnalysis(championId);
-      if (cached) {
-        const data = { summary: cached.summary, fullAnalysis: cached.fullAnalysis };
-        setCachedAnalysis(data);
-        setAnalysisData(data);
-      }
-    }
   }, [championId]);
 
   const handleGenerateAnalysis = async (): Promise<{ summary: string; fullAnalysis: string } | null> => {
@@ -173,8 +179,11 @@ export default function ChampionDetailPage() {
       };
       setAnalysisData(data);
       setCachedAnalysis(data);
-      // Cache in localStorage only on success
-      cacheChampionAnalysis(championId, data);
+      
+      // Cache in localStorage only on success, including the last game timestamp
+      const lastGameTimestamp = championProgress?.trend.last_played;
+      cacheChampionAnalysis(championId, data, lastGameTimestamp);
+      
       return data;
     } else {
       // Return null - error will be shown in thought bubble

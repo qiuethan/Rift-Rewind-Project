@@ -7,6 +7,7 @@ from routes.analytics import router as analytics_router
 from routes.health import router as health_router
 from routes.champion_progress import router as champion_progress_router
 from routes.llm import router as llm_router
+from routes.tracked_champions import router as tracked_champions_router
 
 __all__ = [
     'auth_router',
@@ -17,4 +18,5 @@ __all__ = [
     'health_router',
     'champion_progress_router',
     'llm_router',
+    'tracked_champions_router',
 ]

@@ -16,7 +16,8 @@ from routes import (
     analytics_router,
     health_router,
     champion_progress_router,
-    llm_router
+    llm_router,
+    tracked_champions_router
 )
 from middleware.error_handler import (
     http_exception_handler,
@@ -75,6 +76,7 @@ app.include_router(champions_router)
 app.include_router(analytics_router)
 app.include_router(champion_progress_router)
 app.include_router(llm_router)
+app.include_router(tracked_champions_router)
 
 
 # ============================================================================

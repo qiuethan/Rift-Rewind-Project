@@ -204,6 +204,25 @@ export const getChampionKeyByName = (championName: string): string => {
 };
 
 /**
+ * Get champion ID from champion name (case-insensitive)
+ * @param championName - The champion name from Riot API
+ * @returns Champion ID number, or 0 if not found
+ */
+export const getChampionIdByName = (championName: string): number => {
+  // Normalize the name (remove spaces, lowercase)
+  const normalizedName = championName.replace(/\s+/g, '').toLowerCase();
+  
+  // Search through all champion keys
+  for (const [id, key] of Object.entries(CHAMPION_ID_TO_KEY)) {
+    if (key.toLowerCase() === normalizedName) {
+      return parseInt(id);
+    }
+  }
+  
+  return 0; // Not found
+};
+
+/**
  * Get champion splash art URL
  * @param championKey - The champion key
  * @param skinNum - Skin number (default 0 for base skin)

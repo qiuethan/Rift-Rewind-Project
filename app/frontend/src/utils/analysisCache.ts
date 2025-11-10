@@ -9,6 +9,7 @@ export interface CachedAnalysis {
   summary: string;
   fullAnalysis: string;
   timestamp: number;
+  lastGameTimestamp?: number; // For champion analyses - timestamp of most recent game
 }
 
 /**
@@ -62,16 +63,45 @@ export const getCachedChampionAnalysis = (championId: number): CachedAnalysis | 
 /**
  * Cache analysis for a champion
  */
-export const cacheChampionAnalysis = (championId: number, analysis: { summary: string; fullAnalysis: string }): void => {
+export const cacheChampionAnalysis = (
+  championId: number, 
+  analysis: { summary: string; fullAnalysis: string },
+  lastGameTimestamp?: number
+): void => {
   try {
     const key = `${CACHE_KEY_PREFIX}champion_${championId}`;
     const cached: CachedAnalysis = {
       ...analysis,
       timestamp: Date.now(),
+      lastGameTimestamp,
     };
     localStorage.setItem(key, JSON.stringify(cached));
   } catch (error) {
     console.error('Error caching champion analysis:', error);
+  }
+};
+
+/**
+ * Check if cached champion analysis is still valid
+ * Returns true if cache exists and no new games have been played since caching
+ */
+export const isChampionCacheValid = (championId: number, currentLastGameTimestamp: number): boolean => {
+  try {
+    const cached = getCachedChampionAnalysis(championId);
+    if (!cached) {
+      return false;
+    }
+    
+    // If we don't have a lastGameTimestamp in cache, consider it invalid (old cache format)
+    if (!cached.lastGameTimestamp) {
+      return false;
+    }
+    
+    // Cache is valid if the last game timestamp hasn't changed
+    return cached.lastGameTimestamp === currentLastGameTimestamp;
+  } catch (error) {
+    console.error('Error checking champion cache validity:', error);
+    return false;
   }
 };
 
