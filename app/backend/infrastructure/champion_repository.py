@@ -159,11 +159,11 @@ class ChampionRepositoryImpl(ChampionRepository):
     
     async def get_similar_champions(self, champion_id: str, limit: int) -> List[ChampionRecommendation]:
         """
-        Get similar champions based on player's champion pool using graph-based recommendations
-        weighted by player performance (EPS/CPS).
+        Get similar champions based on player's recent games using graph-based recommendations
+        weighted by player performance (EPS/CPS) from last 30 games.
         
         Args:
-            champion_id: Player's PUUID (used to fetch their champion pool)
+            champion_id: Player's PUUID (used to fetch their recent games)
             limit: Maximum number of recommendations to return
             
         Returns:
@@ -173,18 +173,18 @@ class ChampionRepositoryImpl(ChampionRepository):
             # Get the recommender instance
             recommender = get_recommender()
             
-            # Get player's champion pool (list of graph champion names they play)
+            # Get player's champion pool from last 30 games (weighted by EPS/CPS performance)
             puuid = champion_id
-            champion_pool = await self.get_player_champion_pool(puuid)
+            champion_pool = await self.get_champion_pool_from_recent_games(puuid, game_limit=30)
             
             if not champion_pool:
-                logger.warning(f"No champion pool found for puuid: {puuid}")
+                logger.warning(f"No champion pool found from recent games for puuid: {puuid}")
                 return []
             
             # Get player's performance metrics for their champion pool
             performance_data = await self.get_player_champion_performance(puuid)
             
-            # Get recommendations based on champion pool
+            # Get recommendations based on champion pool from recent games
             # alpha=0.7 means 70% graph similarity, 30% feature similarity
             recommendations = recommender.recommend_from_champion_pool(
                 champion_list=champion_pool,
@@ -330,10 +330,28 @@ class ChampionRepositoryImpl(ChampionRepository):
             high_performers.sort(key=lambda x: x[1], reverse=True)
             
             if high_performers:
-                champs_str = ", ".join([champ for champ, _ in high_performers[:2]])
+                # Deduplicate champion names for display
+                unique_high_performers = []
+                seen_champs = set()
+                for champ, weight in high_performers:
+                    if champ not in seen_champs:
+                        unique_high_performers.append(champ)
+                        seen_champs.add(champ)
+                        if len(unique_high_performers) >= 2:
+                            break
+                champs_str = ", ".join(unique_high_performers)
                 return f"Similar to your high-performing {champs_str}"
             elif similar_to:
-                champs_str = ", ".join([champ for champ, _ in similar_to[:3]])
+                # Deduplicate champion names for display
+                unique_similar = []
+                seen_champs = set()
+                for champ, weight in similar_to:
+                    if champ not in seen_champs:
+                        unique_similar.append(champ)
+                        seen_champs.add(champ)
+                        if len(unique_similar) >= 3:
+                            break
+                champs_str = ", ".join(unique_similar)
                 return f"Similar playstyle to your {champs_str}"
             else:
                 return "Recommended based on your champion pool"
@@ -576,6 +594,83 @@ class ChampionRepositoryImpl(ChampionRepository):
         weight = index - lower_index
         
         return sorted_values[lower_index] * (1 - weight) + sorted_values[upper_index] * weight
+    
+    async def get_champion_pool_from_recent_games(self, puuid: str, game_limit: int = 30) -> List[str]:
+        """Get champion pool from player's last N games with duplicates preserved
+        
+        This is used for feeding into the recommender graph. Returns champions played
+        in the last N games, with duplicates preserved (same champion appears multiple times
+        if played in multiple games). The graph accepts duplicates and uses them for weighting.
+        
+        Args:
+            puuid: Player's PUUID
+            game_limit: Number of recent games to consider (default: 30)
+            
+        Returns:
+            List of graph champion names from recent games, with duplicates preserved,
+            sorted by game recency (newest first)
+        """
+        try:
+            # Query last N matches for this player
+            result = await self.db.table(DatabaseTable.MATCHES).select(
+                'match_id, match_data, analysis, game_creation'
+            ).contains('match_data', {'info': {'participants': [{'puuid': puuid}]}}).order(
+                'game_creation', desc=True
+            ).limit(game_limit).execute()
+            
+            if not result.data:
+                logger.warning(f"No recent matches found for puuid: {puuid}")
+                return []
+            
+            # Extract champion list with duplicates preserved
+            champion_pool = []
+            
+            for match in result.data:
+                match_data = match.get('match_data', {})
+                
+                # Find the player's participant data
+                participants = match_data.get('info', {}).get('participants', [])
+                player_participant = None
+                for p in participants:
+                    if p.get('puuid') == puuid:
+                        player_participant = p
+                        break
+                
+                if not player_participant:
+                    continue
+                
+                # Get champion info
+                champion_id = player_participant.get('championId')
+                
+                if not champion_id:
+                    continue
+                
+                # Convert to graph name
+                graph_name = get_graph_name_from_id(int(champion_id))
+                if not graph_name:
+                    continue
+                
+                # Add champion to pool (duplicates allowed)
+                champion_pool.append(graph_name)
+            
+            if not champion_pool:
+                logger.warning(f"No valid champion data extracted from recent games for puuid: {puuid}")
+                return []
+            
+            # Count unique champions for logging
+            unique_champions = len(set(champion_pool))
+            
+            logger.info(
+                f"Champion pool from last {game_limit} games: {len(champion_pool)} total plays, "
+                f"{unique_champions} unique champions - {list(set(champion_pool))[:10]}"
+                + (f" (and {unique_champions - 10} more unique)" if unique_champions > 10 else "")
+            )
+            
+            return champion_pool
+            
+        except Exception as e:
+            logger.error(f"Error fetching champion pool from recent games: {e}")
+            return []
     
     async def get_player_champion_performance(self, puuid: str) -> Dict[str, Dict[str, float]]:
         """Get player's performance metrics (EPS/CPS) for their champion pool
