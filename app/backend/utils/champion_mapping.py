@@ -1,7 +1,9 @@
 """
 Champion name to ID mapping utility
 """
-from typing import Optional
+from typing import Optional, Dict
+import json
+from pathlib import Path
 
 # Champion name to ID mapping (partial list - expand as needed)
 CHAMPION_NAME_TO_ID = {
@@ -257,3 +259,56 @@ def extract_champion_from_text(text: str) -> Optional[str]:
             return champion_name
     
     return None
+
+
+# Cache for ID to graph name mapping
+_ID_TO_GRAPH_NAME_CACHE: Optional[Dict[int, str]] = None
+
+
+def load_id_to_graph_name_mapping() -> Dict[int, str]:
+    """
+    Load champion ID to graph name mapping from champion.json
+    
+    Returns:
+        Dict mapping champion ID (int) to graph name (str)
+        Example: {62: "MonkeyKing", 103: "Ahri", ...}
+    """
+    global _ID_TO_GRAPH_NAME_CACHE
+    
+    if _ID_TO_GRAPH_NAME_CACHE is not None:
+        return _ID_TO_GRAPH_NAME_CACHE
+    
+    try:
+        # Path to champion.json
+        champion_json_path = Path(__file__).resolve().parents[1] / 'constants' / 'data' / 'champion.json'
+        
+        with open(champion_json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Build mapping: key (ID) -> id (graph name)
+        id_to_name = {}
+        for champion_data in data.get('data', {}).values():
+            champion_id = int(champion_data['key'])
+            graph_name = champion_data['id']  # This is the graph name (e.g., "MonkeyKing")
+            id_to_name[champion_id] = graph_name
+        
+        _ID_TO_GRAPH_NAME_CACHE = id_to_name
+        return id_to_name
+        
+    except Exception as e:
+        print(f"Error loading champion ID to name mapping: {e}")
+        return {}
+
+
+def get_graph_name_from_id(champion_id: int) -> Optional[str]:
+    """
+    Get graph champion name from champion ID
+    
+    Args:
+        champion_id: Riot API champion ID (e.g., 62 for Wukong)
+        
+    Returns:
+        Graph champion name (e.g., "MonkeyKing") or None if not found
+    """
+    mapping = load_id_to_graph_name_mapping()
+    return mapping.get(champion_id)

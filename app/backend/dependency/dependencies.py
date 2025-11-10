@@ -109,7 +109,7 @@ def get_match_repository() -> MatchRepository:
 
 def get_champion_repository() -> ChampionRepository:
     """Get champion repository instance"""
-    return ChampionRepositoryImpl()
+    return ChampionRepositoryImpl(supabase_service)
 
 
 def get_analytics_repository() -> AnalyticsRepository:

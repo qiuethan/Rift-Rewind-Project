@@ -102,6 +102,8 @@ class ChampionProgressRecord(BaseModel):
     last_played: int = Field(..., description="Unix timestamp")
     recent_matches: List[Dict[str, Any]] = Field(default_factory=list)
     performance_history: List[Dict[str, Any]] = Field(default_factory=list)
+    mastery_level: Optional[int] = None
+    mastery_points: Optional[int] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
     

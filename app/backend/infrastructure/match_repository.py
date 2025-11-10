@@ -69,7 +69,15 @@ class MatchRepositoryRiot(MatchRepository):
 
     # TODO: Implement match calculations either in this file or in another file
 
-    async def save_match(self, match_id: str, match_data: Dict[str, Any], puuid: str = None, timeline_data: Dict[str, Any] = None) -> bool:
+    async def save_match(
+        self, 
+        match_id: str, 
+        match_data: Dict[str, Any], 
+        puuid: str = None, 
+        timeline_data: Dict[str, Any] = None,
+        mastery_level: Optional[int] = None,
+        mastery_points: Optional[int] = None
+    ) -> bool:
         """
         Save complete match data to database and optionally track which summoner played in it
         
@@ -78,6 +86,12 @@ class MatchRepositoryRiot(MatchRepository):
             match_data: Full match data
             puuid: Optional PUUID of summoner to track
             timeline_data: Optional timeline data
+            mastery_level: Optional mastery level (should be fetched by service layer)
+            mastery_points: Optional mastery points (should be fetched by service layer)
+            
+        Note:
+            Mastery data is optional. If not provided, champion progress will be updated
+            without mastery info. Mastery can be updated later via explicit champion progress updates.
         """
         try:
             if not self.client:
@@ -139,7 +153,9 @@ class MatchRepositoryRiot(MatchRepository):
             
             # Update champion progress for tracked summoners (only for new matches with analysis)
             if is_new_match and analysis and puuid:
-                await self._update_champion_progress_for_match(match_id, match_data, analysis, puuid)
+                await self._update_champion_progress_for_match(
+                    match_id, match_data, analysis, puuid, mastery_level, mastery_points
+                )
             
             timeline_status = "with timeline" if final_timeline else "without timeline"
             if existing_timeline and not timeline_data:
@@ -428,11 +444,14 @@ class MatchRepositoryRiot(MatchRepository):
         match_id: str, 
         match_data: Dict[str, Any], 
         analysis: Dict[str, Any], 
-        puuid: str
+        puuid: str,
+        mastery_level: Optional[int] = None,
+        mastery_points: Optional[int] = None
     ) -> None:
         """
         Update champion progress after processing a match.
         This is called internally when a new match is saved with analysis.
+        Mastery data should be provided by the caller (service layer).
         """
         try:
             from infrastructure.champion_progress_repository import ChampionProgressRepositorySupabase
@@ -508,9 +527,32 @@ class MatchRepositoryRiot(MatchRepository):
                 game_date=match_data.get('info', {}).get('gameCreation', 0) // 1000  # Convert to seconds
             )
             
-            # Update champion progress
+            # Fetch current mastery data if not provided (mastery changes after each game)
+            if mastery_level is None or mastery_points is None:
+                try:
+                    # Get region
+                    region_result = await self.client.table(DatabaseTable.SUMMONERS).select('region').eq('puuid', puuid).limit(1).execute()
+                    region = region_result.data[0].get('region', 'americas') if region_result.data else 'americas'
+                    
+                    # Import here to avoid circular dependency
+                    from infrastructure.player_repository import PlayerRepositoryRiot
+                    from infrastructure.riot_api_repository import RiotAPIRepositoryImpl
+                    from config.riot_api import riot_api_config
+                    
+                    riot_api = RiotAPIRepositoryImpl(riot_api_config)
+                    player_repo = PlayerRepositoryRiot(self.client, riot_api)
+                    mastery_data = await player_repo.get_champion_mastery_by_champion(puuid, champion_id, region)
+                    
+                    if mastery_data:
+                        mastery_level = mastery_data.champion_level
+                        mastery_points = mastery_data.champion_points
+                        logger.debug(f"Fetched current mastery for {champion_name}: Level {mastery_level}, {mastery_points} points")
+                except Exception as e:
+                    logger.warning(f"Could not fetch mastery for {champion_name}: {e}")
+            
+            # Update champion progress with mastery data
             progress_repo = ChampionProgressRepositorySupabase(self.client)
-            result = await progress_repo.update_champion_progress(user_id, puuid, update_request)
+            result = await progress_repo.update_champion_progress(user_id, puuid, update_request, mastery_level, mastery_points)
             
             if result:
                 logger.info(f"✅ Updated champion progress for {champion_name} (user: {user_id}, match: {match_id})")

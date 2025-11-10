@@ -43,16 +43,7 @@ async def get_champion_recommendations(
     champion_service: ChampionService = Depends(get_champion_service)
 ):
     """Get champion recommendations for player (protected)"""
-    return await champion_service.get_champion_recommendations(recommendation_request)
-
-
-@router.post("/similarity", response_model=ChampionSimilarityResponse)
-async def calculate_champion_similarity(
-    similarity_request: ChampionSimilarityRequest,
-    champion_service: ChampionService = Depends(get_champion_service)
-):
-    """Calculate similarity between two champions (public endpoint)"""
-    return await champion_service.calculate_similarity(similarity_request)
+    return await champion_service.get_champion_recommendations(current_user, recommendation_request)
 
 
 @router.get("/{champion_id}/ability-similarities", response_model=AbilitySimilarityResponse)

@@ -56,7 +56,9 @@ class ChampionProgressRepository(ABC):
         self,
         user_id: str,
         puuid: str,
-        update_request: UpdateChampionProgressRequest
+        update_request: UpdateChampionProgressRequest,
+        mastery_level: Optional[int] = None,
+        mastery_points: Optional[int] = None
     ) -> Optional[ChampionProgressRecord]:
         """
         Update champion progress after a match
@@ -65,6 +67,8 @@ class ChampionProgressRepository(ABC):
             user_id: User ID
             puuid: Player PUUID
             update_request: Match data to update progress
+            mastery_level: Current mastery level for this champion (optional)
+            mastery_points: Current mastery points for this champion (optional)
             
         Returns:
             Updated ChampionProgressRecord or None if failed

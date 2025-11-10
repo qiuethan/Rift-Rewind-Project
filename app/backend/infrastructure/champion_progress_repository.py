@@ -160,7 +160,9 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
         self,
         user_id: str,
         puuid: str,
-        update_request: UpdateChampionProgressRequest
+        update_request: UpdateChampionProgressRequest,
+        mastery_level: Optional[int] = None,
+        mastery_points: Optional[int] = None
     ) -> Optional[ChampionProgressRecord]:
         """Update champion progress after a match"""
         try:
@@ -240,7 +242,9 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
                     cps_trend=cps_trend,
                     last_played=update_request.game_date,
                     recent_matches=recent_matches,
-                    performance_history=performance_history
+                    performance_history=performance_history,
+                    mastery_level=mastery_level,
+                    mastery_points=mastery_points
                 )
                 
                 # Update in database
@@ -274,7 +278,9 @@ class ChampionProgressRepositorySupabase(ChampionProgressRepository):
                         'date': update_request.game_date,
                         'eps_score': update_request.eps_score,
                         'cps_score': update_request.cps_score
-                    }]
+                    }],
+                    mastery_level=mastery_level,
+                    mastery_points=mastery_points
                 )
                 
                 return await self.create_champion_progress_record(new_record)

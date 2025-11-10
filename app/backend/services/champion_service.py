@@ -15,6 +15,7 @@ from models.champions import (
 )
 from fastapi import HTTPException, status
 from typing import List
+from utils.logger import logger
 
 
 class ChampionService:
@@ -51,6 +52,7 @@ class ChampionService:
     
     async def get_champion_recommendations(
         self,
+        user_id: str,
         request: ChampionRecommendationRequest
     ) -> ChampionRecommendationResponse:
         """Get champion recommendations for player"""
@@ -59,20 +61,30 @@ class ChampionService:
         except DomainException as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.message)
         
-        # Get player's champion pool
-        champion_pool = await self.champion_repository.get_player_champion_pool(
-            request.summoner_id
-        )
+        # Get player's puuid from user_id
+        user_summoner = await self.player_repository.get_user_summoner_basic(user_id)
+        if not user_summoner:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No summoner linked to this account"
+            )
         
+        puuid = user_summoner.get('puuid')
+        
+        # Get player's champion pool using puuid
+        champion_pool = await self.champion_repository.get_player_champion_pool(puuid)
+        
+        logger.info(f"Champion pool for user {user_id} (puuid: {puuid}): {champion_pool}")
+
         if not champion_pool:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="No champion data found for this player"
+                detail="No champion data found. Please play some games first and sync your match history to get champion recommendations."
             )
         
-        main_champion = champion_pool[0]
+        # Get recommendations based on player's entire champion pool (using puuid)
         recommendations = await self.champion_repository.get_similar_champions(
-            main_champion.lower(),
+            puuid,  # Pass puuid, not champion name
             request.limit
         )
         
@@ -82,7 +94,7 @@ class ChampionService:
         )
         
         return ChampionRecommendationResponse(
-            summoner_id=request.summoner_id,
+            summoner_id=user_id,
             recommendations=[rec for rec in recommendations],
             based_on_champions=champion_pool
         )

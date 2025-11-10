@@ -40,8 +40,8 @@ class ChampionRepository(ABC):
         pass
     
     @abstractmethod
-    async def get_player_champion_pool(self, summoner_id: str) -> List[str]:
-        """Get player's most played champions"""
+    async def get_player_champion_pool(self, puuid: str) -> List[str]:
+        """Get player's most played champions by puuid"""
         pass
     
     @abstractmethod
