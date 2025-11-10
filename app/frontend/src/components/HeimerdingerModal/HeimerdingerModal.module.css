@@ -246,33 +246,37 @@
 
 /* Markdown Styling */
 .mdH1 {
-  font-size: 1.875rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #1A4D6D;
-  margin: 1.75rem 0 1.25rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 4px solid #F5C96A;
-}
-
-.mdH2 {
-  font-size: 1.625rem;
-  font-weight: 700;
-  color: #1A4D6D;
-  margin: 1.5rem 0 1rem;
-  padding-bottom: 0.5rem;
+  margin: 0.75rem 0 0.25rem;
+  padding-bottom: 0.25rem;
   border-bottom: 3px solid #F5C96A;
 }
 
+.mdH1:first-child {
+  margin-top: 0;
+}
+
+.mdH2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1A4D6D;
+  margin: 0.5rem 0 0.25rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 2px solid #F5C96A;
+}
+
 .mdH3 {
-  font-size: 1.375rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #2B6B8F;
-  margin: 1.25rem 0 0.75rem;
+  margin: 0.4rem 0 0.2rem;
 }
 
 .mdP {
-  margin: 0.875rem 0;
-  line-height: 1.9;
+  margin: 0.15rem 0;
+  line-height: 1.5;
   color: #1A4D6D;
 }
 
@@ -282,9 +286,9 @@
 }
 
 .mdLi {
-  margin: 0.625rem 0;
+  margin: 0.1rem 0;
   margin-left: 2rem;
-  line-height: 1.8;
+  line-height: 1.5;
   color: #1A4D6D;
   list-style-type: disc;
 }

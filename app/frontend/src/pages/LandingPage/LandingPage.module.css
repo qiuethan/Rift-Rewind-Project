@@ -269,6 +269,22 @@
   text-underline-offset: 4px;
 }
 
+.heimerHelp {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 1.125rem;
+  color: var(--region-text-secondary);
+  font-weight: 500;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+}
+
+.heimerHelp strong {
+  color: var(--region-primary);
+  font-weight: 700;
+}
+
 .cta {
   display: flex;
   gap: 1rem;
