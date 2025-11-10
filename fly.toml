@@ -36,6 +36,6 @@ primary_region = "iad"
   cpus = 1
   memory_mb = 1024
 
-[restart]
+[[restart]]
   policy = "on-failure"
   max_retries = 10
