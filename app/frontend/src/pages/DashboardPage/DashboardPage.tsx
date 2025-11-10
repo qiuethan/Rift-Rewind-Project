@@ -198,11 +198,11 @@ export default function DashboardPage() {
       setSuccess('League of Legends account linked successfully!');
       setIsModalOpen(false);
       
-      // Show sync modal for 5 minutes
+      // Show sync modal for 3 minutes
       setShowSyncModal(true);
       setTimeout(() => {
         setShowSyncModal(false);
-      }, 5 * 60 * 1000); // 5 minutes
+      }, 3 * 60 * 1000); // 3 minutes
       
       // Refresh summoner in context
       await refreshSummoner();
